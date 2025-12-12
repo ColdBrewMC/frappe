@@ -1,29 +1,25 @@
 {
 	"schemaVersion": 1,
 	"id": "${mod_id}",
-	"version": "${version}",
-	"name": "Example mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"version": "${mod_version}",
+	"name": "Conduit",
+	"description": "An overcomplicated renderer implementing Fabric Renderer API as well as its own API.",
 	"authors": [
-		"Me!"
+		"Sylv <contact@sylv.gay>"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://sylv.gay/",
+		"sources": "https://github.com/sylv256/conduit"
 	},
 	"license": "${mod_license}",
-	"icon": "assets/modid/icon.png",
-	"environment": "*",
+	"icon": "assets/conduit/icon.png",
+	"environment": "client",
 	"entrypoints": {
-		"main": [
-			"gay.sylv.modid.ExampleMod"
-		],
 		"client": [
-			"gay.sylv.modid.ExampleModClient"
+			"gay.sylv.conduit.impl.base.Conduit"
 		]
 	},
 	"mixins": [
-		"modid.mixins.json",
 		{
 			"config": "modid.client.mixins.json",
 			"environment": "client"
@@ -32,10 +28,11 @@
 	"depends": {
 		"fabricloader": ">=0.18.2",
 		"minecraft": "~1.21.11",
-		"java": ">=21",
+		"java": ">=25",
 		"fabric-api": "*"
 	},
-	"suggests": {
-		"another-mod": "*"
+	"breaks": {
+		"sodium": "*",
+		"iris": "*"
 	}
 }

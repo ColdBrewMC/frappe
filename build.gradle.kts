@@ -21,6 +21,7 @@ repositories {
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
 
+	mavenLocal() // temporary
 	mavenCentral()
 
 	maven {
@@ -42,6 +43,10 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation(libs.fabric.api)
+
+	// Temporary Maven Local dependency on Fabric Model Loading API and FRAPI
+	modImplementation("net.fabricmc.fabric-api:fabric-renderer-api-v1:7.2.7+local")
+	modImplementation("net.fabricmc.fabric-api:fabric-model-loading-api-v1:6.0.11+local")
 }
 
 loom {
@@ -59,11 +64,6 @@ loom {
 	}
 
 	sourceSets {
-		register("testmod") {
-			compileClasspath += sourceSets["main"].compileClasspath
-			runtimeClasspath += sourceSets["main"].runtimeClasspath
-		}
-
 		register("testmodClient") {
 			compileClasspath += sourceSets["main"].compileClasspath
 			runtimeClasspath += sourceSets["main"].runtimeClasspath
@@ -83,12 +83,6 @@ loom {
 			ideConfigGenerated(project.rootProject == project)
 			name = "Testmod Client"
 			source(sourceSets["testmodClient"])
-		}
-		create("testmodServer") {
-			server()
-			ideConfigGenerated(project.rootProject == project)
-			name = "Testmod Server"
-			source(sourceSets["testmod"])
 		}
 	}
 }

@@ -4,8 +4,6 @@
 
 # Base
 minecraft = "1.21.11"
-parchment = "2025.10.12"
-parchment-minecraft = "1.21.10"
 fabric_loader = "0.18.1"
 
 # Libraries
