@@ -43,10 +43,6 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation(libs.fabric.api)
-
-	// Temporary Maven Local dependency on Fabric Model Loading API and FRAPI
-	modImplementation("net.fabricmc.fabric-api:fabric-renderer-api-v1:7.2.7+local")
-	modImplementation("net.fabricmc.fabric-api:fabric-model-loading-api-v1:6.0.11+local")
 }
 
 loom {
@@ -54,6 +50,8 @@ loom {
 
 	// Split sources is best practice in modern Minecraft versions
 	splitEnvironmentSourceSets()
+
+	accessWidenerPath = file("src/client/resources/conduit.classtweaker")
 
 	mods {
 		register(mod_id) {
@@ -84,6 +82,12 @@ loom {
 			name = "Testmod Client"
 			source(sourceSets["testmodClient"])
 		}
+		getByName("client") {
+			ideConfigGenerated(false)
+		}
+		getByName("server") {
+			ideConfigGenerated(false)
+		}
 	}
 }
 
@@ -97,8 +101,8 @@ java {
 	// This line generates javadocs for the mod.
 	// withJavadocJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 tasks {
@@ -129,6 +133,8 @@ tasks {
 		filesMatching(listOf("fabric.mod.json", "*.mixins.json")) {
 			expand(expandProps)
 		}
+
+		exclude("*.classtweaker")
 	}
 
 	javadoc {
@@ -141,7 +147,7 @@ tasks {
 	}
 
 	withType<JavaCompile> {
-		options.release.set(21)
+		options.release.set(25)
 	}
 
 	build {

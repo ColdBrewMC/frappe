@@ -16,12 +16,12 @@
 	"environment": "client",
 	"entrypoints": {
 		"client": [
-			"gay.sylv.conduit.impl.base.Conduit"
+			"gay.sylv.conduit.impl.base.ConduitInitializer"
 		]
 	},
 	"mixins": [
 		{
-			"config": "modid.client.mixins.json",
+			"config": "conduit.mixins.json",
 			"environment": "client"
 		}
 	],

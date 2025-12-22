@@ -1,0 +1,3 @@
+classTweaker	v1	named
+transitive-inject-interface com/mojang/blaze3d/pipeline/RenderPipeline gay/sylv/conduit/api/renderer/pipeline/ConduitRenderPipeline
+transitive-inject-interface com/mojang/blaze3d/pipeline/RenderPipeline$Builder gay/sylv/conduit/api/renderer/pipeline/ConduitRenderPipelineBuilder

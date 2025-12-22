@@ -1,4 +1,5 @@
 import java.nio.file.Files
+import java.util.regex.Pattern
 
 for (def sourceSet in [
 		sourceSets.main,
@@ -9,7 +10,7 @@ for (def sourceSet in [
 	def sourceSetName = sourceSet.name
 	def taskName = sourceSet.getTaskName('generate', 'PackageInfos')
 	def task = tasks.register(taskName, GeneratePackageInfos) {
-		group = 'fabric'
+		group = 'conduit'
 		description = "Generates package-info files for $sourceSetName packages."
 
 		// Only apply to default source directory since we also add the generated
@@ -21,7 +22,7 @@ for (def sourceSet in [
 	sourceSet.java.srcDir task
 
 	def cleanTask = tasks.register(sourceSet.getTaskName('clean', 'PackageInfos'), Delete) {
-		group = 'fabric'
+		group = 'conduit'
 		delete file("src/generated/$sourceSetName")
 	}
 	clean.dependsOn cleanTask
@@ -77,7 +78,8 @@ abstract class GeneratePackageInfos extends DefaultTask {
 
 			def packageName = relativePath.toString().replace(File.separator, '.')
 
-			def implPattern = /^(gay[\/\\]sylv[\/\\]conduit[\/\\](impl|mixin))/
+			def implPattern = /^(gay[\/\\]sylv[\/\\]conduit[\/\\](impl|mixin)).*/
+			implPattern = Pattern.compile(implPattern, Pattern.MULTILINE)
 			def isImpl = relativePath.toString() ==~ implPattern
 
 			target.resolve('package-info.java').withWriter {
