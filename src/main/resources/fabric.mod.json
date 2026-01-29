@@ -3,7 +3,7 @@
 	"id": "${mod_id}",
 	"version": "${mod_version}",
 	"name": "Conduit",
-	"description": "An overcomplicated renderer implementing Fabric Renderer API as well as its own API.",
+	"description": "Khronos-inspired rendering extensions for the Fabric Renderer API.",
 	"authors": [
 		"Sylv <contact@sylv.gay>"
 	],
@@ -13,26 +13,5 @@
 	},
 	"license": "${mod_license}",
 	"icon": "assets/conduit/icon.png",
-	"environment": "client",
-	"entrypoints": {
-		"client": [
-			"gay.sylv.conduit.impl.base.ConduitInitializer"
-		]
-	},
-	"mixins": [
-		{
-			"config": "conduit.mixins.json",
-			"environment": "client"
-		}
-	],
-	"depends": {
-		"fabricloader": ">=0.18.2",
-		"minecraft": "~1.21.11",
-		"java": ">=25",
-		"fabric-api": "*"
-	},
-	"breaks": {
-		"sodium": "*",
-		"iris": "*"
-	}
+	"environment": "client"
 }

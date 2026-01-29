@@ -1,0 +1,22 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}-ext-custom-chunk-layer",
+	"version": "${mod_version}",
+	"name": "Conduit Extension - Custom Chunk Layer",
+	"description": "An extension providing programmable Chunk Render Layers.",
+	"authors": [
+		"Sylv <contact@sylv.gay>"
+	],
+	"license": "${mod_license}",
+	"icon": "assets/conduit-ext-custom-chunk-layer/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["gay.sylv.conduit.impl.ext.custom_chunk_layer.CustomChunkLayerInitializer"]
+	},
+	"mixins": [
+		{
+			"config": "conduit-ext-custom-chunk-layer.mixins.json",
+			"environment": "client"
+		}
+	]
+}
