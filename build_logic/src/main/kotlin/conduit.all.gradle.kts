@@ -95,10 +95,6 @@ tasks {
 	withType<JavaCompile> {
 		options.release.set(25)
 	}
-
-	build {
-//		dependsOn(tasks.applyLicenses)
-	}
 }
 
 if (project !== rootProject) {
@@ -115,6 +111,10 @@ if (project !== rootProject) {
 		exclude("**/*.tsh")
 		exclude("**/*.csh")
 	}
+}
+
+checkstyle {
+	configFile = file("${rootProject.projectDir}/checkstyle.xml")
 }
 
 // configure the maven publication
