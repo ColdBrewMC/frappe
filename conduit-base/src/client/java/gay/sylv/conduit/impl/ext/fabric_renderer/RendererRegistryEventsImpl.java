@@ -24,15 +24,6 @@ public final class RendererRegistryEventsImpl {
 					callback.beforeRegistry();
 				}
 			});
-	public static boolean afterRegistryInvoked = false;
-	public static final Event<RendererRegistryEvents.AfterRendererRegistry> AFTER_REGISTRY = EventFactory.createArrayBacked(
-					RendererRegistryEvents.AfterRendererRegistry.class, callbacks -> () -> {
-						afterRegistryInvoked = true;
-
-						for (RendererRegistryEvents.AfterRendererRegistry callback : callbacks) {
-							callback.afterRegistry();
-						}
-					});
 
 	private RendererRegistryEventsImpl() {
 	}

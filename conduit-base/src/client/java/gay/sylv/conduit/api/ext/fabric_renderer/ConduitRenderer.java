@@ -19,7 +19,7 @@ import gay.sylv.conduit.api.base.extension.RendererExtension;
 import gay.sylv.conduit.impl.base.extension.ExtensionRegistryImpl;
 
 /// @see FabricRendererExtension
-/// @apiNote Do not use this class during mod initialization! Use [RendererRegistryEvents.AfterRendererRegistry]
+/// @apiNote Do not use this class during mod initialization! Use [RendererReadyEntrypoint]
 /// to ensure a [Renderer] has been registered already.
 public interface ConduitRenderer {
 	private static ConduitRenderer get() {

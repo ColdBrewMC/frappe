@@ -17,15 +17,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
 
-import gay.sylv.conduit.impl.ext.fabric_renderer.RendererRegistryEventsImpl;
+import net.fabricmc.loader.api.FabricLoader;
+
+import gay.sylv.conduit.api.ext.fabric_renderer.RendererReadyEntrypoint;
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin {
+public final class MinecraftMixin {
+	private MinecraftMixin() {
+	}
+
 	@Inject(
 			method = "<init>",
 			at = @At("CTOR_HEAD")
 	)
 	private void onInit(GameConfig gameConfig, CallbackInfo ci) {
-		RendererRegistryEventsImpl.AFTER_REGISTRY.invoker().afterRegistry();
+		FabricLoader.getInstance().invokeEntrypoints(
+				"conduit:renderer_ready",
+				RendererReadyEntrypoint.class,
+				RendererReadyEntrypoint::onRendererReady
+		);
 	}
 }

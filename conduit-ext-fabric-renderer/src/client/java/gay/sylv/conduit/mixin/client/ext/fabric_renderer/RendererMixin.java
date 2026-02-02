@@ -39,7 +39,7 @@ public abstract class RendererMixin implements ConduitRenderer {
 	)
 	private static void onRegister(Renderer renderer, CallbackInfo ci) {
 		RendererRegistryEventsImpl.BEFORE_REGISTRY.invoker().beforeRegistry();
-		ExtensionRegistryImpl.loadExtensions();
+		ExtensionRegistryImpl.loadReadyExtensions();
 	}
 
 	@Unique

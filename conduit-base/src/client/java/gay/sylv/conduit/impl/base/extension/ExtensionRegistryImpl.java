@@ -12,10 +12,12 @@ package gay.sylv.conduit.impl.base.extension;
 import static gay.sylv.conduit.impl.base.ConduitInitializer.modId;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -30,6 +32,7 @@ public final class ExtensionRegistryImpl {
 	private static final Map<Identifier, Class<RendererExtension>> EXTENSION_CLASSES = new HashMap<>();
 	private static final Map<Class<RendererExtension>, Identifier> CLASS_2_EXTENSIONS = new HashMap<>();
 	private static final Map<Identifier, RendererExtension> EXTENSIONS = new HashMap<>();
+	private static final Set<Identifier> EXTENSIONS_TO_LOAD = new HashSet<>();
 
 	private ExtensionRegistryImpl() {
 	}
@@ -51,27 +54,33 @@ public final class ExtensionRegistryImpl {
 	}
 
 	/// Loads all extensions that have been registered.
-	public static void loadExtensions() {
+	///
+	/// This may be called at any point before [gay.sylv.conduit.api.ext.fabric_renderer.RendererReadyEntrypoint]
+	/// has been invoked.
+	public static void loadReadyExtensions() {
 		// Special-case the default implementation so other extensions can use it immediately
-		@SuppressWarnings("unchecked") // We can just assume it extends RendererExtension
-		ServiceLoader<RendererExtension> loader = ServiceLoader.load((Class<RendererExtension>) FabricRendererExtension.class.getSuperclass());
-		AtomicReference<@Nullable RendererExtension> extensionAtomic = new AtomicReference<>();
-		findSuitableExtension(
-				Map.entry(modId("fabric-renderer"), loader),
-				entry -> extensionAtomic.set(entry.getValue())
-		);
+		if (!EXTENSIONS.containsKey(modId("fabric-renderer"))) {
+			@SuppressWarnings("unchecked") // We can just assume it extends RendererExtension
+			ServiceLoader<RendererExtension> loader = ServiceLoader.load((Class<RendererExtension>) (Class<?>) FabricRendererExtension.class);
+			AtomicReference<@Nullable RendererExtension> extensionAtomic = new AtomicReference<>();
+			findSuitableExtension(
+					Map.entry(modId("fabric-renderer"), loader),
+					entry -> extensionAtomic.set(entry.getValue())
+			);
 
-		RendererExtension extension = extensionAtomic.get();
-
-		if (extension != null) {
+			RendererExtension extension = Objects.requireNonNull(
+					extensionAtomic.get(),
+					"An implementation of FabricRendererExtension must be present"
+			);
 			EXTENSIONS.put(modId("fabric-renderer"), extension);
 		}
 
-		EXTENSION_CLASSES.entrySet().stream()
-				.map(entry -> Map.entry(entry.getKey(), ServiceLoader.load(entry.getValue())))
-				.<Map.Entry<Identifier, RendererExtension>>mapMulti(ExtensionRegistryImpl::findSuitableExtension)
+		EXTENSIONS_TO_LOAD.stream()
+				.map(id -> Map.entry(id, ServiceLoader.load(EXTENSION_CLASSES.get(id))))
+				.mapMulti(ExtensionRegistryImpl::findSuitableExtension)
 				.forEach(entry -> {
 					EXTENSIONS.put(entry.getKey(), entry.getValue());
+					EXTENSIONS_TO_LOAD.remove(entry.getKey());
 				});
 	}
 
@@ -101,5 +110,7 @@ public final class ExtensionRegistryImpl {
 		if (EXTENSION_CLASSES.put(id, extensionClass) != null || CLASS_2_EXTENSIONS.put(extensionClass, id) != null) {
 			throw new IllegalStateException("Conduit renderer extension of ID " + id + " is already registered");
 		}
+
+		EXTENSIONS_TO_LOAD.add(id);
 	}
 }
