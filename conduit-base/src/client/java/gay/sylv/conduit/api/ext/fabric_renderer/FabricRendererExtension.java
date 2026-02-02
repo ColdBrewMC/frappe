@@ -36,6 +36,7 @@ public interface FabricRendererExtension extends RendererExtension {
 	}
 
 	/// @return the unique (mod) ID of the [Renderer].
+	/// @see ConduitRenderer#id()
 	@ApiStatus.OverrideOnly
 	String getRendererId();
 

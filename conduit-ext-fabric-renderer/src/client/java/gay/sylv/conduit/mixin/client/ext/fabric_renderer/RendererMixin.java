@@ -23,14 +23,13 @@ import gay.sylv.conduit.api.ext.fabric_renderer.FabricRendererExtension;
 import gay.sylv.conduit.impl.base.extension.ExtensionRegistryImpl;
 import gay.sylv.conduit.impl.ext.fabric_renderer.RendererRegistryEventsImpl;
 
-@SuppressWarnings("AddedMixinMembersNamePattern") // If they break ABI, we can just delegate
 @Mixin(Renderer.class)
 public abstract class RendererMixin implements ConduitRenderer {
 	@Unique
 	private static @Nullable FabricRendererExtension extension;
 
 	@Override
-	public String id() {
+	public String conduit$id() {
 		return getExtension().getRendererId();
 	}
 

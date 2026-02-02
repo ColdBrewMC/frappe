@@ -24,7 +24,7 @@ public interface CustomChunkLayer {
 			ChunkSectionLayerGroup group,
 			String label
 	) {
-		return ConduitRenderer.get().getExtension(CustomChunkLayerExtension.class)
+		return ConduitRenderer.getExtension(CustomChunkLayerExtension.class)
 				.createChunkLayer(pipeline, bufferSize, sortOnUpload, group, label);
 	}
 

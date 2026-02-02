@@ -20,6 +20,6 @@ public interface IndigoRendererExtension extends RendererExtension {
 
 	@Override
 	default boolean isEnabled() {
-		return ConduitRenderer.get().id().equals("fabric-renderer-indigo");
+		return ConduitRenderer.id().equals("fabric-renderer-indigo");
 	}
 }
