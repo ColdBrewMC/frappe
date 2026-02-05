@@ -1,8 +1,11 @@
 {
 	"required": true,
 	"package": "gay.sylv.conduit.cerise.mixin.client",
-	"compatibilityLevel": "JAVA_21",
+	"compatibilityLevel": "JAVA_25",
 	"client": [
+		"indigo.custom_chunk_layer.QuadViewImplMixin",
+		"indigo.custom_chunk_layer.MutableQuadViewImplMixin",
+		"indigo.EncodingFormatMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

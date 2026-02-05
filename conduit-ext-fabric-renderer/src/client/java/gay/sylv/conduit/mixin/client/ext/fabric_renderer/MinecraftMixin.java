@@ -20,6 +20,7 @@ import net.minecraft.client.main.GameConfig;
 import net.fabricmc.loader.api.FabricLoader;
 
 import gay.sylv.conduit.api.ext.fabric_renderer.RendererReadyEntrypoint;
+import gay.sylv.conduit.impl.base.extension.ExtensionRegistryImpl;
 
 @Mixin(Minecraft.class)
 public final class MinecraftMixin {
@@ -31,6 +32,7 @@ public final class MinecraftMixin {
 			at = @At("CTOR_HEAD")
 	)
 	private void onInit(GameConfig gameConfig, CallbackInfo ci) {
+		ExtensionRegistryImpl.loadReadyExtensions(); // Load stragglers
 		FabricLoader.getInstance().invokeEntrypoints(
 				"conduit:renderer_ready",
 				RendererReadyEntrypoint.class,

@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}-testmod",
+	"version": "${mod_version}",
+	"name": "Cerise Testmod",
+	"description": "A client testmod for Cerise",
+	"authors": [
+		"Sylv <contact@sylv.gay>"
+	],
+	"contact": {
+		"homepage": "https://sylv.gay/",
+		"sources": "https://github.com/sylv256/conduit"
+	},
+	"license": "${mod_license}",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["gay.sylv.conduit.cerise.test.CeriseTest"],
+		"conduit:renderer_ready": ["gay.sylv.conduit.cerise.test.CeriseTest"]
+	}
+}

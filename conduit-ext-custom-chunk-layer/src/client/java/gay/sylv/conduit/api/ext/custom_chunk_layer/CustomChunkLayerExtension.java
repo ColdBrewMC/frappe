@@ -14,7 +14,6 @@ import static gay.sylv.conduit.impl.base.ConduitInitializer.modId;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import org.jetbrains.annotations.ApiStatus;
 
-import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 import net.minecraft.resources.Identifier;
 
 import gay.sylv.conduit.api.base.extension.RendererExtension;
@@ -26,12 +25,10 @@ public interface CustomChunkLayerExtension extends RendererExtension {
 	}
 
 	/// @return a new instance of [CustomChunkLayer].
+	/// @see CustomChunkLayer#of
 	@ApiStatus.OverrideOnly
 	CustomChunkLayer createChunkLayer(
 			RenderPipeline pipeline,
-			int bufferSize,
-			boolean sortOnUpload,
-			ChunkSectionLayerGroup group,
 			String label
 	);
 }
