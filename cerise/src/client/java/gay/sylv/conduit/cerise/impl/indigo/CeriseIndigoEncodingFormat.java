@@ -7,39 +7,43 @@ import net.minecraft.util.Mth;
 
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.EncodingFormat;
 
-import gay.sylv.conduit.api.ext.custom_chunk_layer.CustomChunkLayer;
+import gay.sylv.conduit.api.ext.terrain_material.TerrainMaterial;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class CeriseIndigoEncodingFormat {
-	public static int HEADER_CERISE_BITS = 4;
-	public static int HEADER_STRIDE = EncodingFormat.HEADER_STRIDE + 1;
+	public static final int DELTA_HEADER_STRIDE = 1;
+	public static final int HEADER_CERISE_BITS = 4;
+	public static final int HEADER_STRIDE = EncodingFormat.HEADER_STRIDE + DELTA_HEADER_STRIDE;
 
-	private static final Map<CustomChunkLayer, Integer> CHUNK_LAYER_2_INDEX = new HashMap<>();
-	private static int chunkLayerCount = 1;
-	private static final CustomChunkLayer[] CHUNK_LAYERS = new CustomChunkLayer[64];
+	private static final Map<TerrainMaterial, Integer> TERRAIN_MATERIAL_2_INDEX = new HashMap<>();
+	private static int terrainMaterialCount = 0;
+	private static final TerrainMaterial[] TERRAIN_MATERIALS = new TerrainMaterial[64];
 
-	private static final int CHUNK_LAYER_BIT_LENGTH = Mth.ceillog2(CHUNK_LAYERS.length);
+	private static final int TERRAIN_MATERIAL_BIT_LENGTH = Mth.ceillog2(TERRAIN_MATERIALS.length);
 
-	private static final int CHUNK_LAYER_BIT_OFFSET = 0;
+	private static final int TERRAIN_MATERIAL_BIT_OFFSET = 0;
 
-	private static final int CHUNK_LAYER_MASK = bitMask(CHUNK_LAYER_BIT_LENGTH, CHUNK_LAYER_BIT_OFFSET);
+	private static final int TERRAIN_MATERIAL_MASK = bitMask(
+			TERRAIN_MATERIAL_BIT_LENGTH,
+			TERRAIN_MATERIAL_BIT_OFFSET
+	);
 
 	private CeriseIndigoEncodingFormat() {
 	}
 
-	public static CustomChunkLayer chunkLayer(int bits) {
-		return CHUNK_LAYERS[(bits & CHUNK_LAYER_MASK) >>> CHUNK_LAYER_BIT_OFFSET];
+	public static TerrainMaterial terrainMaterial(int bits) {
+		return TERRAIN_MATERIALS[(bits & TERRAIN_MATERIAL_MASK) >>> TERRAIN_MATERIAL_BIT_OFFSET];
 	}
 
-	public static int chunkLayer(int bits, CustomChunkLayer chunkLayer) {
-		int index = CHUNK_LAYER_2_INDEX.computeIfAbsent(chunkLayer, layer -> {
-			int idx = chunkLayerCount;
-			CHUNK_LAYER_2_INDEX.put(layer, idx);
-			CHUNK_LAYERS[idx] = layer;
-			chunkLayerCount++;
+	public static int terrainMaterial(int bits, TerrainMaterial terrainMaterial) {
+		int index = TERRAIN_MATERIAL_2_INDEX.computeIfAbsent(terrainMaterial, material -> {
+			int idx = terrainMaterialCount;
+			TERRAIN_MATERIAL_2_INDEX.put(material, idx);
+			TERRAIN_MATERIALS[idx] = material;
+			terrainMaterialCount++;
 			return idx;
 		});
-		return (bits & CHUNK_LAYER_MASK) | (index << CHUNK_LAYER_BIT_OFFSET);
+		return (bits & TERRAIN_MATERIAL_MASK) | (index << TERRAIN_MATERIAL_BIT_OFFSET);
 	}
 
 	private static int bitMask(int bitLength, int bitOffset) {

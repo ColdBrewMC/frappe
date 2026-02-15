@@ -2,13 +2,12 @@ import gay.sylv.conduit.extension
 import gay.sylv.conduit.module
 
 plugins {
-	id("conduit.child")
+	id("conduit.mod")
 }
 
-base.archivesName = "condium"
+base.archivesName = "conduit-ext-custom-chunk-render-layer"
 
 dependencies {
 	module("base")
-	extension("terrain-material")
 	extension("quad-view")
 }

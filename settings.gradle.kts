@@ -10,6 +10,6 @@ pluginManagement {
 }
 
 includeBuild("build_logic")
-include("conduit-base", "conduit-ext-custom-chunk-layer", "conduit-ext-fabric-renderer")
+include("conduit-base", "conduit-ext-terrain-material", "conduit-ext-quad-view")
 
 include("cerise")

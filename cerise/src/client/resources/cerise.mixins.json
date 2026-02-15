@@ -3,8 +3,8 @@
 	"package": "gay.sylv.conduit.cerise.mixin.client",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"indigo.custom_chunk_layer.QuadViewImplMixin",
-		"indigo.custom_chunk_layer.MutableQuadViewImplMixin",
+		"indigo.terrain_material.QuadViewImplMixin",
+		"indigo.terrain_material.MutableQuadViewImplMixin",
 		"indigo.EncodingFormatMixin"
 	],
 	"injectors": {

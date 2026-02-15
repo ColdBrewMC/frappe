@@ -1,0 +1,19 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}-ext-quad-view",
+	"version": "${mod_version}",
+	"name": "Conduit Extension - Quad View",
+	"description": "Creates an abstraction around FRAPI's QuadView interfaces.",
+	"authors": [
+		"Sylv <contact@sylv.gay>"
+	],
+	"license": "${mod_license}",
+	"icon": "assets/conduit-ext-quad-view/icon.png",
+	"environment": "client",
+	"mixins": [
+		{
+			"config": "conduit-ext-quad-view.mixins.json",
+			"environment": "client"
+		}
+	]
+}

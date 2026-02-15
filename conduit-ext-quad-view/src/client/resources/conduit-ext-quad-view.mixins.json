@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "gay.sylv.conduit.mixin.client.ext.quad_view",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"RendererMixin",
+		"MinecraftMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

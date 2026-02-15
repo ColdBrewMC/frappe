@@ -36,14 +36,15 @@ import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
 import net.fabricmc.fabric.api.client.model.loading.v1.wrapper.WrapperBlockStateModel;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadEmitter;
 
-import gay.sylv.conduit.api.ext.custom_chunk_layer.CustomChunkLayer;
-import gay.sylv.conduit.api.ext.custom_chunk_layer.MutableQuadView_CustomChunkLayer;
 import gay.sylv.conduit.api.ext.fabric_renderer.RendererReadyEntrypoint;
+import gay.sylv.conduit.api.ext.quad_view.ConduitMutableQuadView;
+import gay.sylv.conduit.api.ext.terrain_material.MQV_ExtTerrainMaterial;
+import gay.sylv.conduit.api.ext.terrain_material.TerrainMaterial;
 
 public final class CeriseTest implements ClientModInitializer, RendererReadyEntrypoint {
 	private static Block testBlock;
 	private static RenderPipeline solidPlasticTerrainPipeline;
-	private static CustomChunkLayer solidPlastic;
+	private static TerrainMaterial solidPlastic;
 
 	@Override
 	public void onInitializeClient() {
@@ -65,7 +66,7 @@ public final class CeriseTest implements ClientModInitializer, RendererReadyEntr
 
 	@Override
 	public void onRendererReady() {
-		solidPlastic = CustomChunkLayer.of(solidPlasticTerrainPipeline, "solid_plastic");
+		solidPlastic = TerrainMaterial.of(solidPlasticTerrainPipeline, "solid_plastic");
 		PreparableModelLoadingPlugin.register(
 				(store, executor) -> {
 					FileToIdConverter fileToIdConverter = FileToIdConverter.json("models/block/cobblestone");
@@ -101,7 +102,9 @@ public final class CeriseTest implements ClientModInitializer, RendererReadyEntr
 									Predicate<@Nullable Direction> cullTest
 							) {
 								emitter.pushTransform(quad -> {
-									((MutableQuadView_CustomChunkLayer) quad).conduit$setChunkLayer(solidPlastic);
+									ConduitMutableQuadView.of(quad)
+											.as(MQV_ExtTerrainMaterial.class)
+											.conduit$terrainMaterial(solidPlastic);
 									return true;
 								});
 								super.emitQuads(

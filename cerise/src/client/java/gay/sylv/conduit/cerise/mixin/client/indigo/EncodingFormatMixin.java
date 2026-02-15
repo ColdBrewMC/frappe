@@ -4,23 +4,21 @@ import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.EncodingFormat;
 
+import gay.sylv.conduit.cerise.impl.indigo.CeriseIndigoEncodingFormat;
+
 @SuppressWarnings("UnstableApiUsage")
 @Mixin(EncodingFormat.class)
 public abstract class EncodingFormatMixin {
-	@Unique
-	private static final int DELTA_HEADER_STRIDE = 1;
-
 	@ModifyExpressionValue(
 			method = "<clinit>",
 			at = @At(value = "CONSTANT", args = "intValue=4", ordinal = 0)
 	)
 	private static int setVertexX(int original) {
-		return original + DELTA_HEADER_STRIDE;
+		return original + CeriseIndigoEncodingFormat.DELTA_HEADER_STRIDE;
 	}
 
 	@ModifyExpressionValue(
@@ -28,7 +26,7 @@ public abstract class EncodingFormatMixin {
 			at = @At(value = "CONSTANT", args = "intValue=5", ordinal = 0)
 	)
 	private static int setVertexY(int original) {
-		return original + DELTA_HEADER_STRIDE;
+		return original + CeriseIndigoEncodingFormat.DELTA_HEADER_STRIDE;
 	}
 
 	@ModifyExpressionValue(
@@ -36,7 +34,7 @@ public abstract class EncodingFormatMixin {
 			at = @At(value = "CONSTANT", args = "intValue=6", ordinal = 0)
 	)
 	private static int setVertexZ(int original) {
-		return original + DELTA_HEADER_STRIDE;
+		return original + CeriseIndigoEncodingFormat.DELTA_HEADER_STRIDE;
 	}
 
 	@ModifyExpressionValue(
@@ -44,7 +42,7 @@ public abstract class EncodingFormatMixin {
 			at = @At(value = "CONSTANT", args = "intValue=7", ordinal = 0)
 	)
 	private static int setVertexColor(int original) {
-		return original + DELTA_HEADER_STRIDE;
+		return original + CeriseIndigoEncodingFormat.DELTA_HEADER_STRIDE;
 	}
 
 	@ModifyExpressionValue(
@@ -52,7 +50,7 @@ public abstract class EncodingFormatMixin {
 			at = @At(value = "CONSTANT", args = "intValue=8", ordinal = 0)
 	)
 	private static int setVertexU(int original) {
-		return original + DELTA_HEADER_STRIDE;
+		return original + CeriseIndigoEncodingFormat.DELTA_HEADER_STRIDE;
 	}
 
 	@Definition(
@@ -65,7 +63,7 @@ public abstract class EncodingFormatMixin {
 			at = @At("MIXINEXTRAS:EXPRESSION")
 	)
 	private static int setVertexV(int original) {
-		return original + DELTA_HEADER_STRIDE;
+		return original + CeriseIndigoEncodingFormat.DELTA_HEADER_STRIDE;
 	}
 
 	@ModifyExpressionValue(
@@ -73,7 +71,7 @@ public abstract class EncodingFormatMixin {
 			at = @At(value = "CONSTANT", args = "intValue=10", ordinal = 0)
 	)
 	private static int setVertexLightmap(int original) {
-		return original + DELTA_HEADER_STRIDE;
+		return original + CeriseIndigoEncodingFormat.DELTA_HEADER_STRIDE;
 	}
 
 	@ModifyExpressionValue(
@@ -81,7 +79,7 @@ public abstract class EncodingFormatMixin {
 			at = @At(value = "CONSTANT", args = "intValue=11", ordinal = 0)
 	)
 	private static int setVertexNormal(int original) {
-		return original + DELTA_HEADER_STRIDE;
+		return original + CeriseIndigoEncodingFormat.DELTA_HEADER_STRIDE;
 	}
 
 	@Definition(
@@ -94,6 +92,6 @@ public abstract class EncodingFormatMixin {
 			at = @At("MIXINEXTRAS:EXPRESSION")
 	)
 	private static int setTotalStride(int original) {
-		return original + DELTA_HEADER_STRIDE;
+		return original + CeriseIndigoEncodingFormat.DELTA_HEADER_STRIDE;
 	}
 }
