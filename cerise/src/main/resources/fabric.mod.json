@@ -3,13 +3,13 @@
 	"id": "${mod_id}",
 	"version": "${mod_version}",
 	"name": "Cerise",
-	"description": "An implementation of Conduit for Sodium.",
+	"description": "An implementation of Frappé for Indigo and Sodium.",
 	"authors": [
 		"Sylv <contact@sylv.gay>"
 	],
 	"contact": {
 		"homepage": "https://sylv.gay/",
-		"sources": "https://github.com/sylv256/conduit"
+		"sources": "https://github.com/sylv256/frappe"
 	},
 	"license": "${mod_license}",
 	"icon": "assets/cerise/icon.png",

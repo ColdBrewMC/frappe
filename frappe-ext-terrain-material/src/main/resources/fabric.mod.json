@@ -1,0 +1,22 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}-ext-terrain-material",
+	"version": "${mod_version}",
+	"name": "Frappé Extension - Terrain Material",
+	"description": "An extension providing programmable Terrain Materials.",
+	"authors": [
+		"Sylv <contact@sylv.gay>"
+	],
+	"license": "${mod_license}",
+	"icon": "assets/frappe-ext-terrain-material/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["gay.sylv.frappe.impl.ext.terrain_material.TerrainMaterialInitializer"]
+	},
+	"mixins": [
+		{
+			"config": "frappe-ext-terrain-material.mixins.json",
+			"environment": "client"
+		}
+	]
+}

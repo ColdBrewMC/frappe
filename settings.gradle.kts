@@ -10,6 +10,6 @@ pluginManagement {
 }
 
 includeBuild("build_logic")
-include("conduit-base", "conduit-ext-terrain-material", "conduit-ext-quad-view")
+include("frappe-base", "frappe-ext-terrain-material", "frappe-ext-quad-view")
 
 include("cerise")

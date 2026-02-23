@@ -2,16 +2,16 @@
 	"schemaVersion": 1,
 	"id": "${mod_id}",
 	"version": "${mod_version}",
-	"name": "Conduit",
+	"name": "Frappé",
 	"description": "Khronos-inspired rendering extensions for the Fabric Renderer API.",
 	"authors": [
 		"Sylv <contact@sylv.gay>"
 	],
 	"contact": {
 		"homepage": "https://sylv.gay/",
-		"sources": "https://github.com/sylv256/conduit"
+		"sources": "https://github.com/sylv256/frappe"
 	},
 	"license": "${mod_license}",
-	"icon": "assets/conduit/icon.png",
+	"icon": "assets/frappe/icon.png",
 	"environment": "client"
 }

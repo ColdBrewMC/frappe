@@ -9,12 +9,12 @@
 	],
 	"contact": {
 		"homepage": "https://sylv.gay/",
-		"sources": "https://github.com/sylv256/conduit"
+		"sources": "https://github.com/sylv256/frappe"
 	},
 	"license": "${mod_license}",
 	"environment": "client",
 	"entrypoints": {
-		"client": ["gay.sylv.conduit.cerise.test.CeriseTest"],
-		"conduit:renderer_ready": ["gay.sylv.conduit.cerise.test.CeriseTest"]
+		"client": ["gay.sylv.frappe.cerise.test.CeriseTest"],
+		"frappe:renderer_ready": ["gay.sylv.frappe.cerise.test.CeriseTest"]
 	}
 }

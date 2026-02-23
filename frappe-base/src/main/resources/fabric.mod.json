@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}-base",
+	"version": "${mod_version}",
+	"name": "Frappé Base",
+	"description": "Frappé's base module",
+	"authors": [
+		"Sylv <contact@sylv.gay>"
+	],
+	"license": "${mod_license}",
+	"icon": "assets/frappe-base/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"gay.sylv.frappe.impl.base.FrappeInitializer"
+		]
+	},
+	"mixins": [
+		{
+			"config": "frappe-base.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~26.1-alpha.5",
+		"java": ">=25",
+		"fabric-api": "*",
+		"conduit-ext-fabric-renderer": "*"
+	},
+	"breaks": {
+		"quilt_loader": "*"
+	}
+}

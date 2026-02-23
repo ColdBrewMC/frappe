@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "gay.sylv.conduit.cerise.mixin.client",
+	"package": "gay.sylv.frappe.cerise.mixin.client",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"indigo.terrain_material.QuadViewImplMixin",

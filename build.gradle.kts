@@ -1,8 +1,8 @@
-import gay.sylv.conduit.extension
-import gay.sylv.conduit.module
+import gay.sylv.frappe.extension
+import gay.sylv.frappe.module
 
 plugins {
-	id("conduit.mod")
+	id("frappe.mod")
 }
 
 val mod_id: String by project

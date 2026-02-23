@@ -1,11 +1,11 @@
-import gay.sylv.conduit.extension
-import gay.sylv.conduit.module
+import gay.sylv.frappe.extension
+import gay.sylv.frappe.module
 
 plugins {
-	id("conduit.child")
+	id("frappe.child")
 }
 
-base.archivesName = "condium"
+base.archivesName = "cerise"
 
 dependencies {
 	module("base")
