@@ -1,5 +1,5 @@
 /*
- * Conduit
+ * Frappé
  * Copyright (C) 2026 Sylv
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
