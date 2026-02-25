@@ -9,16 +9,25 @@
 
 package gay.sylv.frappe.impl.base;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.minecraft.resources.Identifier;
 
 import net.fabricmc.api.ClientModInitializer;
 
+import gay.sylv.frappe.impl.base.extension.ExtensionRegistryImpl;
+
 public class FrappeInitializer implements ClientModInitializer {
+	public static final Logger LOGGER = LoggerFactory.getLogger("Frappé");
+	public static final String MOD_ID = "frappe";
+
 	@Override
 	public void onInitializeClient() {
+		ExtensionRegistryImpl.loadExtensions(); // Ensure loaded
 	}
 
 	public static Identifier modId(String path) {
-		return Identifier.fromNamespaceAndPath("frappe", path);
+		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
 }

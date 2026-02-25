@@ -11,6 +11,6 @@ base.archivesName = mod_id
 
 dependencies {
 	module("base", include = true)
-	extension("quad-view")
-	extension("terrain-material")
+	extension("quad-view", include = true)
+	extension("terrain-material", include = true)
 }

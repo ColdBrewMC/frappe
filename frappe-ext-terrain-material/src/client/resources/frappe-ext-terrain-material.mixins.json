@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "gay.sylv.frappe.mixin.client.ext.terrain_material",
+	"package": "gay.sylv.frappe.mixin.ext.terrain_material",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 	],

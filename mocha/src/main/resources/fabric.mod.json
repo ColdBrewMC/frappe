@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}",
+	"version": "${mod_version}",
+	"name": "Mocha",
+	"description": "An implementation of Frappé for Indigo and Sodium.",
+	"authors": [
+		"Sylv <contact@sylv.gay>"
+	],
+	"contact": {
+		"homepage": "https://sylv.gay/",
+		"sources": "https://github.com/sylv256/frappe"
+	},
+	"license": "${mod_license}",
+	"icon": "assets/mocha/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"frappe:frappe-ext-terrain-material": ["gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension"],
+		"frappe:frappe-ext-quad-view": ["gay.sylv.frappe.mocha.impl.indigo.quad_view.IndigoQuadViewExtension"]
+	},
+	"mixins": [
+		{
+			"environment": "client",
+			"config": "mocha.mixins.json"
+		}
+	]
+}

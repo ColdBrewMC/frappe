@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "gay.sylv.frappe.mixin.client.base",
+	"package": "gay.sylv.frappe.mixin.base",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 	],

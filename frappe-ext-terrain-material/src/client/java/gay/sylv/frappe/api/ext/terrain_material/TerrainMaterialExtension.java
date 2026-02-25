@@ -9,26 +9,33 @@
 
 package gay.sylv.frappe.api.ext.terrain_material;
 
-import static gay.sylv.frappe.impl.base.FrappeInitializer.modId;
-
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import org.jetbrains.annotations.ApiStatus;
 
 import net.minecraft.resources.Identifier;
 
 import gay.sylv.frappe.api.base.extension.RendererExtension;
+import gay.sylv.frappe.api.base.extension.RendererExtensionManager;
 
 public interface TerrainMaterialExtension extends RendererExtension {
-	@Override
-	default Identifier id() {
-		return modId("terrain-material");
+	/// Registers a [TerrainMaterial].
+	///
+	/// Note that some implementations **may** impose restrictions on how many materials may be
+	/// implemented at once. For example, Mocha allows up to 255 [materials][TerrainMaterial].
+	///
+	/// This method **must not** be invoked after [net.fabricmc.api.ClientModInitializer].
+	static void registerMaterial(TerrainMaterial material) {
+		RendererExtensionManager.getExtension(TerrainMaterialExtension.class)
+				.registerMaterialImpl(material);
 	}
 
 	/// @return a new instance of [TerrainMaterial].
-	/// @see TerrainMaterial#of
+	/// @see TerrainMaterial.Builder#build()
 	@ApiStatus.OverrideOnly
 	TerrainMaterial createChunkLayer(
-			RenderPipeline pipeline,
+			Identifier shaderId,
 			String label
 	);
+
+	@ApiStatus.OverrideOnly
+	void registerMaterialImpl(TerrainMaterial material);
 }

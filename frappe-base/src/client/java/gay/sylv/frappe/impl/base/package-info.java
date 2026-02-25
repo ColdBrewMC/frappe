@@ -7,7 +7,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+@ApiStatus.Internal
 @NullMarked
 package gay.sylv.frappe.impl.base;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NullMarked;

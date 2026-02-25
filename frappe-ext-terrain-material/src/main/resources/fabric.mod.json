@@ -11,7 +11,7 @@
 	"icon": "assets/frappe-ext-terrain-material/icon.png",
 	"environment": "client",
 	"entrypoints": {
-		"client": ["gay.sylv.frappe.impl.ext.terrain_material.TerrainMaterialInitializer"]
+		"frappe:renderer_extension_type": ["gay.sylv.frappe.impl.ext.terrain_material.TerrainMaterialExtensionType"]
 	},
 	"mixins": [
 		{

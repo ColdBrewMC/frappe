@@ -9,108 +9,133 @@
 
 package gay.sylv.frappe.impl.base.extension;
 
-import static gay.sylv.frappe.impl.base.FrappeInitializer.modId;
-
+import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.jspecify.annotations.Nullable;
 
-import net.minecraft.resources.Identifier;
+import net.fabricmc.fabric.api.client.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.client.renderer.v1.RendererProvider;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 
 import gay.sylv.frappe.api.base.extension.RendererExtension;
-import gay.sylv.frappe.api.ext.fabric_renderer.FabricRendererExtension;
+import gay.sylv.frappe.api.base.extension.RendererExtensionType;
+import gay.sylv.frappe.api.base.extension.SupportTier;
+import gay.sylv.frappe.impl.base.FrappeInitializer;
 
 public final class ExtensionRegistryImpl {
-	private static final Map<Identifier, Class<RendererExtension>> EXTENSION_CLASSES = new HashMap<>();
-	private static final Map<Class<RendererExtension>, Identifier> CLASS_2_EXTENSIONS = new HashMap<>();
-	private static final Map<Identifier, RendererExtension> EXTENSIONS = new HashMap<>();
-	private static final Set<Identifier> EXTENSIONS_TO_LOAD = new HashSet<>();
+	private static final Map<Class<? extends RendererExtension>, String> CLASS_2_IMPL_ID = new HashMap<>();
+	private static final Map<Class<? extends RendererExtensionType>, String> CLASS_2_ID = new HashMap<>();
+	private static final Map<Class<? extends RendererExtensionType>, EntrypointContainer<RendererExtensionType>> TYPE_2_ENTRYPOINT = new HashMap<>();
+	private static final Map<String, RendererExtension> EXTENSIONS = new HashMap<>();
+
+	private static boolean loaded = false;
 
 	private ExtensionRegistryImpl() {
 	}
 
-	public static <T extends RendererExtension> Identifier getId(Class<T> clazz) {
-		return CLASS_2_EXTENSIONS.get(clazz);
+	@SuppressWarnings("unchecked") // Type matches when checked in parameter
+	public static <T extends RendererExtensionType> EntrypointContainer<T> getEntrypoint(Class<T> clazz) {
+		loadExtensions();
+		return (EntrypointContainer<T>) TYPE_2_ENTRYPOINT.get(clazz);
 	}
 
-	public static boolean isLoaded(Identifier id) {
+	public static <T extends RendererExtension> String getImplId(Class<T> clazz) {
+		loadExtensions();
+		return CLASS_2_IMPL_ID.get(clazz);
+	}
+
+	public static <T extends RendererExtensionType> String getId(Class<T> clazz) {
+		loadExtensions();
+		return CLASS_2_ID.get(clazz);
+	}
+
+	public static boolean isLoaded(String id) {
+		loadExtensions();
 		return EXTENSIONS.containsKey(id);
 	}
 
-	public @Nullable static RendererExtension getExtension(Identifier id) {
+	public @Nullable static RendererExtension getExtension(String id) {
+		loadExtensions();
 		return EXTENSIONS.get(id);
 	}
 
-	public static RendererExtension getExtensionOrThrow(Identifier id) {
+	public static RendererExtension getExtensionOrThrow(String id) {
+		loadExtensions();
 		return Objects.requireNonNull(getExtension(id), "Extension of ID " + id + " is not loaded");
 	}
 
-	/// Loads all extensions that have been registered.
-	///
-	/// This may be called at any point before [gay.sylv.frappe.api.ext.fabric_renderer.RendererReadyEntrypoint]
-	/// has been invoked.
-	public static void loadReadyExtensions() {
-		// Special-case the default implementation so other extensions can use it immediately
-		if (!EXTENSIONS.containsKey(modId("fabric-renderer"))) {
-			@SuppressWarnings("unchecked") // We can just assume it extends RendererExtension
-			ServiceLoader<RendererExtension> loader = ServiceLoader.load((Class<RendererExtension>) (Class<?>) FabricRendererExtension.class);
-			AtomicReference<@Nullable RendererExtension> extensionAtomic = new AtomicReference<>();
-			findSuitableExtension(
-					Map.entry(modId("fabric-renderer"), loader),
-					entry -> extensionAtomic.set(entry.getValue())
-			);
+	/// Loads all [extension types][RendererExtensionType] and their [implementations][RendererExtension].
+	public static void loadExtensions() {
+		if (loaded) return;
+		loaded = true;
 
-			RendererExtension extension = Objects.requireNonNull(
-					extensionAtomic.get(),
-					"An implementation of FabricRendererExtension must be present"
-			);
-			EXTENSIONS.put(modId("fabric-renderer"), extension);
-		}
-
-		EXTENSIONS_TO_LOAD.stream()
-				.map(id -> Map.entry(id, ServiceLoader.load(EXTENSION_CLASSES.get(id))))
-				.mapMulti(ExtensionRegistryImpl::findSuitableExtension)
-				.forEach(entry -> {
-					EXTENSIONS.put(entry.getKey(), entry.getValue());
-					EXTENSIONS_TO_LOAD.remove(entry.getKey());
-				});
-	}
-
-	private static void findSuitableExtension(
-			Map.Entry<Identifier, ServiceLoader<RendererExtension>> entry,
-			Consumer<Map.Entry<Identifier, RendererExtension>> consumer
-	) {
-		ServiceLoader<RendererExtension> serviceLoader = entry.getValue();
-		Optional<RendererExtension> optional = serviceLoader.findFirst();
-
-		if (optional.isEmpty()) {
-			return;
-		}
-
-		RendererExtension extension = serviceLoader.stream()
-				.map(ServiceLoader.Provider::get)
-				.filter(RendererExtension::isEnabled)
-				.reduce(
-						optional.get(),
-						(a, b) ->
-								a.priority() > b.priority() ? a : b
+		List<EntrypointContainer<RendererExtensionType>> typeContainers = FabricLoader.getInstance()
+				.getEntrypointContainers(
+						"frappe:renderer_extension_type",
+						RendererExtensionType.class
 				);
-		consumer.accept(Map.entry(entry.getKey(), extension));
-	}
+		for (EntrypointContainer<RendererExtensionType> typeContainer : typeContainers) {
+			TYPE_2_ENTRYPOINT.put(typeContainer.getEntrypoint().getClass(), typeContainer);
+			RendererExtensionType type = typeContainer.getEntrypoint();
+			String typeId = type.id();
+			CLASS_2_ID.put(type.getClass(), typeId);
+			//noinspection unchecked // Safe downcast
+			Class<RendererExtension> implClass = (Class<RendererExtension>) type.implClass();
+			Deque<EntrypointContainer<RendererExtension>> extensionContainers = new ConcurrentLinkedDeque<>(FabricLoader.getInstance()
+					.getEntrypointContainers("frappe:" + typeId, implClass));
 
-	public static void register(Identifier id, Class<RendererExtension> extensionClass) {
-		if (EXTENSION_CLASSES.put(id, extensionClass) != null || CLASS_2_EXTENSIONS.put(extensionClass, id) != null) {
-			throw new IllegalStateException("Conduit renderer extension of ID " + id + " is already registered");
+			String rendererId = RendererProvider.getModId();
+
+			while (extensionContainers.size() > 1) {
+				EntrypointContainer<RendererExtension> entrypoint0 = extensionContainers.pop();
+				EntrypointContainer<RendererExtension> entrypoint1 = extensionContainers.pop();
+
+				if (rendererId.equals(entrypoint0.getEntrypoint().getTargetRenderer())) {
+					extensionContainers.push(entrypoint0);
+				} else if (rendererId.equals(entrypoint1.getEntrypoint().getTargetRenderer())) {
+					extensionContainers.push(entrypoint1);
+				}
+			}
+
+			if (extensionContainers.isEmpty()) {
+				if (type.supportTier().equals(SupportTier.CORE)) {
+					FrappeInitializer.LOGGER.error("====================================================");
+					FrappeInitializer.LOGGER.error("                       Frappé                       ");
+					FrappeInitializer.LOGGER.error("A core renderer extension is unimplemented.         ");
+					FrappeInitializer.LOGGER.error("This is strictly unsupported. Consider asking the   ");
+					FrappeInitializer.LOGGER.error("developers of your renderer mod or compatibility mod");
+					FrappeInitializer.LOGGER.error("to add support for the {}", typeId);
+					FrappeInitializer.LOGGER.error("extension.                                          ");
+					FrappeInitializer.LOGGER.error("====================================================");
+
+					// Exempt dev envs from crashing
+					if (!FabricLoader.getInstance().isDevelopmentEnvironment()) {
+						throw new UnsupportedOperationException("A core tier renderer extension is unimplemented. See the above Frappé error message for more details.");
+					}
+				} else if (type.supportTier().equals(SupportTier.STANDARD)) {
+					FrappeInitializer.LOGGER.warn("====================================================");
+					FrappeInitializer.LOGGER.warn("                       Frappé                       ");
+					FrappeInitializer.LOGGER.warn("A standard renderer extension is unimplemented.     ");
+					FrappeInitializer.LOGGER.warn("This is bad for compatibility. Consider asking the  ");
+					FrappeInitializer.LOGGER.warn("developers of your renderer mod or compatibility mod");
+					FrappeInitializer.LOGGER.warn("to add support for the {}", typeId);
+					FrappeInitializer.LOGGER.warn("extension.                                          ");
+					FrappeInitializer.LOGGER.warn("====================================================");
+				}
+
+				continue;
+			}
+
+			EntrypointContainer<RendererExtension> extensionContainer = extensionContainers.getFirst();
+			RendererExtension extension = extensionContainer.getEntrypoint();
+			EXTENSIONS.put(typeId, extension);
+			CLASS_2_IMPL_ID.put(implClass, typeId);
 		}
-
-		EXTENSIONS_TO_LOAD.add(id);
 	}
 }

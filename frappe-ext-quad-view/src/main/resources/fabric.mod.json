@@ -10,6 +10,9 @@
 	"license": "${mod_license}",
 	"icon": "assets/frappe-ext-quad-view/icon.png",
 	"environment": "client",
+	"entrypoints": {
+		"frappe:renderer_extension_type": ["gay.sylv.frappe.impl.ext.quad_view.QuadViewExtensionType"]
+	},
 	"mixins": [
 		{
 			"config": "frappe-ext-quad-view.mixins.json",

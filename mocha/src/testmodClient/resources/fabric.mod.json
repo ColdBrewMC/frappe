@@ -1,0 +1,19 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}-testmod",
+	"version": "${mod_version}",
+	"name": "Mocha Testmod",
+	"description": "A client testmod for Mocha",
+	"authors": [
+		"Sylv <contact@sylv.gay>"
+	],
+	"contact": {
+		"homepage": "https://sylv.gay/",
+		"sources": "https://github.com/sylv256/frappe"
+	},
+	"license": "${mod_license}",
+	"environment": "client",
+	"entrypoints": {
+		"client": ["gay.sylv.frappe.mocha.test.MochaTest"]
+	}
+}

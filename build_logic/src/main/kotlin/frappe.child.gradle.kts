@@ -60,7 +60,7 @@ tasks {
 		"mod_license" to mod_license
 	)
 
-	processResources {
+	withType<ProcessResources> {
 		inputs.property("version", version)
 
 		filesMatching(listOf("fabric.mod.json", "*.mixins.json")) {

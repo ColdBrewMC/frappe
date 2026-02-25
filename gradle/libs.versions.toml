@@ -3,7 +3,7 @@
 # https://fabricmc.net/develop/ for fabric
 
 # Base
-minecraft = "26.1-snapshot-5"
+minecraft = "26.1-snapshot-9"
 fabric_loader = "0.18.4"
 
 # Libraries
@@ -22,6 +22,7 @@ fabric_loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric_l
 
 # Libraries
 fabric_api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric_api" }
+fabric_sylv_api = { module = "net.fabricmc.fabric-api:fabric-api", version = "0.143.5+local" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 
 # Mod Integrations

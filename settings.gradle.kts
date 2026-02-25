@@ -12,4 +12,4 @@ pluginManagement {
 includeBuild("build_logic")
 include("frappe-base", "frappe-ext-terrain-material", "frappe-ext-quad-view")
 
-include("cerise")
+include("mocha")
