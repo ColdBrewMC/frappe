@@ -4,7 +4,7 @@
 _FRAPPE_FUNCTION_DEFS
 #endif
 
-#ifdef _FRAPPE_UNDEFINED
+#if false
 in ivec2 v_frappe_Extra;
 #endif
 

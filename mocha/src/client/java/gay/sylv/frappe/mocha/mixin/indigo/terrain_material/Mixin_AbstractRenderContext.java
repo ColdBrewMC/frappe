@@ -1,10 +1,11 @@
 package gay.sylv.frappe.mocha.mixin.indigo.terrain_material;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractRenderContext;
@@ -18,16 +19,36 @@ import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
 @SuppressWarnings("UnstableApiUsage")
 @Mixin(AbstractRenderContext.class)
 public abstract class Mixin_AbstractRenderContext {
-	@Inject(
+	@WrapOperation(
 			method = "bufferQuad(Lnet/fabricmc/fabric/impl/client/indigo/renderer/mesh/MutableQuadViewImpl;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V",
 			at = @At(
 					value = "INVOKE",
-					target = "Lcom/mojang/blaze3d/vertex/VertexConsumer;addVertex(FFFIFFIIFFF)V",
-					shift = At.Shift.AFTER
+					target = "Lcom/mojang/blaze3d/vertex/VertexConsumer;addVertex(FFFIFFIIFFF)V"
 			)
 	)
-	private void encodeTerrainMaterial(MutableQuadViewImpl quad, VertexConsumer vertexConsumer, CallbackInfo ci) {
+	private void encodeTerrainMaterial(
+			VertexConsumer instance,
+			float x,
+			float y,
+			float z,
+			int color,
+			float u,
+			float v,
+			int overlayCoords,
+			int lightCoords,
+			float nx,
+			float ny,
+			float nz,
+			Operation<Void> original,
+			@Local(argsOnly = true) MutableQuadViewImpl quad
+	) {
 		TerrainMaterial material = FrappeQuadView.of(quad).as(QV_ExtTerrainMaterial.class).frappe$terrainMaterial();
-		vertexConsumer.setUv1(MochaIndigoEncodingFormat.TERRAIN_MATERIAL_2_INDEX.get(material), 42);
+		int i = MochaIndigoEncodingFormat.TERRAIN_MATERIAL_2_INDEX.get(material);
+		instance.addVertex(x, y, z);
+		instance.setColor(color);
+		instance.setUv(u, v);
+		instance.setUv1(i, 42);
+		instance.setLight(lightCoords);
+		instance.setNormal(nx, ny, nz);
 	}
 }
