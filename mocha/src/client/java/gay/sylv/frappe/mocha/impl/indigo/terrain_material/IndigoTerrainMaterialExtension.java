@@ -92,9 +92,6 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 				.withShaderDefine("ALPHA_CUTOUT", 0.01f);
 		List<RenderPipeline.Builder> builders = List.of(solid, cutout, translucent);
 
-		ModContainer mochaMod = FabricLoader.getInstance().getModContainer("mocha").orElseThrow();
-		ResourceLoader.registerBuiltinPack(modId("terrain_material"), mochaMod, PackActivationType.ALWAYS_ENABLED);
-
 		// Load Mocha's fragment shader so we can modify it.
 		try {
 			mochaFragmentShader = Files.readString(getShaderPath(modId("include/fragment"), "glsl").orElseThrow());
