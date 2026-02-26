@@ -23,6 +23,6 @@ No, this is far out of scope. The primary concerns are maintainability and use-c
 already quite difficult to maintain when it breaks. Please do not bother the FRAPI developers.
 
 ## Will this be added to Sodium? Iris? etc.?
-No, absolutely not. Frappé's API is not in scope for individual renderer mods, and Cerise—Frappé's
+No, absolutely not. Frappé's API is not in scope for individual renderer mods, and Mocha—Frappé's
 default Indigo and Sodium implementation—is licensed MPL-2.0. Unless an agreement is made on labor
-and licensing, Cerise/Frappé will remain a separate mod.
+and licensing, Mocha/Frappé will remain a separate mod.
