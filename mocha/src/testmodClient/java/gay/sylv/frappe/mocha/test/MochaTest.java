@@ -11,6 +11,7 @@ package gay.sylv.frappe.mocha.test;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
@@ -22,6 +23,8 @@ import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -41,7 +44,13 @@ import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension;
 
 public final class MochaTest implements ClientModInitializer {
 	private static Block testBlock;
-	private static TerrainMaterial solidPlastic;
+	private static Block testGrassBlock;
+	private static Block testGreenGlassBlock;
+	private static Item testBlockItem;
+	private static Item testGrassBlockItem;
+	private static Item testGreenGlassBlockItem;
+	private static TerrainMaterial testMaterial;
+	private static TerrainMaterial testGreenGlassMaterial;
 
 	@Override
 	public void onInitializeClient() {
@@ -49,26 +58,91 @@ public final class MochaTest implements ClientModInitializer {
 				BuiltInRegistries.BLOCK.key(),
 				modId("test_block")
 		);
+		ResourceKey<Item> itemKey = ResourceKey.create(
+				BuiltInRegistries.ITEM.key(),
+				modId("test_block")
+		);
+		ResourceKey<Block> grassKey = ResourceKey.create(
+				BuiltInRegistries.BLOCK.key(),
+				modId("test_grass_block")
+		);
+		ResourceKey<Item> grassItemKey = ResourceKey.create(
+				BuiltInRegistries.ITEM.key(),
+				modId("test_grass_block")
+		);
+		ResourceKey<Block> glassKey = ResourceKey.create(
+				BuiltInRegistries.BLOCK.key(),
+				modId("test_green_glass_block")
+		);
+		ResourceKey<Item> glassItemKey = ResourceKey.create(
+				BuiltInRegistries.ITEM.key(),
+				modId("test_green_glass_block")
+		);
 		testBlock = Registry.register(
 				BuiltInRegistries.BLOCK,
 				key,
 				new Block(BlockBehaviour.Properties.of().setId(key))
 		);
-		solidPlastic = TerrainMaterial.Builder.of(modId("plastic_terrain"))
+		testBlockItem = Registry.register(
+				BuiltInRegistries.ITEM,
+				itemKey,
+				new BlockItem(testBlock, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix())
+		);
+		testMaterial = TerrainMaterial.Builder.of(modId("test_terrain"))
 				.build();
-		TerrainMaterialExtension.registerMaterial(solidPlastic);
+		testGrassBlock = Registry.register(
+				BuiltInRegistries.BLOCK,
+				grassKey,
+				new Block(BlockBehaviour.Properties.of().setId(grassKey))
+		);
+		testGrassBlockItem = Registry.register(
+				BuiltInRegistries.ITEM,
+				grassItemKey,
+				new BlockItem(testGrassBlock, new Item.Properties().setId(grassItemKey).useBlockDescriptionPrefix())
+		);
+		testGreenGlassBlock = Registry.register(
+				BuiltInRegistries.BLOCK,
+				glassKey,
+				new Block(BlockBehaviour.Properties.of().setId(glassKey))
+		);
+		testGreenGlassBlockItem = Registry.register(
+				BuiltInRegistries.ITEM,
+				glassItemKey,
+				new BlockItem(testGreenGlassBlock, new Item.Properties().setId(glassItemKey).useBlockDescriptionPrefix())
+		);
+		testGreenGlassMaterial = TerrainMaterial.Builder.of(modId("test_terrain"))
+				.simple()
+				.build();
+		TerrainMaterialExtension.registerMaterial(testMaterial);
+		TerrainMaterialExtension.registerMaterial(testGreenGlassMaterial);
 		PreparableModelLoadingPlugin.register(
 				(store, executor) -> {
-					FileToIdConverter fileToIdConverter = FileToIdConverter.json("models/block/cobblestone");
+					FileToIdConverter cobble = FileToIdConverter.json("models/block/cobblestone");
+					FileToIdConverter grass = FileToIdConverter.json("models/block/grass_block");
+					FileToIdConverter glass = FileToIdConverter.json("models/block/lime_stained_glass");
 					return CompletableFuture.supplyAsync(
-							() -> fileToIdConverter.listMatchingResources(store.resourceManager())
-									.keySet()
-									.stream().map(id ->
-											id.withPath(s -> s.substring(
-													7,
-													s.length() - 5
-											)))
-									.toList(),
+							() -> Stream.concat(Stream.concat(
+									cobble.listMatchingResources(store.resourceManager())
+											.keySet()
+											.stream().map(id ->
+													id.withPath(s -> s.substring(
+															7,
+															s.length() - 5
+													))),
+									grass.listMatchingResources(store.resourceManager())
+											.keySet()
+											.stream().map(id ->
+													id.withPath(s -> s.substring(
+															7,
+															s.length() - 5
+													)))
+							), glass.listMatchingResources(store.resourceManager())
+											.keySet()
+											.stream().map(id ->
+													id.withPath(s -> s.substring(
+															7,
+															s.length() - 5
+													)))).toList(),
 							executor
 					);
 				},
@@ -79,7 +153,7 @@ public final class MochaTest implements ClientModInitializer {
 
 					pluginContext.modifyBlockModelAfterBake().register((model, context) -> {
 						BlockState state = context.state();
-						if (!state.is(testBlock)) return model;
+						if (!state.is(testBlock) && !state.is(testGrassBlock) && !state.is(testGreenGlassBlock)) return model;
 
 						return new WrapperBlockStateModel(model) {
 							@Override
@@ -92,9 +166,16 @@ public final class MochaTest implements ClientModInitializer {
 									Predicate<@Nullable Direction> cullTest
 							) {
 								emitter.pushTransform(quad -> {
-									FrappeMutableQuadView.of(quad)
-											.as(MQV_ExtTerrainMaterial.class)
-											.frappe$terrainMaterial(solidPlastic);
+									if (state.is(testBlock)) {
+										FrappeMutableQuadView.of(quad)
+												.as(MQV_ExtTerrainMaterial.class)
+												.frappe$terrainMaterial(testMaterial);
+									} else {
+										FrappeMutableQuadView.of(quad)
+												.as(MQV_ExtTerrainMaterial.class)
+												.frappe$terrainMaterial(testGreenGlassMaterial);
+									}
+
 									return true;
 								});
 								super.emitQuads(

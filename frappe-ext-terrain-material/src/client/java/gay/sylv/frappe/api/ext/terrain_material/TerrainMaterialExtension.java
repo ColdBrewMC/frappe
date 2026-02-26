@@ -33,7 +33,8 @@ public interface TerrainMaterialExtension extends RendererExtension {
 	@ApiStatus.OverrideOnly
 	TerrainMaterial createChunkLayer(
 			Identifier shaderId,
-			String label
+			String label,
+			boolean simple
 	);
 
 	@ApiStatus.OverrideOnly

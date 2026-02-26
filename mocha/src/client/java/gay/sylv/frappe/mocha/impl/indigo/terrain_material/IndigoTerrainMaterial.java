@@ -15,6 +15,7 @@ import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 
 public record IndigoTerrainMaterial(
 		Identifier shaderId,
-		String label
+		String label,
+		boolean simple
 ) implements TerrainMaterial {
 }

@@ -10,6 +10,9 @@
 package gay.sylv.frappe.mocha.impl.indigo.terrain_material;
 
 import static gay.sylv.frappe.mocha.impl.Mocha.modId;
+import static net.minecraft.client.renderer.RenderPipelines.CUTOUT_TERRAIN;
+import static net.minecraft.client.renderer.RenderPipelines.SOLID_TERRAIN;
+import static net.minecraft.client.renderer.RenderPipelines.TRANSLUCENT_TERRAIN;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,16 +29,16 @@ import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 import net.minecraft.resources.Identifier;
 
-import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
-import net.fabricmc.fabric.api.resource.v1.pack.PackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension;
@@ -43,6 +46,8 @@ import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
 
 public final class IndigoTerrainMaterialExtension implements TerrainMaterialExtension, IndigoRendererExtension {
 	public static Map<RenderPipeline, RenderPipeline> VANILLA_2_MOCHA_TERRAIN_PIPELINES = Map.of();
+	public static Map<ChunkSectionLayer, RenderPipeline> CSL_2_MOCHA_TERRAIN_PIPELINES = Map.of();
+	public static Map<RenderPipeline, RenderPipeline> VANILLA_2_SIMPLE_MOCHA_TERRAIN_PIPELINES = Map.of();
 	private static final Logger LOGGER = LoggerFactory.getLogger("Mocha/Indigo/frappe-ext-terrain-material");
 	public static String mochaFragmentShader = "";
 	// this VF is 32 bytes
@@ -53,13 +58,18 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 			.add("UV2", VertexFormatElement.UV2)
 			.add("UV1", VertexFormatElement.UV1) // use an extra 4 bytes
 			.build();
+	public static ChunkSectionLayerGroup MOCHA_OPAQUE_SOLID;
+	public static ChunkSectionLayerGroup MOCHA_OPAQUE_CUTOUT;
+	public static ChunkSectionLayer MOCHA_SOLID;
+	public static ChunkSectionLayer MOCHA_CUTOUT;
 
 	@Override
 	public TerrainMaterial createChunkLayer(
 			Identifier shaderId,
-			String label
+			String label,
+			boolean simple
 	) {
-		return new IndigoTerrainMaterial(shaderId, label);
+		return new IndigoTerrainMaterial(shaderId, label, simple);
 	}
 
 	@Override
@@ -99,8 +109,10 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 			throw new RuntimeException(e);
 		}
 
-		String preFragmentTemplate = findFunction("frappe_pre_fragment");
-		boolean preFragment = false;
+		String preFragmentSimpleTemplate = findFunction("simple_pre_fragment");
+		StringBuilder preFragmentSimpleFunctions = new StringBuilder();
+		StringBuilder preFragmentSimpleBuilder = new StringBuilder();
+		String preFragmentTemplate = findFunction("pre_fragment");
 		StringBuilder preFragmentFunctions = new StringBuilder();
 		StringBuilder preFragmentBuilder = new StringBuilder();
 
@@ -112,23 +124,37 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 			try {
 				if (fragmentShaderPath.isPresent()) {
 					String shader = Files.readString(fragmentShaderPath.get());
-					shader = shader
-							.replaceFirst("#version [0-9]{3}", "")
-							.replaceFirst("(?<=vec4 )frappe_pre_fragment(?=\\()", "_frappe_pre_fragment_" + i);
 
-					boolean frappePreFragment = shader.contains("_frappe_pre_fragment_");
+					if (material.simple()) {
+						shader = shader
+								.replaceFirst("#version [0-9]{3}", "")
+								.replaceFirst("(?<=vec4 )frappe_simple_pre_fragment(?=\\()", "_frappe_simple_pre_fragment_" + i)
+								.replaceFirst("(?<=vec4 )frappe_pre_fragment(?=\\()", RandomStringUtils.secure().nextAlphabetic(24));
 
-					if (frappePreFragment) {
-						preFragment = true;
-						preFragmentBuilder.append(preFragmentTemplate
-								.replaceAll("_FRAPPE_MATERIAL_ID", Integer.toString(i)));
-						preFragmentFunctions.append(shader);
+						if (shader.contains("_frappe_simple_pre_fragment_")) {
+							preFragmentSimpleBuilder.append(preFragmentSimpleTemplate
+									.replaceAll("_FRAPPE_MATERIAL_ID", Integer.toString(i)));
+							preFragmentSimpleFunctions.append(shader);
+						}
+					} else {
+						shader = shader
+								.replaceFirst("#version [0-9]{3}", "")
+								.replaceFirst("(?<=vec4 )frappe_pre_fragment(?=\\()", "_frappe_pre_fragment_" + i)
+								.replaceFirst("(?<=vec4 )frappe_simple_pre_fragment(?=\\()", RandomStringUtils.secure().nextAlphabetic(24));
+
+						if (shader.contains("_frappe_pre_fragment_")) {
+							preFragmentBuilder.append(preFragmentTemplate
+									.replaceAll("_FRAPPE_MATERIAL_ID", Integer.toString(i)));
+							preFragmentFunctions.append(shader);
+						}
 					}
 
 					for (RenderPipeline.Builder builder : builders) {
 						builder.withShaderDefine("_FRAPPE_FRAGMENT");
 
-						if (frappePreFragment) {
+						if (shader.contains("_frappe_simple_pre_fragment_")) {
+							builder.withShaderDefine("_FRAPPE_SIMPLE_PRE_FRAGMENT");
+						} else if (shader.contains("_frappe_pre_fragment_")) {
 							builder.withShaderDefine("_FRAPPE_PRE_FRAGMENT");
 						}
 					}
@@ -138,28 +164,46 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 			}
 		}
 
-		if (preFragment) {
-			mochaFragmentShader = mochaFragmentShader
-					.replaceFirst("(?<=#ifdef _FRAPPE_PRE_FRAGMENT\n)_FRAPPE_FUNCTION_DEFS(?=\n#endif)", preFragmentFunctions.toString())
-					.replaceFirst("(?<=#ifdef _FRAPPE_PRE_FRAGMENT[\\n\\t]{1,3})(?!._FRAPPE)color = _frappe_pre_fragment.*\\(.*\\);", preFragmentBuilder.toString());
-		}
+		mochaFragmentShader = substituteFunction(mochaFragmentShader, "simple_pre_fragment", preFragmentSimpleFunctions.toString(), preFragmentSimpleBuilder.toString());
+		mochaFragmentShader = substituteFunction(mochaFragmentShader, "pre_fragment", preFragmentFunctions.toString(), preFragmentBuilder.toString());
 
 		// Defaults
 		for (RenderPipeline.Builder builder : builders) {
 			builder.withVertexFormat(MATERIAL_BLOCK, VertexFormat.Mode.QUADS);
 		}
 
+		RenderPipeline cutoutMocha = cutout.build();
+		RenderPipeline solidMocha = solid.build();
+
+		for (RenderPipeline.Builder builder : builders) {
+			builder.withShaderDefine("_FRAPPE_SIMPLE_MATERIAL");
+		}
+
 		VANILLA_2_MOCHA_TERRAIN_PIPELINES = Map.of(
-				RenderPipelines.SOLID_TERRAIN, solid.build(),
-				RenderPipelines.CUTOUT_TERRAIN, cutout.build(),
-				RenderPipelines.TRANSLUCENT_TERRAIN, translucent.build()
+				SOLID_TERRAIN, solidMocha,
+				CUTOUT_TERRAIN, cutoutMocha,
+				TRANSLUCENT_TERRAIN, translucent.build()
+		);
+
+		VANILLA_2_SIMPLE_MOCHA_TERRAIN_PIPELINES = Map.of(
+				SOLID_TERRAIN, solid.build(),
+				CUTOUT_TERRAIN, cutout.build(),
+				TRANSLUCENT_TERRAIN, translucent.build()
+		);
+	}
+
+	public static void postResolveMaterials() {
+		CSL_2_MOCHA_TERRAIN_PIPELINES = Map.of(
+				ChunkSectionLayer.SOLID, VANILLA_2_MOCHA_TERRAIN_PIPELINES.get(SOLID_TERRAIN),
+				ChunkSectionLayer.CUTOUT, VANILLA_2_MOCHA_TERRAIN_PIPELINES.get(CUTOUT_TERRAIN),
+				ChunkSectionLayer.TRANSLUCENT, VANILLA_2_MOCHA_TERRAIN_PIPELINES.get(TRANSLUCENT_TERRAIN)
 		);
 	}
 
 	private static String findFunction(String functionName) {
-		String fun = Pattern.quote("_" + functionName);
-		String def = Pattern.quote("_" + functionName.toUpperCase(Locale.ROOT));
-		Pattern pattern = Pattern.compile("(?<=#ifdef " + def + ")(?!._FRAPPE_)(.*" + fun + ".*)(?=#endif)", Pattern.DOTALL);
+		String fun = Pattern.quote("_frappe_" + functionName);
+		String def = Pattern.quote("_FRAPPE_" + functionName.toUpperCase(Locale.ROOT));
+		Pattern pattern = Pattern.compile("(?<=#ifdef " + def + ")(?!._FRAPPE_)(.*" + fun + "[\\w\\t\\n(),=+-; ]+)(?=#endif)", Pattern.DOTALL);
 		Matcher matcher = pattern.matcher(mochaFragmentShader);
 
 		if (!matcher.find()) {
@@ -167,6 +211,14 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 		}
 
 		return matcher.group();
+	}
+
+	private static String substituteFunction(String shader, String functionName, String functions, String calls) {
+		String fun = Pattern.quote("_frappe_" + functionName);
+		String def = Pattern.quote("_FRAPPE_" + functionName.toUpperCase(Locale.ROOT));
+		return shader
+				.replaceFirst("(?<=#ifdef " + def + "\n)" + def + "_FUNCTION_DEFS(?=\n#endif)", functions)
+				.replaceFirst("(?<=#ifdef " + def + "[\\n\\t]{1,3})(?!._FRAPPE_)color = " + fun + ".*\\(.*\\);", calls);
 	}
 
 	private static Optional<Path> getShaderPath(Identifier shaderId, String extension) {

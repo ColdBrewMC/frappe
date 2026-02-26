@@ -9,6 +9,9 @@
 		"indigo.terrain_material.Mixin_ShaderManager1",
 		"indigo.terrain_material.Mixin_AbstractRenderContext",
 		"indigo.terrain_material.Mixin_SectionCompiler",
+		"indigo.terrain_material.Mixin_ChunkSectionLayerGroup",
+		"indigo.terrain_material.Mixin_ChunkSectionsToRender",
+		"indigo.terrain_material.Mixin_LevelRenderer",
 		"indigo.Mixin_EncodingFormat",
 		"indigo.quad_view.Mixin_QuadViewImpl",
 		"indigo.quad_view.Mixin_MutableQuadViewImpl"

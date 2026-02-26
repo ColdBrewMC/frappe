@@ -10,8 +10,12 @@
 package gay.sylv.frappe.mocha.mixin.indigo.terrain_material;
 
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.HEADER_MOCHA_BITS;
+import static gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension.MOCHA_CUTOUT;
+import static gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension.MOCHA_SOLID;
 
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.QuadViewImpl;
@@ -25,6 +29,14 @@ import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
 public abstract class Mixin_MutableQuadViewImpl<Q extends QE_ExtTerrainMaterial<Q>> extends QuadViewImpl implements QE_ExtTerrainMaterial<Q> {
 	@Override
 	public QE_ExtTerrainMaterial<Q> frappe$terrainMaterial(TerrainMaterial material) {
+		if (!material.simple()) {
+			if (this.chunkLayer().equals(ChunkSectionLayer.SOLID)) {
+				this.chunkLayer(MOCHA_SOLID);
+			} else if (this.chunkLayer().equals(ChunkSectionLayer.CUTOUT)) {
+				this.chunkLayer(MOCHA_CUTOUT);
+			}
+		}
+
 		this.data[this.baseIndex + HEADER_MOCHA_BITS] =
 				MochaIndigoEncodingFormat.terrainMaterial(this.data[this.baseIndex + HEADER_MOCHA_BITS], material);
 		return this;

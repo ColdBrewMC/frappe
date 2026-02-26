@@ -11,9 +11,13 @@ package gay.sylv.frappe.mocha.mixin.indigo.terrain_material;
 
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.HEADER_MOCHA_BITS;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.QuadViewImpl;
 
@@ -29,6 +33,13 @@ public abstract class Mixin_QuadViewImpl<Q extends QV_ExtTerrainMaterial<Q>> imp
 
 	@Shadow
 	protected int baseIndex;
+
+	@WrapMethod(method = "chunkLayer")
+	private ChunkSectionLayer retVanillaLayers(Operation<ChunkSectionLayer> original) {
+		ChunkSectionLayer layer = original.call();
+
+		return layer;
+	}
 
 	@Override
 	public @Nullable TerrainMaterial frappe$terrainMaterial() {

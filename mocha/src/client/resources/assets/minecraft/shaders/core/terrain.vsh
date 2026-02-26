@@ -23,7 +23,6 @@ flat out ivec2 v_frappe_Extra;
 void main() {
 	vec3 pos = Position + (ChunkPosition - CameraBlockPos) + CameraOffset;
 	gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
-
 	sphericalVertexDistance = fog_spherical_distance(pos);
 	cylindricalVertexDistance = fog_cylindrical_distance(pos);
 	vertexColor = Color * minecraft_sample_lightmap(Sampler2, UV2);

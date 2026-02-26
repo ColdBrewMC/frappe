@@ -56,7 +56,7 @@ public abstract class Mixin_AbstractRenderContext {
 		instance.addVertex(x, y, z);
 		instance.setColor(color);
 		instance.setUv(u, v);
-		instance.setUv1(i, 42);
+		instance.setUv1(i, i > 0 ? 0xCAFE : 0);
 		instance.setLight(lightCoords);
 		instance.setNormal(nx, ny, nz);
 	}

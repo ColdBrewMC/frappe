@@ -28,9 +28,14 @@ public interface TerrainMaterial {
 
 	String label();
 
+	/// Whether this material uses simple, efficient calculations and is applied to all terrain,
+	/// including translucent terrain/fluids.
+	boolean simple();
+
 	final class Builder {
 		private final Identifier shaderId;
 		private @Nullable String label;
+		private boolean simple;
 
 		public Builder(Identifier shaderId) {
 			this.shaderId = shaderId;
@@ -45,13 +50,18 @@ public interface TerrainMaterial {
 			return this;
 		}
 
+		public Builder simple() {
+			this.simple = true;
+			return this;
+		}
+
 		public TerrainMaterial build() {
 			if (this.label == null) {
 				this.label = shaderId.toString();
 			}
 
 			return RendererExtensionManager.getExtension(TerrainMaterialExtension.class)
-					.createChunkLayer(shaderId, label);
+					.createChunkLayer(shaderId, label, simple);
 		}
 	}
 }
