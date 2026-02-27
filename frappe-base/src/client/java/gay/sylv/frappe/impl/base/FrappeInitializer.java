@@ -27,7 +27,7 @@ public class FrappeInitializer implements ClientModInitializer {
 		ExtensionRegistryImpl.loadExtensions(); // Ensure loaded
 	}
 
-	public static Identifier modId(String path) {
+	public static Identifier frappeId(String path) {
 		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
 }

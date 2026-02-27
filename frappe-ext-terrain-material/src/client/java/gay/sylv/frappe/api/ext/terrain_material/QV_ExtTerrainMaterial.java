@@ -13,6 +13,14 @@ import org.jspecify.annotations.Nullable;
 
 import gay.sylv.frappe.api.ext.quad_view.FrappeQuadView;
 
-public interface QV_ExtTerrainMaterial<Q extends QV_ExtTerrainMaterial<Q>> extends FrappeQuadView<Q> {
+public interface QV_ExtTerrainMaterial extends FrappeQuadView {
 	@Nullable TerrainMaterial frappe$terrainMaterial();
+
+	/// The U coordinate of the extra UVs present on quads supporting {@link TerrainMaterial}.
+	/// @see #u(int)
+	float frappe$u(int vertexIndex);
+
+	/// The V coordinate of the extra UVs present on quads supporting {@link TerrainMaterial}.
+	/// @see #v(int)
+	float frappe$v(int vertexIndex);
 }

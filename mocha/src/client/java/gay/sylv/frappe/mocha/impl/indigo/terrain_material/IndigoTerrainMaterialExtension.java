@@ -9,6 +9,7 @@
 
 package gay.sylv.frappe.mocha.impl.indigo.terrain_material;
 
+import static gay.sylv.frappe.impl.base.FrappeInitializer.frappeId;
 import static gay.sylv.frappe.mocha.impl.Mocha.modId;
 import static net.minecraft.client.renderer.RenderPipelines.CUTOUT_TERRAIN;
 import static net.minecraft.client.renderer.RenderPipelines.SOLID_TERRAIN;
@@ -28,7 +29,6 @@ import java.util.regex.Pattern;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,9 @@ import net.fabricmc.loader.api.FabricLoader;
 
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension;
+import gay.sylv.frappe.impl.base.FrappeInitializer;
 import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
+import gay.sylv.frappe.mocha.impl.indigo.vertex.format.MochaVertexFormats;
 
 public final class IndigoTerrainMaterialExtension implements TerrainMaterialExtension, IndigoRendererExtension {
 	public static Map<RenderPipeline, RenderPipeline> VANILLA_2_MOCHA_TERRAIN_PIPELINES = Map.of();
@@ -50,14 +52,6 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 	public static Map<RenderPipeline, RenderPipeline> VANILLA_2_SIMPLE_MOCHA_TERRAIN_PIPELINES = Map.of();
 	private static final Logger LOGGER = LoggerFactory.getLogger("Mocha/Indigo/frappe-ext-terrain-material");
 	public static String mochaFragmentShader = "";
-	// this VF is 32 bytes
-	public static final VertexFormat MATERIAL_BLOCK = VertexFormat.builder()
-			.add("Position", VertexFormatElement.POSITION)
-			.add("Color", VertexFormatElement.COLOR)
-			.add("UV0", VertexFormatElement.UV0)
-			.add("UV2", VertexFormatElement.UV2)
-			.add("UV1", VertexFormatElement.UV1) // use an extra 4 bytes
-			.build();
 	public static ChunkSectionLayerGroup MOCHA_OPAQUE_SOLID;
 	public static ChunkSectionLayerGroup MOCHA_OPAQUE_CUTOUT;
 	public static ChunkSectionLayer MOCHA_SOLID;
@@ -84,6 +78,7 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 		MochaIndigoEncodingFormat.terrainMaterialCount++;
 	}
 
+	// TODO: support resource reloading
 	// This is cursed as fuck, but it lets us do cool things:tm:
 	// https://regexlicensing.com
 	public static void resolveMaterials() {
@@ -97,7 +92,6 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 				.withLocation("pipeline/cutout_terrain")
 				.withShaderDefine("ALPHA_CUTOUT", 0.5f);
 		RenderPipeline.Builder translucent = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
-				.withLocation("pipeline/translucent_terrain")
 				.withBlend(BlendFunction.TRANSLUCENT)
 				.withShaderDefine("ALPHA_CUTOUT", 0.01f);
 		List<RenderPipeline.Builder> builders = List.of(solid, cutout, translucent);
@@ -167,28 +161,48 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 		mochaFragmentShader = substituteFunction(mochaFragmentShader, "simple_pre_fragment", preFragmentSimpleFunctions.toString(), preFragmentSimpleBuilder.toString());
 		mochaFragmentShader = substituteFunction(mochaFragmentShader, "pre_fragment", preFragmentFunctions.toString(), preFragmentBuilder.toString());
 
-		// Defaults
-		for (RenderPipeline.Builder builder : builders) {
-			builder.withVertexFormat(MATERIAL_BLOCK, VertexFormat.Mode.QUADS);
+		RenderPipeline.Snippet solidSnippet = solid.buildSnippet();
+		RenderPipeline.Snippet cutoutSnippet = cutout.buildSnippet();
+		RenderPipeline.Snippet translucentSnippet = translucent.buildSnippet();
+
+		RenderPipeline.Builder complexSolid = RenderPipeline.builder(solidSnippet)
+				.withLocation(frappeId("pipeline/solid_terrain"));
+		RenderPipeline.Builder complexCutout = RenderPipeline.builder(cutoutSnippet)
+				.withLocation(frappeId("pipeline/cutout_terrain"));
+		List<RenderPipeline.Builder> complexBuilders = List.of(complexSolid, complexCutout);
+
+		for (RenderPipeline.Builder builder : complexBuilders) {
+			builder.withVertexFormat(MochaVertexFormats.COMPLEX_TERRAIN, VertexFormat.Mode.QUADS);
+			builder.withShaderDefine("_FRAPPE_COMPLEX_MATERIAL");
 		}
 
-		RenderPipeline cutoutMocha = cutout.build();
-		RenderPipeline solidMocha = solid.build();
+		RenderPipeline.Builder simpleSolid = RenderPipeline.builder(solidSnippet)
+				.withLocation("pipeline/solid_terrain");
+		RenderPipeline.Builder simpleCutout = RenderPipeline.builder(cutoutSnippet)
+				.withLocation("pipeline/cutout_terrain");
+		RenderPipeline.Builder simpleTranslucent = RenderPipeline.builder(translucentSnippet)
+				.withLocation("pipeline/translucent_terrain");
+		List<RenderPipeline.Builder> simpleBuilders = List.of(
+				simpleSolid,
+				simpleCutout,
+				simpleTranslucent
+		);
 
-		for (RenderPipeline.Builder builder : builders) {
+		for (RenderPipeline.Builder builder : simpleBuilders) {
+			builder.withVertexFormat(MochaVertexFormats.SIMPLE_TERRAIN, VertexFormat.Mode.QUADS);
 			builder.withShaderDefine("_FRAPPE_SIMPLE_MATERIAL");
 		}
 
 		VANILLA_2_MOCHA_TERRAIN_PIPELINES = Map.of(
-				SOLID_TERRAIN, solidMocha,
-				CUTOUT_TERRAIN, cutoutMocha,
-				TRANSLUCENT_TERRAIN, translucent.build()
+				SOLID_TERRAIN, complexSolid.build(),
+				CUTOUT_TERRAIN, complexCutout.build(),
+				TRANSLUCENT_TERRAIN, simpleTranslucent.build()
 		);
 
 		VANILLA_2_SIMPLE_MOCHA_TERRAIN_PIPELINES = Map.of(
-				SOLID_TERRAIN, solid.build(),
-				CUTOUT_TERRAIN, cutout.build(),
-				TRANSLUCENT_TERRAIN, translucent.build()
+				SOLID_TERRAIN, simpleSolid.build(),
+				CUTOUT_TERRAIN, simpleCutout.build(),
+				TRANSLUCENT_TERRAIN, simpleTranslucent.build()
 		);
 	}
 

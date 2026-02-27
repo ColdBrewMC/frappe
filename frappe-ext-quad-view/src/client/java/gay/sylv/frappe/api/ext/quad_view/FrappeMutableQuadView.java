@@ -28,37 +28,40 @@ import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadView;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.ShadeMode;
 import net.fabricmc.fabric.api.util.TriState;
 
-@SuppressWarnings({"unchecked", "NullableProblems"}) // Cast to Q means they're implemented; IJ nullity issue
-public interface FrappeMutableQuadView<Q extends MutableQuadView> extends FrappeQuadView<Q>, MutableQuadView {
-	static FrappeMutableQuadView<MutableQuadView> of(MutableQuadView quad) {
-		return (FrappeMutableQuadView<MutableQuadView>) quad;
+public interface FrappeMutableQuadView extends FrappeQuadView, MutableQuadView {
+	static FrappeMutableQuadView of(MutableQuadView quad) {
+		return (FrappeMutableQuadView) quad;
 	}
 
 	@Override
-	Q pos(int vertexIndex, float x, float y, float z);
+	default FrappeMutableQuadView pos(int vertexIndex, float x, float y, float z) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	default Q pos(int vertexIndex, Vector3f pos) {
-		return (Q) MutableQuadView.super.pos(
+	default FrappeMutableQuadView pos(int vertexIndex, Vector3f pos) {
+		return (FrappeMutableQuadView) MutableQuadView.super.pos(
 				vertexIndex,
 				pos
 		);
 	}
 
 	@Override
-	default Q pos(int vertexIndex, Vector3fc pos) {
-		return (Q) MutableQuadView.super.pos(
+	default FrappeMutableQuadView pos(int vertexIndex, Vector3fc pos) {
+		return (FrappeMutableQuadView) MutableQuadView.super.pos(
 				vertexIndex,
 				pos
 		);
 	}
 
 	@Override
-	Q color(int vertexIndex, int color);
+	default FrappeMutableQuadView color(int vertexIndex, int color) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	default Q color(int c0, int c1, int c2, int c3) {
-		return (Q) MutableQuadView.super.color(
+	default FrappeMutableQuadView color(int c0, int c1, int c2, int c3) {
+		return (FrappeMutableQuadView) MutableQuadView.super.color(
 				c0,
 				c1,
 				c2,
@@ -67,38 +70,42 @@ public interface FrappeMutableQuadView<Q extends MutableQuadView> extends Frappe
 	}
 
 	@Override
-	Q uv(int vertexIndex, float u, float v);
+	default FrappeMutableQuadView uv(int vertexIndex, float u, float v) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	default Q uv(int vertexIndex, Vector2f uv) {
-		return (Q) MutableQuadView.super.uv(
+	default FrappeMutableQuadView uv(int vertexIndex, Vector2f uv) {
+		return (FrappeMutableQuadView) MutableQuadView.super.uv(
 				vertexIndex,
 				uv
 		);
 	}
 
 	@Override
-	default Q uv(int vertexIndex, Vector2fc uv) {
-		return (Q) MutableQuadView.super.uv(
+	default FrappeMutableQuadView uv(int vertexIndex, Vector2fc uv) {
+		return (FrappeMutableQuadView) MutableQuadView.super.uv(
 				vertexIndex,
 				uv
 		);
 	}
 
 	@Override
-	default Q materialBake(Material.Baked material, int bakeFlags) {
-		return (Q) MutableQuadView.super.materialBake(
+	default FrappeMutableQuadView materialBake(Material.Baked material, int bakeFlags) {
+		return (FrappeMutableQuadView) MutableQuadView.super.materialBake(
 				material,
 				bakeFlags
 		);
 	}
 
 	@Override
-	Q lightmap(int vertexIndex, int lightmap);
+	default FrappeMutableQuadView lightmap(int vertexIndex, int lightmap) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	default Q lightmap(int l0, int l1, int l2, int l3) {
-		return (Q) MutableQuadView.super.lightmap(
+	default FrappeMutableQuadView lightmap(int l0, int l1, int l2, int l3) {
+		return (FrappeMutableQuadView) MutableQuadView.super.lightmap(
 				l0,
 				l1,
 				l2,
@@ -107,63 +114,93 @@ public interface FrappeMutableQuadView<Q extends MutableQuadView> extends Frappe
 	}
 
 	@Override
-	Q normal(int vertexIndex, float x, float y, float z);
+	default FrappeMutableQuadView normal(int vertexIndex, float x, float y, float z) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	default Q normal(int vertexIndex, Vector3f normal) {
-		return (Q) MutableQuadView.super.normal(
+	default FrappeMutableQuadView normal(int vertexIndex, Vector3f normal) {
+		return (FrappeMutableQuadView) MutableQuadView.super.normal(
 				vertexIndex,
 				normal
 		);
 	}
 
 	@Override
-	default Q normal(int vertexIndex, Vector3fc normal) {
-		return (Q) MutableQuadView.super.normal(
+	default FrappeMutableQuadView normal(int vertexIndex, Vector3fc normal) {
+		return (FrappeMutableQuadView) MutableQuadView.super.normal(
 				vertexIndex,
 				normal
 		);
 	}
 
 	@Override
-	Q nominalFace(@Nullable Direction face);
+	default FrappeMutableQuadView nominalFace(@Nullable Direction face) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q cullFace(@Nullable Direction face);
+	default FrappeMutableQuadView cullFace(@Nullable Direction face) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q chunkLayer(@Nullable ChunkSectionLayer layer);
+	default FrappeMutableQuadView chunkLayer(ChunkSectionLayer layer) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q itemRenderType(RenderType renderType);
+	default FrappeMutableQuadView itemRenderType(RenderType renderType) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q emissive(boolean emissive);
+	default FrappeMutableQuadView emissive(boolean emissive) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q diffuseShade(boolean shade);
+	default FrappeMutableQuadView diffuseShade(boolean shade) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q ambientOcclusion(TriState ao);
+	default FrappeMutableQuadView ambientOcclusion(TriState ao) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q foilType(ItemStackRenderState.@Nullable FoilType foilType);
+	default FrappeMutableQuadView foilType(ItemStackRenderState.@Nullable FoilType foilType) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q shadeMode(ShadeMode mode);
+	default FrappeMutableQuadView shadeMode(ShadeMode mode) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q atlas(QuadAtlas quadAtlas);
+	default FrappeMutableQuadView atlas(QuadAtlas quadAtlas) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q tintIndex(int tintIndex);
+	default FrappeMutableQuadView tintIndex(int tintIndex) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q tag(int tag);
+	default FrappeMutableQuadView tag(int tag) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q copyFrom(QuadView quad);
+	default FrappeMutableQuadView copyFrom(QuadView quad) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 
 	@Override
-	Q fromBakedQuad(BakedQuad quad);
+	default FrappeMutableQuadView fromBakedQuad(BakedQuad quad) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 }

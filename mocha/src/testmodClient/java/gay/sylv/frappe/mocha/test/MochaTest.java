@@ -15,6 +15,10 @@ import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.Material;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -35,6 +39,10 @@ import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
 import net.fabricmc.fabric.api.client.model.loading.v1.wrapper.WrapperBlockStateModel;
+import net.fabricmc.fabric.api.client.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.client.renderer.v1.mesh.MutableMesh;
+import net.fabricmc.fabric.api.client.renderer.v1.mesh.MutableQuadView;
+import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadAtlas;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadEmitter;
 
 import gay.sylv.frappe.api.ext.quad_view.FrappeMutableQuadView;
@@ -88,7 +96,7 @@ public final class MochaTest implements ClientModInitializer {
 				itemKey,
 				new BlockItem(testBlock, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix())
 		);
-		testMaterial = TerrainMaterial.Builder.of(modId("test_terrain"))
+		testMaterial = TerrainMaterial.Builder.of(modId("test_glint"))
 				.build();
 		testGrassBlock = Registry.register(
 				BuiltInRegistries.BLOCK,
@@ -103,7 +111,7 @@ public final class MochaTest implements ClientModInitializer {
 		testGreenGlassBlock = Registry.register(
 				BuiltInRegistries.BLOCK,
 				glassKey,
-				new Block(BlockBehaviour.Properties.of().setId(glassKey))
+				new Block(BlockBehaviour.Properties.of().setId(glassKey).noOcclusion())
 		);
 		testGreenGlassBlockItem = Registry.register(
 				BuiltInRegistries.ITEM,
@@ -165,15 +173,34 @@ public final class MochaTest implements ClientModInitializer {
 									RandomSource random,
 									Predicate<@Nullable Direction> cullTest
 							) {
+								TextureAtlas atlas = Minecraft.getInstance()
+										.getAtlasManager()
+										.getAtlasOrThrow(QuadAtlas.BLOCK.getId());
+								TextureAtlasSprite glintSprite = atlas.getSprite(modId("block/enchanted_glint_terrain"));
+								MutableMesh glintMesh = Renderer.get().mutableMesh();
+								QuadEmitter glintQuad = glintMesh.emitter();
+
 								emitter.pushTransform(quad -> {
+									MQV_ExtTerrainMaterial materialQuad = FrappeMutableQuadView.of(quad)
+											.as(MQV_ExtTerrainMaterial.class);
+									glintQuad.copyFrom(quad);
+									glintQuad.materialBake(new Material.Baked(glintSprite, false), MutableQuadView.BAKE_LOCK_UV);
+
 									if (state.is(testBlock)) {
-										FrappeMutableQuadView.of(quad)
-												.as(MQV_ExtTerrainMaterial.class)
-												.frappe$terrainMaterial(testMaterial);
+										float du = (glintSprite.getU1() - glintSprite.getU0()) / 4.0f;
+										float dv = (glintSprite.getV1() - glintSprite.getV0()) / 4.0f;
+										float u2 = glintQuad.u(2) - du;
+										float u3 = glintQuad.u(3) - du;
+										float v1 = glintQuad.v(1) - dv;
+										float v2 = glintQuad.v(2) - dv;
+										materialQuad
+												.frappe$terrainMaterial(testMaterial)
+												.frappe$uv(0, glintQuad.u(0) + du, glintQuad.v(0) + dv)
+												.frappe$uv(1, glintQuad.u(1) + du, v1)
+												.frappe$uv(2, u2, v2)
+												.frappe$uv(3, u3, glintQuad.v(3) + dv);
 									} else {
-										FrappeMutableQuadView.of(quad)
-												.as(MQV_ExtTerrainMaterial.class)
-												.frappe$terrainMaterial(testGreenGlassMaterial);
+										materialQuad.frappe$terrainMaterial(testGreenGlassMaterial);
 									}
 
 									return true;

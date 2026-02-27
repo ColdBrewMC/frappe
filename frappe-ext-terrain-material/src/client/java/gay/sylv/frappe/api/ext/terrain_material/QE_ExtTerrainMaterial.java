@@ -9,9 +9,31 @@
 
 package gay.sylv.frappe.api.ext.terrain_material;
 
+import org.joml.Vector2f;
+import org.joml.Vector2fc;
+
 import gay.sylv.frappe.api.ext.quad_view.FrappeQuadEmitter;
 
-public interface QE_ExtTerrainMaterial<Q extends QE_ExtTerrainMaterial<Q>> extends FrappeQuadEmitter<Q>, MQV_ExtTerrainMaterial<Q> {
+public interface QE_ExtTerrainMaterial extends FrappeQuadEmitter, MQV_ExtTerrainMaterial {
 	@Override
-	QE_ExtTerrainMaterial<Q> frappe$terrainMaterial(TerrainMaterial material);
+	QE_ExtTerrainMaterial frappe$terrainMaterial(TerrainMaterial material);
+
+	@Override
+	QE_ExtTerrainMaterial frappe$uv(int vertexIndex, float u, float v);
+
+	@Override
+	default QE_ExtTerrainMaterial frappe$uv(int vertexIndex, Vector2f uv) {
+		return (QE_ExtTerrainMaterial) MQV_ExtTerrainMaterial.super.frappe$uv(
+				vertexIndex,
+				uv
+		);
+	}
+
+	@Override
+	default QE_ExtTerrainMaterial frappe$uv(int vertexIndex, Vector2fc uv) {
+		return (QE_ExtTerrainMaterial) MQV_ExtTerrainMaterial.super.frappe$uv(
+				vertexIndex,
+				uv
+		);
+	}
 }

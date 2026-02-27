@@ -29,37 +29,40 @@ import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadView;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.ShadeMode;
 import net.fabricmc.fabric.api.util.TriState;
 
-@SuppressWarnings({"NullableProblems", "unchecked"}) // IJ nullity issue
-public interface FrappeQuadEmitter<Q extends QuadEmitter> extends FrappeMutableQuadView<Q>, QuadEmitter {
-	static FrappeQuadEmitter<QuadEmitter> of(QuadEmitter emitter) {
-		return (FrappeQuadEmitter<QuadEmitter>) emitter;
+public interface FrappeQuadEmitter extends FrappeMutableQuadView, QuadEmitter {
+	static FrappeQuadEmitter of(QuadEmitter emitter) {
+		return (FrappeQuadEmitter) emitter;
 	}
 
 	@Override
-	Q pos(int vertexIndex, float x, float y, float z);
+	default FrappeQuadEmitter pos(int vertexIndex, float x, float y, float z) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).pos(vertexIndex, x, y, z);
+	}
 
 	@Override
-	default Q pos(int vertexIndex, Vector3f pos) {
-		return (Q) QuadEmitter.super.pos(
+	default FrappeQuadEmitter pos(int vertexIndex, Vector3f pos) {
+		return (FrappeQuadEmitter) QuadEmitter.super.pos(
 				vertexIndex,
 				pos
 		);
 	}
 
 	@Override
-	default Q pos(int vertexIndex, Vector3fc pos) {
-		return (Q) QuadEmitter.super.pos(
+	default FrappeQuadEmitter pos(int vertexIndex, Vector3fc pos) {
+		return (FrappeQuadEmitter) QuadEmitter.super.pos(
 				vertexIndex,
 				pos
 		);
 	}
 
 	@Override
-	Q color(int vertexIndex, int color);
+	default FrappeQuadEmitter color(int vertexIndex, int color) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).color(vertexIndex, color);
+	}
 
 	@Override
-	default Q color(int c0, int c1, int c2, int c3) {
-		return (Q) QuadEmitter.super.color(
+	default FrappeQuadEmitter color(int c0, int c1, int c2, int c3) {
+		return (FrappeQuadEmitter) QuadEmitter.super.color(
 				c0,
 				c1,
 				c2,
@@ -68,43 +71,47 @@ public interface FrappeQuadEmitter<Q extends QuadEmitter> extends FrappeMutableQ
 	}
 
 	@Override
-	Q uv(int vertexIndex, float u, float v);
+	default FrappeQuadEmitter uv(int vertexIndex, float u, float v) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).uv(vertexIndex, u, v);
+	}
 
 	@Override
-	default Q uv(int vertexIndex, Vector2f uv) {
-		return (Q) QuadEmitter.super.uv(
+	default FrappeQuadEmitter uv(int vertexIndex, Vector2f uv) {
+		return (FrappeQuadEmitter) QuadEmitter.super.uv(
 				vertexIndex,
 				uv
 		);
 	}
 
 	@Override
-	default Q uv(int vertexIndex, Vector2fc uv) {
-		return (Q) QuadEmitter.super.uv(
+	default FrappeQuadEmitter uv(int vertexIndex, Vector2fc uv) {
+		return (FrappeQuadEmitter) QuadEmitter.super.uv(
 				vertexIndex,
 				uv
 		);
 	}
 
 	@Override
-	default Q materialBake(Material.Baked material, int bakeFlags) {
-		return (Q) QuadEmitter.super.materialBake(
+	default FrappeQuadEmitter materialBake(Material.Baked material, int bakeFlags) {
+		return (FrappeQuadEmitter) QuadEmitter.super.materialBake(
 				material,
 				bakeFlags
 		);
 	}
 
 	@Override
-	default Q uvUnitSquare() {
-		return (Q) QuadEmitter.super.uvUnitSquare();
+	default FrappeQuadEmitter uvUnitSquare() {
+		return (FrappeQuadEmitter) QuadEmitter.super.uvUnitSquare();
 	}
 
 	@Override
-	Q lightmap(int vertexIndex, int lightmap);
+	default FrappeQuadEmitter lightmap(int vertexIndex, int lightmap) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).lightmap(vertexIndex, lightmap);
+	}
 
 	@Override
-	default Q lightmap(int l0, int l1, int l2, int l3) {
-		return (Q) QuadEmitter.super.lightmap(
+	default FrappeQuadEmitter lightmap(int l0, int l1, int l2, int l3) {
+		return (FrappeQuadEmitter) QuadEmitter.super.lightmap(
 				l0,
 				l1,
 				l2,
@@ -113,74 +120,104 @@ public interface FrappeQuadEmitter<Q extends QuadEmitter> extends FrappeMutableQ
 	}
 
 	@Override
-	Q normal(int vertexIndex, float x, float y, float z);
+	default FrappeQuadEmitter normal(int vertexIndex, float x, float y, float z) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).normal(vertexIndex, x, y, z);
+	}
 
 	@Override
-	default Q normal(int vertexIndex, Vector3f normal) {
-		return (Q) QuadEmitter.super.normal(
+	default FrappeQuadEmitter normal(int vertexIndex, Vector3f normal) {
+		return (FrappeQuadEmitter) QuadEmitter.super.normal(
 				vertexIndex,
 				normal
 		);
 	}
 
 	@Override
-	default Q normal(int vertexIndex, Vector3fc normal) {
-		return (Q) QuadEmitter.super.normal(
+	default FrappeQuadEmitter normal(int vertexIndex, Vector3fc normal) {
+		return (FrappeQuadEmitter) QuadEmitter.super.normal(
 				vertexIndex,
 				normal
 		);
 	}
 
 	@Override
-	Q nominalFace(@Nullable Direction face);
+	default FrappeQuadEmitter nominalFace(@Nullable Direction face) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).nominalFace(face);
+	}
 
 	@Override
-	Q cullFace(@Nullable Direction face);
+	default FrappeQuadEmitter cullFace(@Nullable Direction face) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).cullFace(face);
+	}
 
 	@Override
-	Q chunkLayer(@Nullable ChunkSectionLayer layer);
+	default FrappeQuadEmitter chunkLayer(ChunkSectionLayer layer) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).chunkLayer(layer);
+	}
 
 	@Override
-	Q itemRenderType(RenderType renderType);
+	default FrappeQuadEmitter itemRenderType(RenderType renderType) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).itemRenderType(renderType);
+	}
 
 	@Override
-	Q emissive(boolean emissive);
+	default FrappeQuadEmitter emissive(boolean emissive) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).emissive(emissive);
+	}
 
 	@Override
-	Q diffuseShade(boolean shade);
+	default FrappeQuadEmitter diffuseShade(boolean shade) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).diffuseShade(shade);
+	}
 
 	@Override
-	Q ambientOcclusion(TriState ao);
+	default FrappeQuadEmitter ambientOcclusion(TriState ao) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).ambientOcclusion(ao);
+	}
 
 	@Override
-	Q foilType(ItemStackRenderState.@Nullable FoilType foilType);
+	default FrappeQuadEmitter foilType(ItemStackRenderState.@Nullable FoilType foilType) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).foilType(foilType);
+	}
 
 	@Override
-	Q shadeMode(ShadeMode mode);
+	default FrappeQuadEmitter shadeMode(ShadeMode mode) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).shadeMode(mode);
+	}
 
 	@Override
-	Q atlas(QuadAtlas quadAtlas);
+	default FrappeQuadEmitter atlas(QuadAtlas quadAtlas) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).atlas(quadAtlas);
+	}
 
 	@Override
-	Q tintIndex(int tintIndex);
+	default FrappeQuadEmitter tintIndex(int tintIndex) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).tintIndex(tintIndex);
+	}
 
 	@Override
-	Q tag(int tag);
+	default FrappeQuadEmitter tag(int tag) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).tag(tag);
+	}
 
 	@ApiStatus.NonExtendable
 	@Override
-	default Q copyFrom(QuadView quad) {
-		return this.copyFrom((FrappeQuadView<QuadView>) quad);
+	default FrappeQuadEmitter copyFrom(QuadView quad) {
+		return this.copyFrom((FrappeQuadView) quad);
 	}
 
-	Q copyFrom(FrappeQuadView<QuadView> quad);
+	default FrappeQuadEmitter copyFrom(FrappeQuadView quad) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).copyFrom(quad);
+	}
 
 	@Override
-	Q fromBakedQuad(BakedQuad quad);
+	default FrappeQuadEmitter fromBakedQuad(BakedQuad quad) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).fromBakedQuad(quad);
+	}
 
 	@Override
-	default Q square(Direction nominalFace, float left, float bottom, float right, float top, float depth) {
-		return (Q) QuadEmitter.super.square(
+	default FrappeQuadEmitter square(Direction nominalFace, float left, float bottom, float right, float top, float depth) {
+		return (FrappeQuadEmitter) QuadEmitter.super.square(
 				nominalFace,
 				left,
 				bottom,
@@ -191,5 +228,7 @@ public interface FrappeQuadEmitter<Q extends QuadEmitter> extends FrappeMutableQ
 	}
 
 	@Override
-	FrappeQuadEmitter<QuadEmitter> emit();
+	default FrappeQuadEmitter emit() {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).emit();
+	}
 }

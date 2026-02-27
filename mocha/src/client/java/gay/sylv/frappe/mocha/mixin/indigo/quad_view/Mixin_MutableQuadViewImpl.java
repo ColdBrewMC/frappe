@@ -18,5 +18,5 @@ import gay.sylv.frappe.api.ext.quad_view.FrappeQuadEmitter;
 
 @SuppressWarnings("UnstableApiUsage")
 @Mixin(MutableQuadViewImpl.class)
-public abstract class Mixin_MutableQuadViewImpl implements FrappeMutableQuadView<MutableQuadViewImpl>, FrappeQuadEmitter<MutableQuadViewImpl> {
+public abstract class Mixin_MutableQuadViewImpl implements FrappeMutableQuadView, FrappeQuadEmitter {
 }

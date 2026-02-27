@@ -19,8 +19,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractRenderContext;
 
-import gay.sylv.frappe.api.ext.quad_view.FrappeQuadView;
-import gay.sylv.frappe.api.ext.terrain_material.QV_ExtTerrainMaterial;
+import gay.sylv.frappe.api.ext.quad_view.FrappeMutableQuadView;
+import gay.sylv.frappe.api.ext.terrain_material.QE_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
 
@@ -49,14 +49,18 @@ public abstract class Mixin_AbstractRenderContext {
 			float ny,
 			float nz,
 			Operation<Void> original,
-			@Local(argsOnly = true) MutableQuadViewImpl quad
+			@Local(argsOnly = true) MutableQuadViewImpl quad,
+			@Local(name = "i") int i
 	) {
-		TerrainMaterial material = FrappeQuadView.of(quad).as(QV_ExtTerrainMaterial.class).frappe$terrainMaterial();
-		int i = MochaIndigoEncodingFormat.TERRAIN_MATERIAL_2_INDEX.get(material);
+		QE_ExtTerrainMaterial materialQuad = FrappeMutableQuadView.of(quad)
+				.as(QE_ExtTerrainMaterial.class);
+		TerrainMaterial material = materialQuad.frappe$terrainMaterial();
+		int materialId = MochaIndigoEncodingFormat.TERRAIN_MATERIAL_2_INDEX.get(material);
 		instance.addVertex(x, y, z);
 		instance.setColor(color);
 		instance.setUv(u, v);
-		instance.setUv1(i, i > 0 ? 0xCAFE : 0);
+		instance.frappe$setUv(materialQuad.frappe$u(i), materialQuad.frappe$v(i));
+		instance.frappe$setMaterialId((byte) materialId);
 		instance.setLight(lightCoords);
 		instance.setNormal(nx, ny, nz);
 	}

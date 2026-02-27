@@ -9,15 +9,13 @@
 
 package gay.sylv.frappe.mocha.mixin.indigo.terrain_material;
 
+import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE_U_0;
+import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE_V_0;
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.HEADER_MOCHA_BITS;
 
-import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.QuadViewImpl;
 
@@ -27,22 +25,25 @@ import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
 
 @SuppressWarnings("UnstableApiUsage")
 @Mixin(QuadViewImpl.class)
-public abstract class Mixin_QuadViewImpl<Q extends QV_ExtTerrainMaterial<Q>> implements QV_ExtTerrainMaterial<Q> {
+public abstract class Mixin_QuadViewImpl implements QV_ExtTerrainMaterial {
 	@Shadow
 	protected int[] data;
 
 	@Shadow
 	protected int baseIndex;
 
-	@WrapMethod(method = "chunkLayer")
-	private ChunkSectionLayer retVanillaLayers(Operation<ChunkSectionLayer> original) {
-		ChunkSectionLayer layer = original.call();
-
-		return layer;
-	}
-
 	@Override
 	public @Nullable TerrainMaterial frappe$terrainMaterial() {
 		return MochaIndigoEncodingFormat.terrainMaterial(this.data[this.baseIndex + HEADER_MOCHA_BITS]);
+	}
+
+	@Override
+	public float frappe$u(int vertexIndex) {
+		return Float.intBitsToFloat(this.data[this.baseIndex + HEADER_MOCHA_BITS + FRAPPE_U_0 + vertexIndex * 2]);
+	}
+
+	@Override
+	public float frappe$v(int vertexIndex) {
+		return Float.intBitsToFloat(this.data[this.baseIndex + HEADER_MOCHA_BITS + FRAPPE_V_0 + vertexIndex * 2]);
 	}
 }

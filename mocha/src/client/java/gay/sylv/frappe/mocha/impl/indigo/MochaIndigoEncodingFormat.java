@@ -9,8 +9,6 @@
 
 package gay.sylv.frappe.mocha.impl.indigo;
 
-import static gay.sylv.frappe.impl.base.FrappeInitializer.modId;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,8 +21,10 @@ import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class MochaIndigoEncodingFormat {
-	public static final int DELTA_HEADER_STRIDE = 4; // 1,024 quads have 16 MiB more data
+	public static final int DELTA_HEADER_STRIDE = 12;
 	public static final int HEADER_MOCHA_BITS = 4;
+	public static final int FRAPPE_U_0 = 1;
+	public static final int FRAPPE_V_0 = 2;
 	public static final int HEADER_STRIDE = EncodingFormat.HEADER_STRIDE + DELTA_HEADER_STRIDE;
 
 	public static final Map<TerrainMaterial, Integer> TERRAIN_MATERIAL_2_INDEX = new HashMap<>();
@@ -33,7 +33,7 @@ public final class MochaIndigoEncodingFormat {
 
 	private static final int TERRAIN_MATERIAL_BIT_LENGTH = Mth.ceillog2(TERRAIN_MATERIALS.length);
 
-	private static final int TERRAIN_MATERIAL_BIT_OFFSET = 0;
+	private static final int TERRAIN_MATERIAL_BIT_OFFSET = 0;;
 
 	private static final int TERRAIN_MATERIAL_MASK = bitMask(
 			TERRAIN_MATERIAL_BIT_LENGTH,
@@ -43,6 +43,7 @@ public final class MochaIndigoEncodingFormat {
 	static {
 		TERRAIN_MATERIALS[0] = TerrainMaterial.Builder.of(Identifier.fromNamespaceAndPath("frappe-ext-terrain-material", "default"))
 				.label("Default")
+				.simple()
 				.build();
 		TERRAIN_MATERIAL_2_INDEX.put(TERRAIN_MATERIALS[0], 0);
 	}

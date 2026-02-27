@@ -10,11 +10,12 @@ in float sphericalVertexDistance;
 in float cylindricalVertexDistance;
 in vec4 vertexColor;
 in vec2 texCoord0;
-flat in ivec2 v_frappe_Extra;
+#ifdef _FRAPPE_COMPLEX_MATERIAL
+in vec2 frappeUV;
+#endif
+flat in uint _frappe_material_id;
 
 out vec4 fragColor;
-
-#moj_import <mocha:fragment.glsl>
 
 vec4 sampleNearest(sampler2D source, vec2 uv, vec2 pixelSize, vec2 du, vec2 dv, vec2 texelScreenSize) {
 	// Convert our UV back up to texel coordinates and find out how far over we are from the center of each pixel
@@ -88,11 +89,14 @@ vec4 sampleRGSS(sampler2D source, vec2 uv, vec2 pixelSize) {
 	return mix(nearestColor, rgssColor, blendFactor);
 }
 
+#moj_import <mocha:fragment.glsl>
+
 void main() {
 	vec4 color = (UseRgss == 1 ? sampleRGSS(Sampler0, texCoord0, 1.0f / TextureSize) : sampleNearest(Sampler0, texCoord0, 1.0f / TextureSize)) * vertexColor;
 	#ifdef _FRAPPE_SIMPLE_MATERIAL
 	color = _frappe_simple_pre_fragment(color);
-	#else
+	#endif
+	#ifdef _FRAPPE_COMPLEX_MATERIAL
 	color = _frappe_pre_fragment(color);
 	#endif
 	color = mix(FogColor * vec4(1, 1, 1, color.a), color, ChunkVisibility);
