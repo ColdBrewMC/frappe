@@ -33,7 +33,7 @@ public final class MochaIndigoEncodingFormat {
 
 	private static final int TERRAIN_MATERIAL_BIT_LENGTH = Mth.ceillog2(TERRAIN_MATERIALS.length);
 
-	private static final int TERRAIN_MATERIAL_BIT_OFFSET = 0;;
+	private static final int TERRAIN_MATERIAL_BIT_OFFSET = 0;
 
 	private static final int TERRAIN_MATERIAL_MASK = bitMask(
 			TERRAIN_MATERIAL_BIT_LENGTH,
@@ -43,7 +43,7 @@ public final class MochaIndigoEncodingFormat {
 	static {
 		TERRAIN_MATERIALS[0] = TerrainMaterial.Builder.of(Identifier.fromNamespaceAndPath("frappe-ext-terrain-material", "default"))
 				.label("Default")
-				.simple()
+				.complexity(TerrainMaterial.Complexity.SIMPLE)
 				.build();
 		TERRAIN_MATERIAL_2_INDEX.put(TERRAIN_MATERIALS[0], 0);
 	}

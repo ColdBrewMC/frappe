@@ -26,6 +26,8 @@ out vec2 frappeUV;
 #endif
 flat out uint _frappe_material_id;
 
+#moj_import <mocha:vertex.glsl>
+
 void main() {
 	vec3 pos = Position + (ChunkPosition - CameraBlockPos) + CameraOffset;
 	gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
@@ -34,7 +36,7 @@ void main() {
 	vertexColor = Color * minecraft_sample_lightmap(Sampler2, UV2);
 	texCoord0 = UV0;
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
-	frappeUV = FrappeUV;
+	frappeUV = _frappe_modify_uv(FrappeUV);
 	#endif
 	_frappe_material_id = _frappe_simple_material_info.x;
 }

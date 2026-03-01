@@ -2,3 +2,4 @@ classTweaker	v1	official
 accessible class com/mojang/blaze3d/opengl/VertexArrayCache$Emulated
 accessible class com/mojang/blaze3d/opengl/VertexArrayCache$Separate
 inject-interface com/mojang/blaze3d/vertex/VertexConsumer gay/sylv/frappe/mocha/impl/indigo/terrain_material/ExtTerrainMaterial_BufferBuilder
+inject-interface net/minecraft/client/renderer/chunk/ChunkSectionLayer gay/sylv/frappe/mocha/impl/indigo/terrain_material/Ext_ChunkSectionLayer

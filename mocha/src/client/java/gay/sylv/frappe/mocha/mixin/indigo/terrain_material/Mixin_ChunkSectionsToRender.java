@@ -1,7 +1,17 @@
+/*
+ * Frappé
+ * Copyright (C) 2026 Sylv
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package gay.sylv.frappe.mocha.mixin.indigo.terrain_material;
 
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
@@ -22,10 +32,11 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
+
+import gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterial;
 
 @Mixin(ChunkSectionsToRender.class)
 public abstract class Mixin_ChunkSectionsToRender {
@@ -47,7 +58,7 @@ public abstract class Mixin_ChunkSectionsToRender {
 
 	/**
 	 * @author Sylv
-	 * @reason We add our own passes, so it's more useful and powerful to just overwrite this.
+	 * @reason We add our own passes, so it's more useful and less annoying to just overwrite this.
 	 */
 	@Overwrite
 	public void renderGroup(ChunkSectionLayerGroup group, GpuSampler sampler) {
@@ -55,6 +66,15 @@ public abstract class Mixin_ChunkSectionsToRender {
 		GpuBuffer defaultIndexBuffer = this.maxIndicesRequired == 0 ? null : autoIndices.getBuffer(this.maxIndicesRequired);
 		VertexFormat.IndexType defaultIndexType = this.maxIndicesRequired == 0 ? null : autoIndices.type();
 		ChunkSectionLayer[] layers = group.layers();
+
+		for (ChunkSectionLayer layer : layers) {
+			IndigoTerrainMaterial material = (IndigoTerrainMaterial) layer.mocha$getAssociatedMaterial();
+
+			if (material != null && material.preRenderPassState() != null) {
+				material.preRenderPassState().run();
+			}
+		}
+
 		Minecraft minecraft = Minecraft.getInstance();
 		boolean wireframe = SharedConstants.DEBUG_HOTKEYS && minecraft.wireframe;
 		RenderTarget renderTarget = group.outputTarget();
@@ -63,7 +83,7 @@ public abstract class Mixin_ChunkSectionsToRender {
 				.createCommandEncoder()
 				.createRenderPass(
 						() -> "Section layers for " + group.label(),
-						renderTarget.getColorTextureView(),
+						Objects.requireNonNull(renderTarget.getColorTextureView()),
 						OptionalInt.empty(),
 						renderTarget.getDepthTextureView(),
 						OptionalDouble.empty()
@@ -81,7 +101,15 @@ public abstract class Mixin_ChunkSectionsToRender {
 			);
 
 			for (ChunkSectionLayer layer : layers) {
-				renderPass.setPipeline(wireframe ? RenderPipelines.WIREFRAME : layer.pipeline());
+				IndigoTerrainMaterial material = (IndigoTerrainMaterial) layer.mocha$getAssociatedMaterial();
+
+				if (material != null) {
+					if (material.renderPassSetup() != null) {
+						material.renderPassSetup().accept(renderPass);
+					}
+				}
+
+				renderPass.setPipeline(wireframe ? layer.mocha$getWireframePipeline() : layer.pipeline());
 				Int2ObjectOpenHashMap<List<RenderPass.Draw<GpuBufferSlice[]>>> drawGroup = this.drawGroupsPerLayer
 						.get(layer);
 
@@ -100,6 +128,20 @@ public abstract class Mixin_ChunkSectionsToRender {
 						);
 					}
 				}
+
+				if (material != null) {
+					if (material.renderPassCleanup() != null) {
+						material.renderPassCleanup().accept(renderPass);
+					}
+				}
+			}
+		}
+
+		for (ChunkSectionLayer layer : layers) {
+			IndigoTerrainMaterial material = (IndigoTerrainMaterial) layer.mocha$getAssociatedMaterial();
+
+			if (material != null && material.postRenderPassState() != null) {
+				material.postRenderPassState().run();
 			}
 		}
 	}

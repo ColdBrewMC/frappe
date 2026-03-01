@@ -31,9 +31,14 @@ public abstract class Mixin_ShaderManager1 {
 	private String processMochaImport(Reader sw, Operation<String> original, @Local(name = "location") Identifier location) {
 		String origShader = original.call(sw);
 
-		if (location.getNamespace().equals("mocha") && location.getPath().endsWith("fragment.glsl")) {
-			IndigoTerrainMaterialExtension.resolveMaterials();
-			return IndigoTerrainMaterialExtension.mochaFragmentShader;
+		if (location.getNamespace().equals("mocha")) {
+			if (location.getPath().endsWith("fragment.glsl")) {
+				IndigoTerrainMaterialExtension.resolveMaterials(true);
+				return IndigoTerrainMaterialExtension.mochaFragmentShader;
+			} else if (location.getPath().endsWith("vertex.glsl")) {
+				IndigoTerrainMaterialExtension.resolveMaterials(true);
+				return IndigoTerrainMaterialExtension.mochaVertexShader;
+			}
 		}
 
 		return origShader;

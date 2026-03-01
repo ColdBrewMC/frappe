@@ -9,7 +9,13 @@
 
 package gay.sylv.frappe.api.ext.terrain_material;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.systems.RenderPass;
 import org.jetbrains.annotations.ApiStatus;
+import org.jspecify.annotations.Nullable;
 
 import net.minecraft.resources.Identifier;
 
@@ -17,15 +23,19 @@ import gay.sylv.frappe.api.base.extension.RendererExtension;
 import gay.sylv.frappe.api.base.extension.RendererExtensionManager;
 
 public interface TerrainMaterialExtension extends RendererExtension {
+	/// @see RendererExtensionManager#getExtension(Class)
+	static TerrainMaterialExtension get() {
+		return RendererExtensionManager.getExtension(TerrainMaterialExtension.class);
+	}
+
 	/// Registers a [TerrainMaterial].
 	///
 	/// Note that some implementations **may** impose restrictions on how many materials may be
 	/// implemented at once. For example, Mocha allows up to 255 [materials][TerrainMaterial].
 	///
-	/// This method **must not** be invoked after [net.fabricmc.api.ClientModInitializer].
+	/// This method **must** only be invoked in the [TerrainMaterialRegistryEntrypoint].
 	static void registerMaterial(TerrainMaterial material) {
-		RendererExtensionManager.getExtension(TerrainMaterialExtension.class)
-				.registerMaterialImpl(material);
+		get().registerMaterialImpl(material);
 	}
 
 	/// @return a new instance of [TerrainMaterial].
@@ -34,9 +44,15 @@ public interface TerrainMaterialExtension extends RendererExtension {
 	TerrainMaterial createChunkLayer(
 			Identifier shaderId,
 			String label,
-			boolean simple
+			TerrainMaterial.Complexity complexity,
+			@Nullable Function<RenderPipeline.Builder, RenderPipeline.Builder> renderPipelineModifier,
+			@Nullable Runnable preRenderPassState,
+			@Nullable Runnable postRenderPassState,
+			@Nullable Consumer<RenderPass> renderPassSetup,
+			@Nullable Consumer<RenderPass> renderPassCleanup
 	);
 
+	/// @see #registerMaterial(TerrainMaterial)
 	@ApiStatus.OverrideOnly
 	void registerMaterialImpl(TerrainMaterial material);
 }

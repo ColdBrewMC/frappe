@@ -9,12 +9,10 @@
 
 package gay.sylv.frappe.api.ext.terrain_material;
 
-import org.jspecify.annotations.Nullable;
-
 import gay.sylv.frappe.api.ext.quad_view.FrappeQuadView;
 
 public interface QV_ExtTerrainMaterial extends FrappeQuadView {
-	@Nullable TerrainMaterial frappe$terrainMaterial();
+	TerrainMaterial frappe$terrainMaterial();
 
 	/// The U coordinate of the extra UVs present on quads supporting {@link TerrainMaterial}.
 	/// @see #u(int)

@@ -14,6 +14,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
@@ -28,6 +29,9 @@ import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
 @SuppressWarnings("UnstableApiUsage")
 @Mixin(AbstractRenderContext.class)
 public abstract class Mixin_AbstractRenderContext {
+	@Shadow
+	protected int overlay;
+
 	@WrapOperation(
 			method = "bufferQuad(Lnet/fabricmc/fabric/impl/client/indigo/renderer/mesh/MutableQuadViewImpl;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V",
 			at = @At(
@@ -61,6 +65,7 @@ public abstract class Mixin_AbstractRenderContext {
 		instance.setUv(u, v);
 		instance.frappe$setUv(materialQuad.frappe$u(i), materialQuad.frappe$v(i));
 		instance.frappe$setMaterialId((byte) materialId);
+		instance.setOverlay(overlayCoords);
 		instance.setLight(lightCoords);
 		instance.setNormal(nx, ny, nz);
 	}

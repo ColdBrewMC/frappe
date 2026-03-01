@@ -13,6 +13,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
@@ -31,10 +33,12 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
@@ -49,8 +53,9 @@ import gay.sylv.frappe.api.ext.quad_view.FrappeMutableQuadView;
 import gay.sylv.frappe.api.ext.terrain_material.MQV_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension;
+import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialRegistryEntrypoint;
 
-public final class MochaTest implements ClientModInitializer {
+public final class MochaTest implements ClientModInitializer, TerrainMaterialRegistryEntrypoint {
 	private static Block testBlock;
 	private static Block testGrassBlock;
 	private static Block testGreenGlassBlock;
@@ -59,6 +64,23 @@ public final class MochaTest implements ClientModInitializer {
 	private static Item testGreenGlassBlockItem;
 	private static TerrainMaterial testMaterial;
 	private static TerrainMaterial testGreenGlassMaterial;
+	private static GpuBufferSlice dynamicTransforms;
+	private static TestDynamicUniforms dynamicUniforms;
+
+	@Override
+	public void onTerrainMaterialRegistry() {
+		ClientLifecycleEvents.CLIENT_STARTED.register(_ -> {
+			dynamicUniforms = new TestDynamicUniforms();
+		});
+		testMaterial = TerrainMaterial.Builder.of(modId("test_glint"))
+				.complexity(TerrainMaterial.Complexity.COMPLEX)
+				.build();
+		testGreenGlassMaterial = TerrainMaterial.Builder.of(modId("test_terrain"))
+				.complexity(TerrainMaterial.Complexity.SIMPLE)
+				.build();
+		TerrainMaterialExtension.registerMaterial(testMaterial);
+		TerrainMaterialExtension.registerMaterial(testGreenGlassMaterial);
+	}
 
 	@Override
 	public void onInitializeClient() {
@@ -96,8 +118,6 @@ public final class MochaTest implements ClientModInitializer {
 				itemKey,
 				new BlockItem(testBlock, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix())
 		);
-		testMaterial = TerrainMaterial.Builder.of(modId("test_glint"))
-				.build();
 		testGrassBlock = Registry.register(
 				BuiltInRegistries.BLOCK,
 				grassKey,
@@ -118,11 +138,6 @@ public final class MochaTest implements ClientModInitializer {
 				glassItemKey,
 				new BlockItem(testGreenGlassBlock, new Item.Properties().setId(glassItemKey).useBlockDescriptionPrefix())
 		);
-		testGreenGlassMaterial = TerrainMaterial.Builder.of(modId("test_terrain"))
-				.simple()
-				.build();
-		TerrainMaterialExtension.registerMaterial(testMaterial);
-		TerrainMaterialExtension.registerMaterial(testGreenGlassMaterial);
 		PreparableModelLoadingPlugin.register(
 				(store, executor) -> {
 					FileToIdConverter cobble = FileToIdConverter.json("models/block/cobblestone");
@@ -161,7 +176,7 @@ public final class MochaTest implements ClientModInitializer {
 
 					pluginContext.modifyBlockModelAfterBake().register((model, context) -> {
 						BlockState state = context.state();
-						if (!state.is(testBlock) && !state.is(testGrassBlock) && !state.is(testGreenGlassBlock)) return model;
+						if (!state.is(testBlock) && !state.is(testGrassBlock) && !state.is(testGreenGlassBlock) && !state.is(Blocks.NETHERITE_BLOCK)) return model;
 
 						return new WrapperBlockStateModel(model) {
 							@Override
@@ -177,32 +192,134 @@ public final class MochaTest implements ClientModInitializer {
 										.getAtlasManager()
 										.getAtlasOrThrow(QuadAtlas.BLOCK.getId());
 								TextureAtlasSprite glintSprite = atlas.getSprite(modId("block/enchanted_glint_terrain"));
-								MutableMesh glintMesh = Renderer.get().mutableMesh();
-								QuadEmitter glintQuad = glintMesh.emitter();
+								final MutableMesh glintMesh = Renderer.get().mutableMesh();
+								final QuadEmitter glintQuad = glintMesh.emitter();
 
 								emitter.pushTransform(quad -> {
 									MQV_ExtTerrainMaterial materialQuad = FrappeMutableQuadView.of(quad)
 											.as(MQV_ExtTerrainMaterial.class);
-									glintQuad.copyFrom(quad);
-									glintQuad.materialBake(new Material.Baked(glintSprite, false), MutableQuadView.BAKE_LOCK_UV);
 
-									if (state.is(testBlock)) {
-										float du = (glintSprite.getU1() - glintSprite.getU0()) / 4.0f;
-										float dv = (glintSprite.getV1() - glintSprite.getV0()) / 4.0f;
-										float u2 = glintQuad.u(2) - du;
-										float u3 = glintQuad.u(3) - du;
-										float v1 = glintQuad.v(1) - dv;
-										float v2 = glintQuad.v(2) - dv;
+									glintQuad.copyFrom(quad);
+
+									if (state.is(testBlock) || state.is(Blocks.NETHERITE_BLOCK)) {
+										// Find the minimum and maximum UV's.
+										// A simulation of the algorithm is provided in comments below.
+										int minUi = -1;
+										int minVi = -1;
+										int maxUi = -1;
+										int maxVi = -1;
+										float minU = Float.MAX_VALUE; // 7, 7, 5, 3
+										float minV = Float.MAX_VALUE; // 9, 8, 8, 8
+										float maxU = 0; // 7, 12, 12, 12
+										float maxV = 0; // 9, 9,  10, 13
+
+										// u, v
+										// 7, 9
+										// 12,8
+										// 5, 10
+										// 3, 13
+
+										glintQuad.materialBake(new Material.Baked(glintSprite, false), MutableQuadView.BAKE_LOCK_UV);
+										Vector3fc normal = glintQuad.faceNormal();
+										Direction direction = Direction.getApproximateNearest(normal.x(), normal.y(), normal.z());
+
+										//CHECKSTYLE.OFF: MatchXpath
+										for (int i = 0; i < 4; i++) {
+											float u = 0;
+											float v = 0;
+
+											switch (direction) {
+												case UP, DOWN -> {
+													u = glintQuad.x(i);
+													v = glintQuad.z(i);
+												}
+												case SOUTH, NORTH -> {
+													u = glintQuad.x(i);
+													v = glintQuad.y(i);
+												}
+												case WEST, EAST -> {
+													u = glintQuad.z(i);
+													v = glintQuad.y(i);
+												}
+											}
+
+											if (u < minU) {
+												minUi = i;
+												minU = u;
+											}
+
+											if (u > maxU) {
+												maxUi = i;
+												maxU = u;
+											}
+
+											if (v < minV) {
+												minVi = i;
+												minV = v;
+											}
+
+											if (v > maxV) {
+												maxVi = i;
+												maxV = v;
+											}
+										}
+
+										maxU -= (maxU - minU) / 2.0f;
+										maxV -= (maxV - minV) / 2.0f;
+										minU += (maxU - minU) / 2.0f;
+										minV += (maxV - minV) / 2.0f;
+
+										switch (direction) {
+											case UP, DOWN -> {
+												glintQuad.pos(maxUi, maxU, glintQuad.y(maxUi), glintQuad.z(maxUi));
+												glintQuad.pos(maxVi, glintQuad.x(maxVi), glintQuad.y(maxVi), maxV);
+												glintQuad.pos(minUi, minU, glintQuad.y(minUi), glintQuad.z(minUi));
+												glintQuad.pos(minVi, glintQuad.x(minVi), glintQuad.y(minVi), minV);
+											}
+											case SOUTH, NORTH -> {
+												glintQuad.pos(maxUi, maxU, glintQuad.y(maxUi), glintQuad.z(maxUi));
+												glintQuad.pos(maxVi, glintQuad.x(maxVi), maxV, glintQuad.z(maxVi));
+												glintQuad.pos(minUi, minU, glintQuad.y(minUi), glintQuad.z(minUi));
+												glintQuad.pos(minVi, glintQuad.x(minVi), minV, glintQuad.z(minVi));
+											}
+											case EAST, WEST -> {
+												glintQuad.pos(maxUi, glintQuad.x(maxUi), glintQuad.y(maxUi), maxU);
+												glintQuad.pos(maxVi, glintQuad.x(maxVi), maxV, glintQuad.z(maxVi));
+												glintQuad.pos(minUi, glintQuad.x(minUi), glintQuad.y(minUi), minU);
+												glintQuad.pos(minVi, glintQuad.x(minVi), minV, glintQuad.z(minVi));
+											}
+										}
+
+										//CHECKSTYLE.ON: MatchXpath
+
+										float scale = 1.0625f;
 										materialQuad
 												.frappe$terrainMaterial(testMaterial)
-												.frappe$uv(0, glintQuad.u(0) + du, glintQuad.v(0) + dv)
-												.frappe$uv(1, glintQuad.u(1) + du, v1)
-												.frappe$uv(2, u2, v2)
-												.frappe$uv(3, u3, glintQuad.v(3) + dv);
+												.frappe$uv(
+														0,
+														glintQuad.u(0),
+														glintQuad.v(0)
+												)
+												.frappe$uv(
+														1,
+														glintQuad.u(1),
+														glintQuad.v(1) - (glintQuad.v(1) - glintQuad.v(0)) / scale
+												)
+												.frappe$uv(
+														2,
+														glintQuad.u(2) - (glintQuad.u(2) - glintQuad.u(0)) / scale,
+														glintQuad.v(2) - (glintQuad.v(2) - glintQuad.v(3)) / scale
+												)
+												.frappe$uv(
+														3,
+														glintQuad.u(3) - (glintQuad.u(3) - glintQuad.u(1)) / scale,
+														glintQuad.v(3)
+												);
 									} else {
 										materialQuad.frappe$terrainMaterial(testGreenGlassMaterial);
 									}
 
+									glintQuad.emit();
 									return true;
 								});
 								super.emitQuads(
@@ -214,6 +331,7 @@ public final class MochaTest implements ClientModInitializer {
 										cullTest
 								);
 								emitter.popTransform();
+								glintMesh.clear();
 							}
 						};
 					});

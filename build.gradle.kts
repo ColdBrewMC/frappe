@@ -13,4 +13,5 @@ dependencies {
 	module("base", include = true)
 	extension("quad-view", include = true)
 	extension("terrain-material", include = true)
+	module("mocha", include = true, api = false, prefix = false)
 }

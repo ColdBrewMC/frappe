@@ -35,7 +35,7 @@ public interface FrappeMutableQuadView extends FrappeQuadView, MutableQuadView {
 
 	@Override
 	default FrappeMutableQuadView pos(int vertexIndex, float x, float y, float z) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).pos(vertexIndex, x, y, z);
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public interface FrappeMutableQuadView extends FrappeQuadView, MutableQuadView {
 
 	@Override
 	default FrappeMutableQuadView color(int vertexIndex, int color) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).color(vertexIndex, color);
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public interface FrappeMutableQuadView extends FrappeQuadView, MutableQuadView {
 
 	@Override
 	default FrappeMutableQuadView uv(int vertexIndex, float u, float v) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).uv(vertexIndex, u, v);
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public interface FrappeMutableQuadView extends FrappeQuadView, MutableQuadView {
 
 	@Override
 	default FrappeMutableQuadView lightmap(int vertexIndex, int lightmap) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).lightmap(vertexIndex, lightmap);
 	}
 
 	@Override
@@ -115,7 +115,7 @@ public interface FrappeMutableQuadView extends FrappeQuadView, MutableQuadView {
 
 	@Override
 	default FrappeMutableQuadView normal(int vertexIndex, float x, float y, float z) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).normal(vertexIndex, x, y, z);
 	}
 
 	@Override
@@ -136,71 +136,71 @@ public interface FrappeMutableQuadView extends FrappeQuadView, MutableQuadView {
 
 	@Override
 	default FrappeMutableQuadView nominalFace(@Nullable Direction face) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).nominalFace(face);
 	}
 
 	@Override
 	default FrappeMutableQuadView cullFace(@Nullable Direction face) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).cullFace(face);
 	}
 
 	@Override
 	default FrappeMutableQuadView chunkLayer(ChunkSectionLayer layer) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).chunkLayer(layer);
 	}
 
 	@Override
 	default FrappeMutableQuadView itemRenderType(RenderType renderType) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).itemRenderType(renderType);
 	}
 
 	@Override
 	default FrappeMutableQuadView emissive(boolean emissive) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).emissive(emissive);
 	}
 
 	@Override
 	default FrappeMutableQuadView diffuseShade(boolean shade) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).diffuseShade(shade);
 	}
 
 	@Override
 	default FrappeMutableQuadView ambientOcclusion(TriState ao) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).ambientOcclusion(ao);
 	}
 
 	@Override
 	default FrappeMutableQuadView foilType(ItemStackRenderState.@Nullable FoilType foilType) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).foilType(foilType);
 	}
 
 	@Override
 	default FrappeMutableQuadView shadeMode(ShadeMode mode) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).shadeMode(mode);
 	}
 
 	@Override
 	default FrappeMutableQuadView atlas(QuadAtlas quadAtlas) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).atlas(quadAtlas);
 	}
 
 	@Override
 	default FrappeMutableQuadView tintIndex(int tintIndex) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).tintIndex(tintIndex);
 	}
 
 	@Override
 	default FrappeMutableQuadView tag(int tag) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).tag(tag);
 	}
 
 	@Override
 	default FrappeMutableQuadView copyFrom(QuadView quad) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).copyFrom(quad);
 	}
 
 	@Override
 	default FrappeMutableQuadView fromBakedQuad(BakedQuad quad) {
-		throw new UnsupportedOperationException("Implemented via Mixin.");
+		return (FrappeMutableQuadView) ((MutableQuadView) this).fromBakedQuad(quad);
 	}
 }

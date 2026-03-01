@@ -10,6 +10,9 @@
 package gay.sylv.frappe.mocha.mixin.indigo.terrain_material;
 
 import static gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension.MOCHA_CUTOUT;
+import static net.minecraft.client.renderer.chunk.ChunkSectionLayer.CUTOUT;
+import static net.minecraft.client.renderer.chunk.ChunkSectionLayer.SOLID;
+import static net.minecraft.client.renderer.chunk.ChunkSectionLayer.TRANSLUCENT;
 
 import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
@@ -36,8 +39,10 @@ public abstract class Mixin_SectionCompiler {
 	private VertexFormat overridePipeline(VertexFormat original, @Local(name = "renderType") ChunkSectionLayer layer) {
 		if (layer.equals(IndigoTerrainMaterialExtension.MOCHA_SOLID) || layer.equals(MOCHA_CUTOUT)) {
 			return MochaVertexFormats.COMPLEX_TERRAIN;
-		} else {
+		} else if (layer.equals(SOLID) || layer.equals(CUTOUT) || layer.equals(TRANSLUCENT)) {
 			return MochaVertexFormats.SIMPLE_TERRAIN;
+		} else {
+			return layer.pipeline().getVertexFormat();
 		}
 	}
 }

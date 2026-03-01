@@ -1,14 +1,24 @@
+/*
+ * Frappé
+ * Copyright (C) 2026 Sylv
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package gay.sylv.frappe.mocha.mixin.indigo.terrain_material;
 
-import static gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension.MOCHA_CUTOUT;
+import static gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension.CUTOUT_LAYERS;
 import static gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension.MOCHA_OPAQUE_CUTOUT;
 import static gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension.MOCHA_OPAQUE_SOLID;
-import static gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension.MOCHA_SOLID;
+import static gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension.SOLID_LAYERS;
 
 import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -22,33 +32,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 
+import gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension;
+
 @Mixin(ChunkSectionLayerGroup.class)
 public abstract class Mixin_ChunkSectionLayerGroup {
 	@Unique
-	private static int offset;
+	private static int ordinalOffset;
 
 	@Mutable
 	@Shadow
 	@Final
 	private static ChunkSectionLayerGroup[] $VALUES;
 
-	@Shadow
-	@Final
-	public static ChunkSectionLayerGroup OPAQUE;
-
-	@Shadow
-	@Final
-	public static ChunkSectionLayerGroup TRANSLUCENT;
-
 	@Definition(id = "ordinal", local = @Local(type = int.class, argsOnly = true, ordinal = 0))
 	@Expression("ordinal")
 	@ModifyExpressionValue(method = "<init>", at = @At("MIXINEXTRAS:EXPRESSION"))
 	private static int overrideOrdinal(int original, @Local(argsOnly = true) String name) {
-		if (name.equals("CUTOUT") || name.equals("TRANSLUCENT")) {
-			offset++;
-		}
-
-		return original + offset;
+		ordinalOffset++;
+		return original;
 	}
 
 	@SuppressWarnings("CheckStyle")
@@ -59,10 +60,22 @@ public abstract class Mixin_ChunkSectionLayerGroup {
 
 	@Inject(method = "<clinit>", at = @At("RETURN"))
 	private static void onClinit(CallbackInfo ci) {
-		offset = 0;
-		MOCHA_OPAQUE_SOLID = init("MOCHA_OPAQUE_SOLID", 0, MOCHA_SOLID);
-		MOCHA_OPAQUE_CUTOUT = init("MOCHA_OPAQUE_CUTOUT", 2, MOCHA_CUTOUT);
+		clinit();
+	}
 
-		$VALUES = new ChunkSectionLayerGroup[]{MOCHA_OPAQUE_SOLID, OPAQUE, MOCHA_OPAQUE_CUTOUT, TRANSLUCENT};
+	@Unique
+	private static void clinit() {
+		IndigoTerrainMaterialExtension.resolveMaterials();
+		MOCHA_OPAQUE_SOLID = init(
+				"MOCHA_OPAQUE_SOLID",
+				ordinalOffset,
+				SOLID_LAYERS.toArray(ChunkSectionLayer[]::new)
+		);
+		MOCHA_OPAQUE_CUTOUT = init(
+				"MOCHA_OPAQUE_CUTOUT",
+				ordinalOffset,
+				CUTOUT_LAYERS.toArray(ChunkSectionLayer[]::new)
+		);
+		$VALUES = ArrayUtils.addAll($VALUES, MOCHA_OPAQUE_SOLID, MOCHA_OPAQUE_CUTOUT);
 	}
 }

@@ -9,16 +9,20 @@ fun DependencyHandlerScope.frappe(module: String): ProjectDependency {
 	return dependencies.project(":frappe-$module", configuration = "default")
 }
 
-fun DependencyHandlerScope.module(module: String, include: Boolean = false, api: Boolean = true): Dependency? {
+fun DependencyHandlerScope.module(module: String, include: Boolean = false, api: Boolean = true, prefix: Boolean = true): Dependency? {
+	val prefixer = if (prefix) { this::frappe } else {
+		module -> dependencies.project(module, configuration = "default")
+	}
+
 	if (include) {
-		add("include", frappe(module))
+		add("include", prefixer(module))
 	}
 
 	return if (!api) {
 		// Ensure dependents don't get unwanted TAWs or extension classes
-		add("implementation", frappe(module))
+		add("implementation", prefixer(module))
 	} else {
-		add("api", frappe(module))
+		add("api", prefixer(module))
 	}
 }
 

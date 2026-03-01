@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.jspecify.annotations.Nullable;
 
-import net.fabricmc.fabric.api.client.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.client.renderer.v1.RendererProvider;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;

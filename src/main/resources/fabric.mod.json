@@ -13,5 +13,9 @@
 	},
 	"license": "${mod_license}",
 	"icon": "assets/frappe/icon.png",
-	"environment": "client"
+	"environment": "client",
+	"breaks": {
+		"quilt_loader": "*",
+		"optifabric": "*"
+	}
 }
