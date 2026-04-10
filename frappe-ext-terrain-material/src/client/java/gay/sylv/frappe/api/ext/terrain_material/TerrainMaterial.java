@@ -139,7 +139,7 @@ public interface TerrainMaterial {
 		/// across all terrain.
 		SIMPLE,
 		/// This material's shader uses more complicated operations that may be repeated across all
-		/// other terrain with moderate materials.
+		/// other terrain with complex materials.
 		COMPLEX,
 		/// This material's shader uses branches, uses very complicated operations, or requires extra
 		/// uniforms, all of which absolutely must not be repeated for other terrain. Most
