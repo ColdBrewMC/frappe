@@ -18,12 +18,12 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.jspecify.annotations.Nullable;
 
-import net.fabricmc.fabric.api.client.renderer.v1.RendererProvider;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 
 import gay.sylv.frappe.api.base.extension.RendererExtension;
 import gay.sylv.frappe.api.base.extension.RendererExtensionType;
+import gay.sylv.frappe.api.base.extension.RendererInfo;
 import gay.sylv.frappe.api.base.extension.SupportTier;
 import gay.sylv.frappe.impl.base.FrappeInitializer;
 
@@ -32,6 +32,7 @@ public final class ExtensionRegistryImpl {
 	private static final Map<Class<? extends RendererExtensionType>, String> CLASS_2_ID = new HashMap<>();
 	private static final Map<Class<? extends RendererExtensionType>, EntrypointContainer<RendererExtensionType>> TYPE_2_ENTRYPOINT = new HashMap<>();
 	private static final Map<String, RendererExtension> EXTENSIONS = new HashMap<>();
+	public static final String UNSUPPORTED = "The current Renderer implementation is not supported by Frappé; try adding a mod that supports the current rendering optimization (Sodium, VulkanMod, etc.) or renderer mod.";
 
 	private static boolean loaded = false;
 
@@ -89,7 +90,7 @@ public final class ExtensionRegistryImpl {
 			Deque<EntrypointContainer<RendererExtension>> extensionContainers = new ConcurrentLinkedDeque<>(FabricLoader.getInstance()
 					.getEntrypointContainers("frappe:" + typeId, implClass));
 
-			String rendererId = RendererProvider.getModId();
+			String rendererId = RendererInfo.getModId();
 
 			while (extensionContainers.size() > 1) {
 				EntrypointContainer<RendererExtension> entrypoint0 = extensionContainers.pop();
