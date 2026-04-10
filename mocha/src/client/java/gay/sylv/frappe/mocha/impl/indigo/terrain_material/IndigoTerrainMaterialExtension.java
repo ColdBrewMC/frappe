@@ -145,6 +145,9 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 			throw new RuntimeException(e);
 		}
 
+		mochaFragmentShader = fuckOffWindows(mochaFragmentShader);
+		mochaVertexShader = fuckOffWindows(mochaVertexShader);
+
 		String preFragmentSimpleTemplate = findFunction(mochaFragmentShader, "simple_pre_fragment");
 		StringBuilder preFragmentSimpleFunctions = new StringBuilder();
 		StringBuilder preFragmentSimpleBuilder = new StringBuilder();
@@ -164,6 +167,7 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 			try {
 				if (fragmentShaderPath.isPresent()) {
 					String shader = Files.readString(fragmentShaderPath.get());
+					shader = fuckOffWindows(shader);
 
 					if (material.simple()) {
 						shader = shader
@@ -202,6 +206,7 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 
 				if (vertexShaderPath.isPresent()) {
 					String shader = Files.readString(vertexShaderPath.get());
+					shader = fuckOffWindows(shader);
 
 					shader = shader
 							.replaceFirst("#version [0-9]{3}", "")
@@ -298,7 +303,7 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 	private static String findFunction(String shader, String functionName) {
 		String fun = Pattern.quote("_frappe_" + functionName);
 		String def = Pattern.quote("_FRAPPE_" + functionName.toUpperCase(Locale.ROOT));
-		Pattern pattern = Pattern.compile("(?<=#ifdef " + def + ")(?!._FRAPPE_)(.*" + fun + "[\\w\\t\\n(),=+-; ]+)(?=#endif)", Pattern.DOTALL);
+		Pattern pattern = Pattern.compile("(?s)(?<=#ifdef " + def + ")(?!._FRAPPE_)(.*" + fun + "[\\w\\t\\n(),=+-; ]+)(?=#endif)");
 		Matcher matcher = pattern.matcher(shader);
 
 		if (!matcher.find()) {
@@ -328,5 +333,12 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 		} catch (NoSuchElementException e) {
 			throw new NoSuchElementException(path, e);
 		}
+	}
+
+	/// makes windows fuck off
+	private static String fuckOffWindows(String infected) {
+		Pattern weHateWindows = Pattern.compile("\\r\\n");
+		Matcher windowsVaccine = weHateWindows.matcher(infected);
+		return windowsVaccine.replaceAll("\n");
 	}
 }

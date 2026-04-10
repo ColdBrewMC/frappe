@@ -202,119 +202,21 @@ public final class MochaTest implements ClientModInitializer, TerrainMaterialReg
 									glintQuad.copyFrom(quad);
 
 									if (state.is(testBlock) || state.is(Blocks.NETHERITE_BLOCK)) {
-										// Find the minimum and maximum UV's.
-										// A simulation of the algorithm is provided in comments below.
-										int minUi = -1;
-										int minVi = -1;
-										int maxUi = -1;
-										int maxVi = -1;
-										float minU = Float.MAX_VALUE; // 7, 7, 5, 3
-										float minV = Float.MAX_VALUE; // 9, 8, 8, 8
-										float maxU = 0; // 7, 12, 12, 12
-										float maxV = 0; // 9, 9,  10, 13
-
-										// u, v
-										// 7, 9
-										// 12,8
-										// 5, 10
-										// 3, 13
-
 										glintQuad.materialBake(new Material.Baked(glintSprite, false), MutableQuadView.BAKE_LOCK_UV);
-										Vector3fc normal = glintQuad.faceNormal();
-										Direction direction = Direction.getApproximateNearest(normal.x(), normal.y(), normal.z());
 
-										//CHECKSTYLE.OFF: MatchXpath
-										for (int i = 0; i < 4; i++) {
-											float u = 0;
-											float v = 0;
-
-											switch (direction) {
-												case UP, DOWN -> {
-													u = glintQuad.x(i);
-													v = glintQuad.z(i);
-												}
-												case SOUTH, NORTH -> {
-													u = glintQuad.x(i);
-													v = glintQuad.y(i);
-												}
-												case WEST, EAST -> {
-													u = glintQuad.z(i);
-													v = glintQuad.y(i);
-												}
-											}
-
-											if (u < minU) {
-												minUi = i;
-												minU = u;
-											}
-
-											if (u > maxU) {
-												maxUi = i;
-												maxU = u;
-											}
-
-											if (v < minV) {
-												minVi = i;
-												minV = v;
-											}
-
-											if (v > maxV) {
-												maxVi = i;
-												maxV = v;
-											}
-										}
-
-										maxU -= (maxU - minU) / 2.0f;
-										maxV -= (maxV - minV) / 2.0f;
-										minU += (maxU - minU) / 2.0f;
-										minV += (maxV - minV) / 2.0f;
-
-										switch (direction) {
-											case UP, DOWN -> {
-												glintQuad.pos(maxUi, maxU, glintQuad.y(maxUi), glintQuad.z(maxUi));
-												glintQuad.pos(maxVi, glintQuad.x(maxVi), glintQuad.y(maxVi), maxV);
-												glintQuad.pos(minUi, minU, glintQuad.y(minUi), glintQuad.z(minUi));
-												glintQuad.pos(minVi, glintQuad.x(minVi), glintQuad.y(minVi), minV);
-											}
-											case SOUTH, NORTH -> {
-												glintQuad.pos(maxUi, maxU, glintQuad.y(maxUi), glintQuad.z(maxUi));
-												glintQuad.pos(maxVi, glintQuad.x(maxVi), maxV, glintQuad.z(maxVi));
-												glintQuad.pos(minUi, minU, glintQuad.y(minUi), glintQuad.z(minUi));
-												glintQuad.pos(minVi, glintQuad.x(minVi), minV, glintQuad.z(minVi));
-											}
-											case EAST, WEST -> {
-												glintQuad.pos(maxUi, glintQuad.x(maxUi), glintQuad.y(maxUi), maxU);
-												glintQuad.pos(maxVi, glintQuad.x(maxVi), maxV, glintQuad.z(maxVi));
-												glintQuad.pos(minUi, glintQuad.x(minUi), glintQuad.y(minUi), minU);
-												glintQuad.pos(minVi, glintQuad.x(minVi), minV, glintQuad.z(minVi));
-											}
-										}
-
-										//CHECKSTYLE.ON: MatchXpath
-
-										float scale = 1.0625f;
+										final float scale = 2.0f;
+										float du = (glintSprite.getU1() - glintSprite.getU0()) / (2.0f + scale);
+										float dv = (glintSprite.getV1() - glintSprite.getV0()) / (2.0f + scale);
+										float u2 = glintQuad.u(2) - du;
+										float u3 = glintQuad.u(3) - du;
+										float v1 = glintQuad.v(1) - dv;
+										float v2 = glintQuad.v(2) - dv;
 										materialQuad
 												.frappe$terrainMaterial(testMaterial)
-												.frappe$uv(
-														0,
-														glintQuad.u(0),
-														glintQuad.v(0)
-												)
-												.frappe$uv(
-														1,
-														glintQuad.u(1),
-														glintQuad.v(1) - (glintQuad.v(1) - glintQuad.v(0)) / scale
-												)
-												.frappe$uv(
-														2,
-														glintQuad.u(2) - (glintQuad.u(2) - glintQuad.u(0)) / scale,
-														glintQuad.v(2) - (glintQuad.v(2) - glintQuad.v(3)) / scale
-												)
-												.frappe$uv(
-														3,
-														glintQuad.u(3) - (glintQuad.u(3) - glintQuad.u(1)) / scale,
-														glintQuad.v(3)
-												);
+												.frappe$uv(0, glintQuad.u(0) + du, glintQuad.v(0) + dv)
+												.frappe$uv(1, glintQuad.u(1) + du, glintQuad.v(1) - dv)
+												.frappe$uv(2, glintQuad.u(2) - du, glintQuad.v(2) - dv)
+												.frappe$uv(3, glintQuad.u(3) - du, glintQuad.v(3) + dv);
 									} else {
 										materialQuad.frappe$terrainMaterial(testGreenGlassMaterial);
 									}
