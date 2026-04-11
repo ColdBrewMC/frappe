@@ -16,21 +16,17 @@ import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.textures.GpuSampler;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.jspecify.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
-import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
-import net.minecraft.client.renderer.state.LevelRenderState;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 import gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension;
@@ -39,17 +35,6 @@ import gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialE
 public abstract class Mixin_LevelRenderer {
 	@Shadow
 	private @Nullable GpuSampler chunkLayerSampler;
-
-	@Shadow
-	private @Nullable SectionRenderDispatcher sectionRenderDispatcher;
-
-	@Shadow
-	@Final
-	private Minecraft minecraft;
-
-	@Shadow
-	@Final
-	private ObjectArrayList<SectionRenderDispatcher.RenderSection> visibleSections;
 
 	@Definition(id = "chunkSectionsToRender", local = @Local(type = ChunkSectionsToRender.class, argsOnly = true))
 	@Definition(
@@ -77,7 +62,7 @@ public abstract class Mixin_LevelRenderer {
 			ResourceHandle<RenderTarget> itemEntityTarget,
 			ResourceHandle<RenderTarget> particleTarget,
 			boolean renderOutline,
-			Matrix4f modelViewMatrix,
+			Matrix4fc modelViewMatrix,
 			CallbackInfo ci
 	) {
 		//noinspection DataFlowIssue // No issue at Mixin target
@@ -110,7 +95,7 @@ public abstract class Mixin_LevelRenderer {
 			ResourceHandle<RenderTarget> itemEntityTarget,
 			ResourceHandle<RenderTarget> particleTarget,
 			boolean renderOutline,
-			Matrix4f modelViewMatrix,
+			Matrix4fc modelViewMatrix,
 			CallbackInfo ci
 	) {
 		//noinspection DataFlowIssue // No issue at Mixin target

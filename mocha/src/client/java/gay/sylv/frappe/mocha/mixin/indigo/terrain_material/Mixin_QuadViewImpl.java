@@ -13,11 +13,19 @@ import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE_V_0;
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.HEADER_MOCHA_BITS;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
 
+import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.QuadViewImpl;
 
+import gay.sylv.frappe.api.ext.quad_view.FrappeMutableQuadView;
+import gay.sylv.frappe.api.ext.terrain_material.QE_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.QV_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
@@ -44,5 +52,43 @@ public abstract class Mixin_QuadViewImpl implements QV_ExtTerrainMaterial {
 	@Override
 	public float frappe$v(int vertexIndex) {
 		return Float.intBitsToFloat(this.data[this.baseIndex + HEADER_MOCHA_BITS + FRAPPE_V_0 + vertexIndex * 2]);
+	}
+
+	@WrapOperation(
+			method = "buffer(ILcom/mojang/blaze3d/vertex/VertexConsumer;)V",
+			at = @At(
+					value = "INVOKE",
+					target = "Lcom/mojang/blaze3d/vertex/VertexConsumer;addVertex(FFFIFFIIFFF)V"
+			)
+	)
+	private void encodeTerrainMaterial(
+			VertexConsumer instance,
+			float x,
+			float y,
+			float z,
+			int color,
+			float u,
+			float v,
+			int overlayCoords,
+			int lightCoords,
+			float nx,
+			float ny,
+			float nz,
+			Operation<Void> original,
+			@Local(name = "i") int i
+	) {
+		//noinspection DataFlowIssue // "quad outputs" always use MutableQuadViewImpls
+		QE_ExtTerrainMaterial materialQuad = FrappeMutableQuadView.of((MutableQuadViewImpl) (Object) this)
+				.as(QE_ExtTerrainMaterial.class);
+		TerrainMaterial material = materialQuad.frappe$terrainMaterial();
+		int materialId = MochaIndigoEncodingFormat.TERRAIN_MATERIAL_2_INDEX.get(material);
+		instance.addVertex(x, y, z);
+		instance.setColor(color);
+		instance.setUv(u, v);
+		instance.frappe$setUv(materialQuad.frappe$u(i), materialQuad.frappe$v(i));
+		instance.frappe$setMaterialId((byte) materialId);
+		instance.setOverlay(overlayCoords);
+		instance.setLight(lightCoords);
+		instance.setNormal(nx, ny, nz);
 	}
 }

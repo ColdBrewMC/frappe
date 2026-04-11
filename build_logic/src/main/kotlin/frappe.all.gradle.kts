@@ -28,26 +28,13 @@ repositories {
 		name = "TerraformersMC"
 		url = uri("https://maven.terraformersmc.com/")
 	}
-
-	exclusiveContent {
-		forRepository {
-			maven {
-				name = "Sylv Snapshots"
-				url = uri("https://maven.sylv.gay/snapshots/")
-			}
-		}
-
-		filter {
-			includeGroup("net.fabricmc.fabric-api")
-		}
-	}
 }
 
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft(libs.minecraft)
 	implementation(libs.fabric.loader)
-	implementation(libs.fabric.sylv.api)
+	implementation(libs.fabric.api)
 }
 
 loom {

@@ -30,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.PolygonMode;
 import com.mojang.blaze3d.systems.RenderPass;
@@ -133,7 +134,7 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 				.withLocation("pipeline/cutout_terrain")
 				.withShaderDefine("ALPHA_CUTOUT", 0.5f);
 		RenderPipeline.Builder translucent = RenderPipeline.builder(RenderPipelines.TERRAIN_SNIPPET)
-				.withBlend(BlendFunction.TRANSLUCENT)
+				.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
 				.withShaderDefine("ALPHA_CUTOUT", 0.01f);
 		List<RenderPipeline.Builder> builders = List.of(solid, cutout, translucent);
 

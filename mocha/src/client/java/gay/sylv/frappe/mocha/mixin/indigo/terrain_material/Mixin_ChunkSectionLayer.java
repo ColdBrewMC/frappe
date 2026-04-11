@@ -83,10 +83,6 @@ public abstract class Mixin_ChunkSectionLayer implements Ext_ChunkSectionLayer {
 	@Final
 	public static ChunkSectionLayer CUTOUT;
 
-	@Shadow
-	@Final
-	private RenderPipeline pipeline;
-
 	@Override
 	public @Nullable TerrainMaterial mocha$getAssociatedMaterial() {
 		return associatedMaterial;

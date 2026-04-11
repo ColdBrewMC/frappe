@@ -3,17 +3,17 @@
 # https://fabricmc.net/develop/ for fabric
 
 # Base
-minecraft = "26.1-snapshot-9"
-fabric_loader = "0.18.4"
+minecraft = "26.1.2"
+fabric_loader = "0.18.6"
 
 # Libraries
-fabric_api = "0.142.3+26.1"
+fabric_api = "0.145.4+26.1.2"
 jspecify = "1.0.0"
 
 # Mod Integrations
 
 # Runtime Mods
-modmenu = "18.0.0-alpha.5"
+modmenu = "18.0.0-alpha.8"
 
 [libraries]
 # Base
@@ -22,7 +22,6 @@ fabric_loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric_l
 
 # Libraries
 fabric_api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric_api" }
-fabric_sylv_api = { module = "net.fabricmc.fabric-api:fabric-api", version = "0.143.5+local" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 
 # Mod Integrations
@@ -34,6 +33,6 @@ modmenu = { module = "com.terraformersmc:modmenu", version.ref = "modmenu" }
 [bundles]
 
 [plugins]
-fabric_loom = { id = "net.fabricmc.fabric-loom", version = "1.15-SNAPSHOT" }
+fabric_loom = { id = "net.fabricmc.fabric-loom", version = "1.16-SNAPSHOT" }
 extra-java-module-info = { id = "org.gradlex.extra-java-module-info", version = "1.13.1" }
 yumi-gradle-licenser = { id = "dev.yumi.gradle.licenser", version = "2.2.+" }

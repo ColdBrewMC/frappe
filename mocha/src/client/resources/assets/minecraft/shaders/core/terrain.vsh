@@ -4,7 +4,7 @@
 #moj_import <minecraft:globals.glsl>
 #moj_import <minecraft:chunksection.glsl>
 #moj_import <minecraft:projection.glsl>
-#moj_import <minecraft:smooth_lighting.glsl>
+#moj_import <minecraft:sample_lightmap.glsl>
 
 in vec3 Position;
 in vec4 Color;
@@ -31,9 +31,10 @@ flat out uint _frappe_material_id;
 void main() {
 	vec3 pos = Position + (ChunkPosition - CameraBlockPos) + CameraOffset;
 	gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
+
 	sphericalVertexDistance = fog_spherical_distance(pos);
 	cylindricalVertexDistance = fog_cylindrical_distance(pos);
-	vertexColor = Color * minecraft_sample_lightmap(Sampler2, UV2);
+	vertexColor = Color * sample_lightmap(Sampler2, UV2);
 	texCoord0 = UV0;
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
 	frappeUV = _frappe_modify_uv(FrappeUV);

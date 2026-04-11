@@ -16,11 +16,11 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.Material;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.sprite.Material.Baked;
 import net.minecraft.core.Direction;
 
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadAtlas;
@@ -92,11 +92,30 @@ public interface FrappeQuadEmitter extends FrappeMutableQuadView, QuadEmitter {
 	}
 
 	@Override
-	default FrappeQuadEmitter materialBake(Material.Baked material, int bakeFlags) {
-		return (FrappeQuadEmitter) QuadEmitter.super.materialBake(
-				material,
-				bakeFlags
-		);
+	default FrappeQuadEmitter fromBakedQuad(BakedQuad quad) {
+		return (FrappeQuadEmitter) FrappeMutableQuadView.super.fromBakedQuad(quad);
+	}
+
+	@Override
+	default FrappeQuadEmitter materialBake(
+			Baked material,
+			int bakeFlags
+	) {
+		return (FrappeQuadEmitter) FrappeMutableQuadView.super.materialBake(material, bakeFlags);
+	}
+
+	@Override
+	default FrappeQuadEmitter multiplyColor(int color) {
+		return (FrappeQuadEmitter) FrappeMutableQuadView.super.multiplyColor(color);
+	}
+
+	@Override
+	default FrappeQuadEmitter translate(
+			float x,
+			float y,
+			float z
+	) {
+		return (FrappeQuadEmitter) FrappeMutableQuadView.super.translate(x, y, z);
 	}
 
 	@Override
@@ -211,11 +230,6 @@ public interface FrappeQuadEmitter extends FrappeMutableQuadView, QuadEmitter {
 	}
 
 	@Override
-	default FrappeQuadEmitter fromBakedQuad(BakedQuad quad) {
-		return (FrappeQuadEmitter) ((QuadEmitter) this).fromBakedQuad(quad);
-	}
-
-	@Override
 	default FrappeQuadEmitter square(Direction nominalFace, float left, float bottom, float right, float top, float depth) {
 		return (FrappeQuadEmitter) QuadEmitter.super.square(
 				nominalFace,
@@ -230,5 +244,25 @@ public interface FrappeQuadEmitter extends FrappeMutableQuadView, QuadEmitter {
 	@Override
 	default FrappeQuadEmitter emit() {
 		return (FrappeQuadEmitter) ((QuadEmitter) this).emit();
+	}
+
+	@Override
+	default FrappeQuadEmitter postMaterialBake(Baked material) {
+		return (FrappeQuadEmitter) QuadEmitter.super.postMaterialBake(material);
+	}
+
+	@Override
+	default FrappeQuadEmitter minLightmap(int lightmap) {
+		return (FrappeQuadEmitter) QuadEmitter.super.minLightmap(lightmap);
+	}
+
+	@Override
+	default FrappeQuadEmitter animated(boolean animated) {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).animated(animated);
+	}
+
+	@Override
+	default FrappeQuadEmitter clear() {
+		return (FrappeQuadEmitter) ((QuadEmitter) this).clear();
 	}
 }

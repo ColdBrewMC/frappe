@@ -3,6 +3,8 @@ package gay.sylv.frappe.api.base.extension;
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
+import net.fabricmc.fabric.api.client.renderer.v1.Renderer;
+
 import gay.sylv.frappe.impl.base.FrappeInitializer;
 
 /// Helper for retrieving information about the currently selected renderer.
@@ -23,4 +25,8 @@ public interface RendererInfo {
 	/// @see #getModId()
 	@ApiStatus.OverrideOnly
 	@Nullable String getLoadedRendererModId();
+
+	/// @return a new or existing instance of the [Renderer]
+	@ApiStatus.OverrideOnly
+	Renderer getRendererEarly();
 }

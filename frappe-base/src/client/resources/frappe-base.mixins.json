@@ -3,6 +3,7 @@
 	"package": "gay.sylv.frappe.mixin.base",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
+		"Mixin_Renderer"
 	],
 	"injectors": {
 		"defaultRequire": 1

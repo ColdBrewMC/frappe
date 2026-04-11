@@ -15,11 +15,11 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.Material;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
 
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.MutableQuadView;
@@ -88,6 +88,53 @@ public interface FrappeMutableQuadView extends FrappeQuadView, MutableQuadView {
 				vertexIndex,
 				uv
 		);
+	}
+
+	@Override
+	default FrappeMutableQuadView translate(
+			float x,
+			float y,
+			float z
+	) {
+		return (FrappeMutableQuadView) MutableQuadView.super.translate(x, y, z);
+	}
+
+	@Override
+	default FrappeMutableQuadView multiplyColor(int color) {
+		return (FrappeMutableQuadView) MutableQuadView.super.multiplyColor(color);
+	}
+
+	@Override
+	default FrappeMutableQuadView uvUnitSquare() {
+		return (FrappeMutableQuadView) MutableQuadView.super.uvUnitSquare();
+	}
+
+	@Override
+	default MutableQuadView postMaterialBake(Material.Baked material) {
+		return MutableQuadView.super.postMaterialBake(material);
+	}
+
+	@Override
+	default MutableQuadView minLightmap(int lightmap) {
+		return MutableQuadView.super.minLightmap(lightmap);
+	}
+
+	@Override
+	MutableQuadView animated(boolean animated);
+
+	@Override
+	MutableQuadView clear();
+
+	@Override
+	default MutableQuadView square(
+			Direction nominalFace,
+			float left,
+			float bottom,
+			float right,
+			float top,
+			float depth
+	) {
+		return MutableQuadView.super.square(nominalFace, left, bottom, right, top, depth);
 	}
 
 	@Override
