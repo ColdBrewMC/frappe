@@ -52,11 +52,14 @@ public abstract class Mixin_ChunkSectionLayerGroup {
 		return original;
 	}
 
+	//CHECKSTYLE.OFF: MatchXpath
 	@SuppressWarnings("CheckStyle")
 	@Invoker(value = "<init>")
 	private static ChunkSectionLayerGroup init(String name, int ordinal, ChunkSectionLayer... layers) {
 		throw new UnsupportedOperationException("@Invoker in Mixin");
 	}
+
+	//CHECKSTYLE.ON: MatchXpath
 
 	@Inject(method = "<clinit>", at = @At("RETURN"))
 	private static void onClinit(CallbackInfo ci) {

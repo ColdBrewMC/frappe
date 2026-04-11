@@ -124,7 +124,7 @@ public abstract class Mixin_ChunkSectionLayer implements Ext_ChunkSectionLayer {
 		return ordinal;
 	}
 
-	//CHECKSTYLE:OFF
+	//CHECKSTYLE.OFF: MatchXpath
 	@SuppressWarnings("CheckStyle") // it thinks we need @Unique here LOL
 	@Invoker(value = "<init>")
 	private static ChunkSectionLayer init(
@@ -136,7 +136,8 @@ public abstract class Mixin_ChunkSectionLayer implements Ext_ChunkSectionLayer {
 	) {
 		throw new UnsupportedOperationException("@Invoker in Mixin");
 	}
-	//CHECKSTYLE:ON
+
+	//CHECKSTYLE.ON: MatchXpath
 
 	@Inject(method = "<clinit>", at = @At("RETURN"))
 	private static void onClinit(CallbackInfo ci) {
