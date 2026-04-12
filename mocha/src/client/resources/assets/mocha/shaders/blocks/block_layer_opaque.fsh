@@ -1,23 +1,46 @@
-#version 330
+#version 330 core
 
-#moj_import <minecraft:fog.glsl>
-#moj_import <minecraft:globals.glsl>
-#moj_import <minecraft:chunksection.glsl>
+#import <sodium:include/fog.glsl>
+#import <sodium:include/chunk_material.glsl>
 
-uniform sampler2D Sampler0;
+// Sodium and Minecraft compatibility
+#define Color v_Color;
+#define UV0 v_TexCoord
+#define TextureSize u_FrappeCompatTextureSize
+#define ChunkVisibility fadeFactor
+#define FogColor u_FogColor
+#define sphericalVertexDistance v_FragDistance
+#define cylindricalVertexDistance v_FragDistance
+#define Sampler0 u_BlockTex
+#define FogEnvironmentalStart u_EnvironmentFog.x
+#define FogEnvironmentalEnd u_EnvironmentFog.y
+#define FogRenderDistanceStart u_RenderFog.x
+#define FogRenderDistanceEnd u_RenderFog.y
+#define UseRgss uint(u_UseRGSS)
 
-in float sphericalVertexDistance;
-in float cylindricalVertexDistance;
-in vec4 vertexColor;
-in vec2 texCoord0;
+in vec4 v_Color; // The interpolated vertex color
+in vec2 v_TexCoord; // The interpolated block texture coordinates
+in vec2 v_FragDistance; // The fragment's distance from the camera (cylindrical and spherical)
+in float fadeFactor;
 #ifdef _FRAPPE_COMPLEX_MATERIAL
 in vec2 v_FrappeUV;
 #endif
+
+flat in uint v_Material;
 flat in uint v_FrappeMaterialId;
 
-out vec4 fragColor;
+uniform sampler2D u_BlockTex; // The block texture
 
-vec4 sampleNearest(sampler2D source, vec2 uv, vec2 pixelSize, vec2 du, vec2 dv, vec2 texelScreenSize) {
+uniform vec4 u_FogColor; // The color of the shader fog
+uniform vec2 u_EnvironmentFog; // The start and end position for environmental fog
+uniform vec2 u_RenderFog; // The start and end position for border fog
+uniform vec2 u_TexelSize;
+uniform bool u_UseRGSS;
+uniform vec2 u_FrappeCompatTextureSize;
+
+out vec4 fragColor; // The output fragment for the color framebuffer
+
+vec4 sampleNearest(sampler2D sampler, vec2 uv, vec2 pixelSize, vec2 du, vec2 dv, vec2 texelScreenSize) {
 	// Convert our UV back up to texel coordinates and find out how far over we are from the center of each pixel
 	vec2 uvTexelCoords = uv / pixelSize;
 	vec2 texelCenter = round(uvTexelCoords) - 0.5f;
@@ -28,7 +51,7 @@ vec4 sampleNearest(sampler2D source, vec2 uv, vec2 pixelSize, vec2 du, vec2 dv, 
 	texelOffset = clamp(texelOffset, 0.0f, 1.0f);
 
 	uv = (texelCenter + texelOffset) * pixelSize;
-	return textureGrad(source, uv, du, dv);
+	return textureGrad(sampler, uv, du, dv);
 }
 
 vec4 sampleNearest(sampler2D source, vec2 uv, vec2 pixelSize) {
@@ -61,10 +84,6 @@ vec4 sampleRGSS(sampler2D source, vec2 uv, vec2 pixelSize) {
 
 	float mipLevelExact = max(0.0, log2(effectiveDerivative / minPixelSize));
 
-	float mipLevelLow = floor(mipLevelExact);
-	float mipLevelHigh = mipLevelLow + 1.0;
-	float mipBlend = fract(mipLevelExact);
-
 	const vec2 offsets[4] = vec2[](
 	vec2(0.125, 0.375),
 	vec2(-0.125, -0.375),
@@ -72,38 +91,36 @@ vec4 sampleRGSS(sampler2D source, vec2 uv, vec2 pixelSize) {
 	vec2(-0.375, 0.125)
 	);
 
-	vec4 rgssColorLow = vec4(0.0);
-	vec4 rgssColorHigh = vec4(0.0);
+	vec4 rgssColor = vec4(0.0);
 	for (int i = 0; i < 4; ++i) {
 		vec2 sampleUV = uv + offsets[i] * pixelSize;
-		rgssColorLow += textureLod(source, sampleUV, mipLevelLow);
-		rgssColorHigh += textureLod(source, sampleUV, mipLevelHigh);
+		rgssColor += textureLod(source, sampleUV, mipLevelExact);
 	}
-	rgssColorLow *= 0.25;
-	rgssColorHigh *= 0.25;
-
-	vec4 rgssColor = mix(rgssColorLow, rgssColorHigh, mipBlend);
+	rgssColor *= 0.25;
 
 	vec4 nearestColor = sampleNearest(source, uv, pixelSize, du, dv, texelScreenSize);
 
 	return mix(nearestColor, rgssColor, blendFactor);
 }
 
-#moj_import <mocha:fragment.glsl>
+#import <mocha:fragment.glsl>
 
 void main() {
-	vec4 color = (UseRgss == 1 ? sampleRGSS(Sampler0, texCoord0, 1.0f / TextureSize) : sampleNearest(Sampler0, texCoord0, 1.0f / TextureSize)) * vertexColor;
+	vec4 color = u_UseRGSS ? sampleRGSS(u_BlockTex, v_TexCoord, u_TexelSize) : sampleNearest(u_BlockTex, v_TexCoord, u_TexelSize);
+	color *= v_Color; // Apply per-vertex color modulator
+
 	#ifdef _FRAPPE_SIMPLE_MATERIAL
 	color = _frappe_simple_pre_fragment(color);
 	#endif
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
 	color = _frappe_pre_fragment(color);
 	#endif
-	color = mix(FogColor * vec4(1, 1, 1, color.a), color, ChunkVisibility);
-	#ifdef ALPHA_CUTOUT
-	if (color.a < ALPHA_CUTOUT) {
+
+	#ifdef USE_FRAGMENT_DISCARD
+	if (color.a < _material_alpha_cutoff(v_Material)) {
 		discard;
 	}
 	#endif
-	fragColor = apply_fog(color, sphericalVertexDistance, cylindricalVertexDistance, FogEnvironmentalStart, FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, FogColor);
+
+	fragColor = _linearFog(color, v_FragDistance, u_FogColor, u_EnvironmentFog, u_RenderFog, fadeFactor);
 }

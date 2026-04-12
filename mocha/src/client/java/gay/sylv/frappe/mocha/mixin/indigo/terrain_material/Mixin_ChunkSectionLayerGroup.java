@@ -69,6 +69,13 @@ public abstract class Mixin_ChunkSectionLayerGroup {
 	@Unique
 	private static void clinit() {
 		IndigoTerrainMaterialExtension.resolveMaterials();
+
+		try {
+			Class.forName(ChunkSectionLayer.class.getName(), true, ChunkSectionLayerGroup.class.getClassLoader());
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
 		MOCHA_OPAQUE_SOLID = init(
 				"MOCHA_OPAQUE_SOLID",
 				ordinalOffset,

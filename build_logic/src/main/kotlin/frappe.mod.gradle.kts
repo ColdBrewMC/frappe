@@ -42,6 +42,10 @@ tasks {
 		filesMatching("*.kra") {
 			exclude()
 		}
+
+		filesMatching("*.ase") {
+			exclude()
+		}
 	}
 
 	val expandProps = mapOf(

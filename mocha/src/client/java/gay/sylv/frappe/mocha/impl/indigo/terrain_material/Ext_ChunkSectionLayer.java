@@ -30,4 +30,12 @@ public interface Ext_ChunkSectionLayer {
 	default void mocha$setWireframePipeline(RenderPipeline pipeline) {
 		throw new UnsupportedOperationException("Implemented via Mixin.");
 	}
+
+	default boolean mocha$isFromMocha() {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
+
+	default void mocha$setFromMocha() {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 }

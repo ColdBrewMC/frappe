@@ -11,9 +11,9 @@ in vec4 Color;
 in vec2 UV0;
 in ivec2 UV2;
 #ifdef _FRAPPE_COMPLEX_MATERIAL
-in vec2 FrappeUV;
+in vec2 _vert_frappe_uv;
 #endif
-in uvec2 _frappe_simple_material_info;
+in uvec2 _vert_frappe_simple_material_info;
 
 uniform sampler2D Sampler2;
 
@@ -22,9 +22,9 @@ out float cylindricalVertexDistance;
 out vec4 vertexColor;
 out vec2 texCoord0;
 #ifdef _FRAPPE_COMPLEX_MATERIAL
-out vec2 frappeUV;
+out vec2 v_FrappeUV;
 #endif
-flat out uint _frappe_material_id;
+flat out uint v_FrappeMaterialId;
 
 #moj_import <mocha:vertex.glsl>
 
@@ -37,7 +37,7 @@ void main() {
 	vertexColor = Color * sample_lightmap(Sampler2, UV2);
 	texCoord0 = UV0;
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
-	frappeUV = _frappe_modify_uv(FrappeUV);
+	v_FrappeUV = _frappe_modify_uv(_vert_frappe_uv);
 	#endif
-	_frappe_material_id = _frappe_simple_material_info.x;
+	v_FrappeMaterialId = _vert_frappe_simple_material_info.x;
 }

@@ -9,6 +9,8 @@
 
 package gay.sylv.frappe.api.base.extension;
 
+import java.util.List;
+
 import org.jetbrains.annotations.ApiStatus;
 
 /// An additional, optional API that [renderers][net.fabricmc.fabric.api.client.renderer.v1.Renderer]
@@ -19,8 +21,8 @@ import org.jetbrains.annotations.ApiStatus;
 /// this not required. This is to distinguish the extension definitions from related or possibly
 /// identically named classes.
 public interface RendererExtension {
-	/// @return the mod ID of the [renderer][net.fabricmc.fabric.api.client.renderer.v1.Renderer] that this
+	/// @return the mod IDs of the [renderers][net.fabricmc.fabric.api.client.renderer.v1.Renderer] that this
 	/// extension implementation applies to.
 	@ApiStatus.OverrideOnly
-	String getTargetRenderer();
+	List<String> getTargetRenderers();
 }

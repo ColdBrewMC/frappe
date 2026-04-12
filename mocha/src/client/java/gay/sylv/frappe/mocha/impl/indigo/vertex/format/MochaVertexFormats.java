@@ -46,8 +46,8 @@ public final class MochaVertexFormats {
 			.add("Color", VertexFormatElement.COLOR) // 4
 			.add("UV0", VertexFormatElement.UV0) // 8
 			.add("UV2", VertexFormatElement.UV2) // 4
-			.add("FrappeUV", UV3) // 8
-			.add("_frappe_simple_material_info", SIMPLE_MATERIAL_INFO) // 2
+			.add("_vert_frappe_uv", UV3) // 8
+			.add("_vert_frappe_simple_material_info", SIMPLE_MATERIAL_INFO) // 2
 			.padding(2) // 2
 			.build(); // 40
 	public static final VertexFormat SIMPLE_TERRAIN = VertexFormat.builder()
@@ -55,7 +55,7 @@ public final class MochaVertexFormats {
 			.add("Color", VertexFormatElement.COLOR) // 4
 			.add("UV0", VertexFormatElement.UV0) // 8
 			.add("UV2", VertexFormatElement.UV2) // 4
-			.add("_frappe_simple_material_info", SIMPLE_MATERIAL_INFO) // 2
+			.add("_vert_frappe_simple_material_info", SIMPLE_MATERIAL_INFO) // 2
 			.padding(2) // 2
 			.build(); // 32
 

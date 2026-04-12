@@ -7,13 +7,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package gay.sylv.frappe.mocha.impl.indigo.terrain_material;
+package gay.sylv.frappe.mocha.impl.indigo;
+
+import java.util.List;
 
 import gay.sylv.frappe.api.base.extension.RendererExtension;
 
 public interface IndigoRendererExtension extends RendererExtension {
 	@Override
-	default String getTargetRenderer() {
-		return "fabric-renderer-indigo";
+	default List<String> getTargetRenderers() {
+		return List.of("fabric-renderer-indigo");
 	}
 }

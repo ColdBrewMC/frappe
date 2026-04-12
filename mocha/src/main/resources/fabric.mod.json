@@ -25,5 +25,8 @@
 			"environment": "client",
 			"config": "mocha.mixins.json"
 		}
-	]
+	],
+	"breaks": {
+		"sodium": "<${sodium_version}"
+	}
 }

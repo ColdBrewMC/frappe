@@ -51,6 +51,10 @@ public final class MochaIndigoEncodingFormat {
 	private MochaIndigoEncodingFormat() {
 	}
 
+	public static int terrainMaterialInt(int bits) {
+		return (bits & TERRAIN_MATERIAL_MASK) >>> TERRAIN_MATERIAL_BIT_OFFSET;
+	}
+
 	public static TerrainMaterial terrainMaterial(int bits) {
 		return TERRAIN_MATERIALS[(bits & TERRAIN_MATERIAL_MASK) >>> TERRAIN_MATERIAL_BIT_OFFSET];
 	}

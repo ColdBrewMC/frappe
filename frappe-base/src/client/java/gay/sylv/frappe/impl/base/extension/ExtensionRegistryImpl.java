@@ -96,9 +96,9 @@ public final class ExtensionRegistryImpl {
 				EntrypointContainer<RendererExtension> entrypoint0 = extensionContainers.pop();
 				EntrypointContainer<RendererExtension> entrypoint1 = extensionContainers.pop();
 
-				if (rendererId.equals(entrypoint0.getEntrypoint().getTargetRenderer())) {
+				if (entrypoint0.getEntrypoint().getTargetRenderers().contains(rendererId)) {
 					extensionContainers.push(entrypoint0);
-				} else if (rendererId.equals(entrypoint1.getEntrypoint().getTargetRenderer())) {
+				} else if (entrypoint1.getEntrypoint().getTargetRenderers().contains(rendererId)) {
 					extensionContainers.push(entrypoint1);
 				}
 			}

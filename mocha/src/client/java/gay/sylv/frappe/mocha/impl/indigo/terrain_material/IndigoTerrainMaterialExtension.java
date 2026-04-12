@@ -50,10 +50,11 @@ import net.fabricmc.loader.api.FabricLoader;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialRegistryEntrypoint;
+import gay.sylv.frappe.mocha.impl.indigo.IndiumRendererExtension;
 import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
 import gay.sylv.frappe.mocha.impl.indigo.vertex.format.MochaVertexFormats;
 
-public final class IndigoTerrainMaterialExtension implements TerrainMaterialExtension, IndigoRendererExtension {
+public final class IndigoTerrainMaterialExtension implements TerrainMaterialExtension, IndiumRendererExtension {
 	public static Map<RenderPipeline, RenderPipeline> VANILLA_2_MOCHA_TERRAIN_PIPELINES = Map.of();
 	public static Map<ChunkSectionLayer, RenderPipeline> CSL_2_MOCHA_TERRAIN_PIPELINES = Map.of();
 	public static Map<RenderPipeline, RenderPipeline> VANILLA_2_SIMPLE_MOCHA_TERRAIN_PIPELINES = Map.of();
@@ -72,6 +73,7 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 	public static RenderPipeline.Snippet MOCHA_CUTOUT_SNIPPET;
 	public static List<ChunkSectionLayer> SOLID_LAYERS = new ArrayList<>();
 	public static List<ChunkSectionLayer> CUTOUT_LAYERS = new ArrayList<>();
+	public static List<ChunkSectionLayer> MOCHA_LAYERS = new ArrayList<>();
 
 	@Override
 	public TerrainMaterial createChunkLayer(

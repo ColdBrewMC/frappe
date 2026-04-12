@@ -28,6 +28,11 @@ repositories {
 		name = "TerraformersMC"
 		url = uri("https://maven.terraformersmc.com/")
 	}
+
+	maven {
+		name = "JellySquid's Excuse To Get Modrinth Points"
+		url = uri("https://maven.caffeinemc.net/releases")
+	}
 }
 
 dependencies {
@@ -35,6 +40,11 @@ dependencies {
 	minecraft(libs.minecraft)
 	implementation(libs.fabric.loader)
 	implementation(libs.fabric.api)
+
+//	implementation(libs.sodium)
+	compileOnly(libs.sodium)
+
+	runtimeOnly(libs.modmenu)
 }
 
 loom {
@@ -132,5 +142,13 @@ publishing {
 		// Notice: This block does NOT have the same function as the block in the top level.
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
+		maven {
+			name = "Sylv"
+			url = uri("https://maven.sylv.gay/releases/")
+			credentials {
+				username = System.getenv("MAVEN_USERNAME")
+				password = System.getenv("MAVEN_PASSWORD")
+			}
+		}
 	}
 }

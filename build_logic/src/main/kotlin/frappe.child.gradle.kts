@@ -51,19 +51,24 @@ tasks {
 		filesMatching("*.kra") {
 			exclude()
 		}
+
+		filesMatching("*.ase") {
+			exclude()
+		}
 	}
 
 	val expandProps = mapOf(
 		"maven_group" to maven_group,
 		"mod_id" to mod_id,
 		"mod_version" to mod_version,
-		"mod_license" to mod_license
+		"mod_license" to mod_license,
+		"sodium_version" to libs.sodium.get().version
 	)
 
 	withType<ProcessResources> {
 		inputs.property("version", version)
 
-		filesMatching(listOf("fabric.mod.json", "*.mixins.json")) {
+		filesMatching(listOf("fabric.mod.json")) {
 			expand(expandProps)
 		}
 
