@@ -16,6 +16,7 @@ import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.HEADER
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.caffeinemc.mods.sodium.client.render.frapi.wrapper.MutableQuadViewWrapper;
 import net.caffeinemc.mods.sodium.client.render.frapi.wrapper.QuadViewWrapper;
@@ -81,8 +82,12 @@ public abstract class Mixin_QuadViewWrapper implements QV_ExtTerrainMaterial {
 		instance.addVertex(x, y, z);
 		instance.setColor(color);
 		instance.setUv(u, v);
-		instance.frappe$setUv(materialQuad.frappe$u(i), materialQuad.frappe$v(i));
-		instance.frappe$setMaterialId((byte) materialId);
+
+		if (instance instanceof BufferBuilder builder) {
+			builder.frappe$setUv(materialQuad.frappe$u(i), materialQuad.frappe$v(i));
+			builder.frappe$setMaterialId((byte) materialId);
+		}
+
 		instance.setOverlay(overlayCoords);
 		instance.setLight(lightCoords);
 		instance.setNormal(nx, ny, nz);
