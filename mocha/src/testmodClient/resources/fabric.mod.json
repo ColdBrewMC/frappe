@@ -14,6 +14,7 @@
 	"license": "${mod_license}",
 	"environment": "client",
 	"entrypoints": {
-		"client": ["gay.sylv.frappe.mocha.test.MochaTest"]
+		"client": ["gay.sylv.frappe.mocha.test.MochaTest"],
+		"frappe-ext-terrain-material:registry": ["gay.sylv.frappe.mocha.test.MochaTest"]
 	}
 }
