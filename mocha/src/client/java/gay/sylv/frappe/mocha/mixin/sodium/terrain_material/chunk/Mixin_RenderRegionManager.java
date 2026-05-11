@@ -13,6 +13,7 @@ import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.platform.NativeImage;
 import net.caffeinemc.mods.sodium.client.render.chunk.data.BuiltSectionMeshParts;
 import net.caffeinemc.mods.sodium.client.render.chunk.data.SectionRenderDataStorage;
 import net.caffeinemc.mods.sodium.client.render.chunk.region.RenderRegion;
@@ -38,7 +39,7 @@ public abstract class Mixin_RenderRegionManager {
 			@Local(name = "resources") RenderRegion.DeviceResources resources
 	) {
 		//noinspection DataFlowIssue
-		int[] packedMaterials = ((Ext_PackedMaterials) original).mocha$getPackedMaterials();
+		NativeImage packedMaterials = ((Ext_PackedMaterials) original).mocha$getPackedMaterials();
 
 		if (packedMaterials != null) {
 			((Ext_DeviceResources) resources).mocha$writeMeshMaterials(packedMaterials);

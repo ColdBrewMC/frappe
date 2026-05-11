@@ -13,6 +13,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
+import net.caffeinemc.mods.sodium.client.render.frapi.SodiumRenderer;
 import org.jspecify.annotations.Nullable;
 
 import net.fabricmc.fabric.api.client.renderer.v1.Renderer;
@@ -51,6 +52,10 @@ public class MochaRendererInfo implements RendererInfo {
 
 	@Override
 	public Renderer getRendererEarly() {
+		if ("sodium".equals(getLoadedRendererModId())) {
+			return SodiumRenderer.INSTANCE;
+		}
+
 		return IndigoRenderer.INSTANCE;
 	}
 }

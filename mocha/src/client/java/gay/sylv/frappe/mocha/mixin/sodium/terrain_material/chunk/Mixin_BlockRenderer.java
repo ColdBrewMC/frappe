@@ -9,6 +9,7 @@
 
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material.chunk;
 
+import java.util.Arrays;
 import java.util.function.Predicate;
 
 import com.llamalad7.mixinextras.expression.Definition;
@@ -16,8 +17,11 @@ import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.caffeinemc.mods.sodium.client.render.chunk.LocalSectionIndex;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderer;
+import net.caffeinemc.mods.sodium.client.render.chunk.region.RenderRegion;
 import net.caffeinemc.mods.sodium.client.render.chunk.terrain.material.Material;
 import net.caffeinemc.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import net.caffeinemc.mods.sodium.client.render.model.MutableQuadViewImpl;
@@ -75,7 +79,7 @@ public abstract class Mixin_BlockRenderer {
 			PlatformModelEmitter.Bufferer bufferer,
 			Operation<Void> original
 	) {
-		ScopedValue.where(MochaSodiumUtils.QUAD_EMITTER_BLOCK_POS, new BlockPos(blockPos.getX() & 0xF, blockPos.getY() & 0xF, blockPos.getZ() & 0xF))
+		ScopedValue.where(MochaSodiumUtils.QUAD_EMITTER_BLOCK_POS, new BlockPos(blockPos.getX(), blockPos.getY(), blockPos.getZ()))
 				.run(() -> original.call(instance, blockStateModel, directionPredicate, quadView, randomSource, blockAndTintGetter, blockPos, blockState, bufferer));
 	}
 
@@ -91,17 +95,29 @@ public abstract class Mixin_BlockRenderer {
 			CallbackInfo ci,
 			@Local(name = "builder") ChunkModelBuilder builder
 	) {
-		//noinspection DataFlowIssue
-		int[] packedMaterials = ((Ext_PackedMaterials) builder).mocha$getPackedMaterials();
+		NativeImage packedMaterials = ((Ext_PackedMaterials) builder).mocha$getPackedMaterials();
 
-		if (packedMaterials == null) {
-			packedMaterials = new int[4096];
+		int materialId = MochaIndigoEncodingFormat.terrainMaterialInt(quad.data[quad.baseIndex + MochaIndigoEncodingFormat.HEADER_MOCHA_BITS]);
+
+		if (materialId != 0 && packedMaterials == null) {
+			packedMaterials = new NativeImage(NativeImage.Format.LUMINANCE, 4096, 256, true);
 			((Ext_PackedMaterials) builder).mocha$setPackedMaterials(packedMaterials);
 		}
 
-		int materialId = MochaIndigoEncodingFormat.terrainMaterialInt(quad.data[quad.baseIndex + MochaIndigoEncodingFormat.HEADER_MOCHA_BITS]);
-		BlockPos blockPos = MochaSodiumUtils.QUAD_EMITTER_BLOCK_POS.get();
-		int blockId = (blockPos.getX() & 0xF) | ((blockPos.getY() & 0xF) << 4) | ((blockPos.getZ() & 0xF) << 8);
-		packedMaterials[blockId] = materialId;
+		if (materialId != 0) {
+			BlockPos blockPos = MochaSodiumUtils.QUAD_EMITTER_BLOCK_POS.get();
+			int x = blockPos.getX() & 0xF;
+			int y = blockPos.getY() & 0xF;
+			int z = blockPos.getZ() & 0xF;
+			int blockId = (y << 4 | z) << 4 | x;
+			int chunkX = blockPos.getX() >> 4;
+			int chunkY = blockPos.getY() >> 4;
+			int chunkZ = blockPos.getZ() >> 4;
+			int regionX = chunkX & RenderRegion.REGION_WIDTH_M;
+			int regionY = chunkY & RenderRegion.REGION_HEIGHT_M;
+			int regionZ = chunkZ & RenderRegion.REGION_LENGTH_M;
+			int chunkId = LocalSectionIndex.pack(regionX, regionY, regionZ);
+			packedMaterials.setPixel(blockId, chunkId, materialId);
+		}
 	}
 }

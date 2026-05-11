@@ -11,6 +11,8 @@
 #define TextureSize u_FrappeCompatTextureSize
 #define ChunkVisibility fadeFactor
 #define FogColor u_FogColor
+#define GameTime float(u_CurrentTime)
+#define moj_import import
 
 #ifdef _FRAPPE_COMPLEX_MATERIAL
 in vec2 _vert_frappe_uv;
@@ -33,18 +35,16 @@ flat out uint v_FrappeMaterialId;
 uniform vec3 u_RegionOffset;
 uniform vec2 u_TexCoordShrink;
 uniform vec2 u_FrappeCompatTextureSize;
+uniform vec3 u_MochaCameraOffset;
 
 uniform sampler2D u_LightTex; // The light map texture sampler
+uniform sampler2D u_MochaTex; // We pack material info into an int for each block of each chunk
 
 uniform int u_CurrentTime;
 uniform float u_FadePeriodInv;
 
 layout(std140) uniform ChunkData {
 	ivec4 u_chunkFades[64]; // Packing into ivec4 is needed to avoid wasting 3KB...
-};
-
-layout(std140) uniform MochaData {
-	uint u_FrappeSimpleMaterialInfo[4096]; // We pack material info into an int for each block of each chunk
 };
 
 #import <mocha:vertex.glsl>
@@ -89,9 +89,10 @@ void main() {
 	v_FrappeUV = _frappe_modify_uv(_vert_frappe_uv);
 	#endif
 	// Unpack material ID byte
-	uint _frappeBlockId = (uint(position.x) & 0xFu) | ((uint(position.y) & 0xFu) << 4u) | ((uint(position.z) & 0xFu) << 8u);
-//	uint _frappeComponentPiece = (_frappeBlockId & 3u);
-//	uint _frappeComponentMask = 0xFFu << _frappeComponentPiece;
-//	v_FrappeMaterialId = (u_FrappeSimpleMaterialInfo[_frappeBlockId / 4u] & _frappeComponentMask) >> _frappeComponentPiece;
-	v_FrappeMaterialId = u_FrappeSimpleMaterialInfo[_frappeBlockId];
+	vec3 block_position = position + u_MochaCameraOffset;
+	block_position = vec3(round(block_position.x), round(block_position.y), round(block_position.z));
+	uint _frappeBlockId = uint(int(block_position.x) & 0xF) | uint((int(block_position.y) & 0xF) << 4u) | uint((int(block_position.z) & 0xF) << 8u);
+	// this SSBO is sus
+	v_FrappeMaterialId = uint(texelFetch(u_MochaTex, ivec2(int(_frappeBlockId), chunkId), 0).r * 255.0);
+	v_FrappeMaterialId = (uint(block_position.x) | v_FrappeMaterialId) & 255u;
 }

@@ -1,5 +1,7 @@
 #version 330
 
+#ifdef _FRAPPE_COMPLEX_MATERIAL
+
 #define PI 3.141592653589793238462643
 #define GLINT_SPEED 1.0
 
@@ -46,3 +48,5 @@ vec2 frappe_modify_uv(vec2 oldUv, float isMaterial) {
 	uv.y += dy;
 	return uv.xy;
 }
+
+#endif

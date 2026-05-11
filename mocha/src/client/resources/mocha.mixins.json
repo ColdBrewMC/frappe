@@ -41,7 +41,9 @@
 		"sodium.terrain_material.chunk.Mixin_RenderRegionManager",
 		"sodium.terrain_material.chunk.Mixin_BuiltSectionInfo$Mixin_Builder",
 		"sodium.terrain_material.chunk.Mixin_BuiltSectionInfo",
-		"sodium.terrain_material.chunk.Mixin_DefaultChunkRenderer"
+		"sodium.terrain_material.chunk.Mixin_DefaultChunkRenderer",
+		"sodium.terrain_material.Mixin_ChunkShaderTextureSlot",
+		"sodium.terrain_material.Mixin_NativeImage"
 	],
 	"injectors": {
 		"defaultRequire": 1

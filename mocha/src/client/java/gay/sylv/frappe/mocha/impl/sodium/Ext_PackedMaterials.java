@@ -9,14 +9,15 @@
 
 package gay.sylv.frappe.mocha.impl.sodium;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import org.jspecify.annotations.Nullable;
 
 public interface Ext_PackedMaterials {
-	default void mocha$setPackedMaterials(int[] packedMaterials) {
+	default void mocha$setPackedMaterials(NativeImage packedMaterials) {
 		throw new IllegalStateException("Implemented via Mixin.");
 	}
 
-	default int @Nullable [] mocha$getPackedMaterials() {
+	default @Nullable NativeImage mocha$getPackedMaterials() {
 		throw new IllegalStateException("Implemented via Mixin.");
 	}
 }

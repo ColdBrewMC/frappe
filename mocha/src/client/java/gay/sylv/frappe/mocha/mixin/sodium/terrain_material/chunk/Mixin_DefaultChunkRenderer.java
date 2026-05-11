@@ -30,7 +30,7 @@ import gay.sylv.frappe.mocha.impl.sodium.Ext_DeviceResources;
 
 @Mixin(DefaultChunkRenderer.class)
 public abstract class Mixin_DefaultChunkRenderer {
-	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/render/chunk/DefaultChunkRenderer;executeDrawBatch(Lnet/caffeinemc/mods/sodium/client/gl/device/CommandList;Lnet/caffeinemc/mods/sodium/client/gl/tessellation/GlTessellation;Lnet/caffeinemc/mods/sodium/client/gl/device/MultiDrawBatch;)V"))
+	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/render/chunk/DefaultChunkRenderer;setModelMatrixUniforms(Lnet/caffeinemc/mods/sodium/client/render/chunk/shader/ChunkShaderInterface;Lnet/caffeinemc/mods/sodium/client/render/chunk/region/RenderRegion;Lnet/caffeinemc/mods/sodium/client/render/viewport/CameraTransform;Lnet/caffeinemc/mods/sodium/client/gl/buffer/GlBuffer;)V"))
 	private void setMochaData(
 			ChunkRenderMatrices matrices,
 			CommandList commandList,
@@ -44,6 +44,7 @@ public abstract class Mixin_DefaultChunkRenderer {
 			@Local(name = "shader") ChunkShaderInterface shader,
 			@Local(name = "region") RenderRegion region
 	) {
-		((Ext_ChunkShaderInterface) shader).mocha$setMeshMaterials(((Ext_DeviceResources) region.getResources()).mocha$prepareMeshMaterials(commandList));
+		Ext_DeviceResources resources = ((Ext_DeviceResources) region.getResources()).mocha$prepareMeshMaterials(commandList);
+		((Ext_ChunkShaderInterface) shader).mocha$bindMeshMaterials(resources.mocha$getSamplerMaterialInfo(), resources.mocha$getTextureMaterialInfo());
 	}
 }

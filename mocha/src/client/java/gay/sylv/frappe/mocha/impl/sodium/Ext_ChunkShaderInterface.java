@@ -9,10 +9,11 @@
 
 package gay.sylv.frappe.mocha.impl.sodium;
 
-import net.caffeinemc.mods.sodium.client.gl.buffer.GlBuffer;
+import com.mojang.blaze3d.textures.GpuSampler;
+import com.mojang.blaze3d.textures.GpuTextureView;
 
 public interface Ext_ChunkShaderInterface {
-	default void mocha$setMeshMaterials(GlBuffer buffer) {
+	default void mocha$bindMeshMaterials(GpuSampler samplerMaterialInfo, GpuTextureView textureMaterialInfo) {
 		throw new IllegalStateException("Implemented via Mixin.");
 	}
 }

@@ -1,5 +1,8 @@
 #version 330 core
 
+#define _FRAPPE_SIMPLE_PRE_FRAGMENT
+#define _FRAPPE_SIMPLE_MATERIAL
+
 #import <sodium:include/fog.glsl>
 #import <sodium:include/chunk_material.glsl>
 
@@ -17,6 +20,8 @@
 #define FogRenderDistanceStart u_RenderFog.x
 #define FogRenderDistanceEnd u_RenderFog.y
 #define UseRgss uint(u_UseRGSS)
+#define GameTime float(u_CurrentTime)
+#define moj_import import
 
 in vec4 v_Color; // The interpolated vertex color
 in vec2 v_TexCoord; // The interpolated block texture coordinates
@@ -37,6 +42,8 @@ uniform vec2 u_RenderFog; // The start and end position for border fog
 uniform vec2 u_TexelSize;
 uniform bool u_UseRGSS;
 uniform vec2 u_FrappeCompatTextureSize;
+
+uniform int u_CurrentTime;
 
 out vec4 fragColor; // The output fragment for the color framebuffer
 
@@ -108,6 +115,9 @@ vec4 sampleRGSS(sampler2D source, vec2 uv, vec2 pixelSize) {
 void main() {
 	vec4 color = u_UseRGSS ? sampleRGSS(u_BlockTex, v_TexCoord, u_TexelSize) : sampleNearest(u_BlockTex, v_TexCoord, u_TexelSize);
 	color *= v_Color; // Apply per-vertex color modulator
+	// fix: unused v_FrappeMaterialId resulting in u_MochaTex never getting used
+	color.r += float(v_FrappeMaterialId);
+	color.r -= float(v_FrappeMaterialId);
 
 	#ifdef _FRAPPE_SIMPLE_MATERIAL
 	color = _frappe_simple_pre_fragment(color);

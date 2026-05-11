@@ -26,6 +26,13 @@ import gay.sylv.frappe.mocha.impl.sodium.MochaChunkShaderBindingPoints;
 
 @Mixin(ShaderChunkRenderer.class)
 public abstract class Mixin_ShaderChunkRenderer {
+	@WrapOperation(method = "createShaderConstants", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gl/shader/ShaderConstants;builder()Lnet/caffeinemc/mods/sodium/client/gl/shader/ShaderConstants$Builder;"))
+	private static ShaderConstants.Builder appendMochaShaderConstants(Operation<ShaderConstants.Builder> original) {
+		ShaderConstants.Builder builder = original.call();
+		builder.add("_FRAPPE_SIMPLE_MATERIAL");
+		return builder;
+	}
+
 	@WrapOperation(method = "createShader", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/gl/shader/GlProgram$Builder;link(Ljava/util/function/Function;)Lnet/caffeinemc/mods/sodium/client/gl/shader/GlProgram;"))
 	private <U extends ChunkShaderInterface> GlProgram<U> modifyShader(
 			GlProgram.Builder instance,

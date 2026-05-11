@@ -9,6 +9,7 @@
 
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material.chunk;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.buffers.BakedChunkModelBuilder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -18,15 +19,15 @@ import gay.sylv.frappe.mocha.impl.sodium.Ext_PackedMaterials;
 @Mixin(BakedChunkModelBuilder.class)
 public abstract class Mixin_BakedChunkModelBuilder implements Ext_PackedMaterials {
 	@Unique
-	private int[] packedMaterials;
+	private NativeImage packedMaterials;
 
 	@Override
-	public void mocha$setPackedMaterials(int[] packedMaterials) {
+	public void mocha$setPackedMaterials(NativeImage packedMaterials) {
 		this.packedMaterials = packedMaterials;
 	}
 
 	@Override
-	public int[] mocha$getPackedMaterials() {
+	public NativeImage mocha$getPackedMaterials() {
 		return this.packedMaterials;
 	}
 }

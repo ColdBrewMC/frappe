@@ -25,6 +25,9 @@
 			"config": "mocha.mixins.json"
 		}
 	],
+	"depends": {
+		"fabricloader": ">=0.19.0"
+	},
 	"breaks": {
 		"sodium": "<${sodium_version}"
 	}

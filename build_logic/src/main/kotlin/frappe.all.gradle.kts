@@ -41,7 +41,7 @@ dependencies {
 	implementation(libs.fabric.loader)
 	implementation(libs.fabric.api)
 
-//	implementation(libs.sodium)
+	implementation(libs.sodium)
 	compileOnly(libs.sodium)
 
 	runtimeOnly(libs.modmenu)

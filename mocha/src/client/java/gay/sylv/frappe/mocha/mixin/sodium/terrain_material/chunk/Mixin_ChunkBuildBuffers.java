@@ -11,6 +11,7 @@ package gay.sylv.frappe.mocha.mixin.sodium.terrain_material.chunk;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.mojang.blaze3d.platform.NativeImage;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.ChunkBuildBuffers;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.buffers.BakedChunkModelBuilder;
@@ -46,8 +47,7 @@ public abstract class Mixin_ChunkBuildBuffers {
 			return null;
 		}
 
-		//noinspection DataFlowIssue
-		int[] packedMaterials = ((Ext_PackedMaterials) builder).mocha$getPackedMaterials();
+		NativeImage packedMaterials = ((Ext_PackedMaterials) builder).mocha$getPackedMaterials();
 
 		if (packedMaterials != null) {
 			((Ext_PackedMaterials) parts).mocha$setPackedMaterials(packedMaterials);
@@ -63,8 +63,7 @@ public abstract class Mixin_ChunkBuildBuffers {
 	) {
 		BakedChunkModelBuilder builder = this.builders.get(DefaultTerrainRenderPasses.TRANSLUCENT);
 		BuiltSectionMeshParts parts = original.call(updatedQuads);
-		//noinspection DataFlowIssue
-		int[] packedMaterials = ((Ext_PackedMaterials) builder).mocha$getPackedMaterials();
+		NativeImage packedMaterials = ((Ext_PackedMaterials) builder).mocha$getPackedMaterials();
 
 		if (packedMaterials != null) {
 			((Ext_PackedMaterials) parts).mocha$setPackedMaterials(packedMaterials);

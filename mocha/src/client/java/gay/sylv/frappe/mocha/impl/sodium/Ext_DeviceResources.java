@@ -9,15 +9,25 @@
 
 package gay.sylv.frappe.mocha.impl.sodium;
 
-import net.caffeinemc.mods.sodium.client.gl.buffer.GlBuffer;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.textures.GpuSampler;
+import com.mojang.blaze3d.textures.GpuTextureView;
 import net.caffeinemc.mods.sodium.client.gl.device.CommandList;
 
 public interface Ext_DeviceResources {
-	default void mocha$writeMeshMaterials(int[] packedMaterials) {
+	default void mocha$writeMeshMaterials(NativeImage packedMaterials) {
 		throw new IllegalStateException("Implemented via Mixin.");
 	}
 
-	default GlBuffer mocha$prepareMeshMaterials(CommandList commandList) {
+	default Ext_DeviceResources mocha$prepareMeshMaterials(CommandList commandList) {
+		throw new IllegalStateException("Implemented via Mixin.");
+	}
+
+	default GpuTextureView mocha$getTextureMaterialInfo() {
+		throw new IllegalStateException("Implemented via Mixin.");
+	}
+
+	default GpuSampler mocha$getSamplerMaterialInfo() {
 		throw new IllegalStateException("Implemented via Mixin.");
 	}
 }
