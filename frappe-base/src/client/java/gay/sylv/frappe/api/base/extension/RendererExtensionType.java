@@ -17,6 +17,9 @@ import gay.sylv.frappe.impl.base.extension.ExtensionRegistryImpl;
 ///
 /// This is used to find implementations of [renderer extensions][RendererExtension].
 /// This interface also holds metadata about a [renderer extension][RendererExtension].
+///
+/// Implementations of this interface must declare themselves with the
+/// `frappe:renderer_extension_type` entrypoint in the `fabric.mod.json`.
 public interface RendererExtensionType {
 	/// Extensions may override this method in favor of using modules with separate mods.
 	///
