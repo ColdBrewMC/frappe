@@ -77,7 +77,7 @@ public final class ExtensionRegistryImpl {
 
 		List<EntrypointContainer<RendererExtensionType>> typeContainers = FabricLoader.getInstance()
 				.getEntrypointContainers(
-						"frappe:renderer_extension_type",
+						"frappe-base:renderer_extension_type",
 						RendererExtensionType.class
 				);
 		for (EntrypointContainer<RendererExtensionType> typeContainer : typeContainers) {
