@@ -9,11 +9,16 @@
 
 package gay.sylv.frappe.impl.base.extension;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.jspecify.annotations.Nullable;
@@ -75,6 +80,16 @@ public final class ExtensionRegistryImpl {
 		if (loaded) return;
 		loaded = true;
 
+		Properties properties = new Properties();
+
+		try (InputStream inputStream = Files.newInputStream(FabricLoader.getInstance().getConfigDir().resolve("frappe.properties"))) {
+			properties.load(inputStream);
+		} catch (FileNotFoundException _) {
+			// ignored
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
 		List<EntrypointContainer<RendererExtensionType>> typeContainers = FabricLoader.getInstance()
 				.getEntrypointContainers(
 						"frappe-base:renderer_extension_type",
@@ -103,7 +118,10 @@ public final class ExtensionRegistryImpl {
 				}
 			}
 
-			if (extensionContainers.isEmpty()) {
+			boolean enabledByDefault = type.enabledByDefault();
+			boolean unloaded = extensionContainers.isEmpty() || !Boolean.parseBoolean(properties.getProperty(typeId + ".enabled", Boolean.toString(enabledByDefault)));
+
+			if (unloaded) {
 				if (type.supportTier().equals(SupportTier.CORE)) {
 					FrappeInitializer.LOGGER.error("====================================================");
 					FrappeInitializer.LOGGER.error("                       Frappé                       ");

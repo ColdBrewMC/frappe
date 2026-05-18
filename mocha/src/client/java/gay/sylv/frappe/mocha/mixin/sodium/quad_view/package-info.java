@@ -7,9 +7,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+@MochaExtensionPackage("frappe-ext-quad-view")
 @ApiStatus.Internal
 @NullMarked
 package gay.sylv.frappe.mocha.mixin.sodium.quad_view;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.NullMarked;
+
+import gay.sylv.frappe.mocha.impl.base.MochaExtensionPackage;
