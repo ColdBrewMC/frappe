@@ -11,8 +11,6 @@ package gay.sylv.frappe.api.base.extension;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import net.fabricmc.loader.api.FabricLoader;
-
 import gay.sylv.frappe.impl.base.extension.ExtensionRegistryImpl;
 
 /// A definition of an interface of [RendererExtension].
@@ -41,7 +39,7 @@ public interface RendererExtensionType {
 
 	/// Whether extensions of this type should load by default unless otherwise specified by
 	/// `extension-id-here.enabled` in the `frappe.properties` file in the
-	/// [FabricLoader#getConfigDir()].
+	/// [net.fabricmc.loader.api.FabricLoader#getConfigDir()].
 	///
 	/// This method primarily exists for [SupportTier#EXPERIMENTAL] extensions that have a
 	/// stable enough implementation to be enabled by default.
