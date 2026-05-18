@@ -16,6 +16,7 @@ import gay.sylv.frappe.impl.base.extension.ExtensionRegistryImpl;
 /// A definition of an interface of [RendererExtension].
 ///
 /// This is used to find implementations of [renderer extensions][RendererExtension].
+/// This interface also holds metadata about a [renderer extension][RendererExtension].
 public interface RendererExtensionType {
 	/// Extensions may override this method in favor of using modules with separate mods.
 	///
