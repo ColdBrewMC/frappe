@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -84,7 +85,7 @@ public final class ExtensionRegistryImpl {
 
 		try (InputStream inputStream = Files.newInputStream(FabricLoader.getInstance().getConfigDir().resolve("frappe.properties"))) {
 			properties.load(inputStream);
-		} catch (FileNotFoundException _) {
+		} catch (NoSuchFileException _) {
 			// ignored
 		} catch (IOException e) {
 			throw new RuntimeException(e);
