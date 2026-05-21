@@ -9,9 +9,10 @@
 
 package gay.sylv.frappe.api.base.extension;
 
-/// The extent of support for a particular [RendererExtensionType] and its implementations.
+/// The extent of support for a particular renderer extension and its implementations.
 ///
 /// The terms MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are used as defined in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119.html).
+@MCPFriendly
 public enum SupportTier {
 	/// An extension so essential that its implementation is required to be considered Frappé compliant.
 	/// Core extensions MUST NOT be added or removed outside minor Minecraft versions.
@@ -41,5 +42,10 @@ public enum SupportTier {
 	/// An experimental extension MUST NOT have a default implementation in Mocha.
 	/// Thus, default implementations of experimental extensions in Mocha are to
 	/// be disabled by default.
-	EXPERIMENTAL
+	EXPERIMENTAL;
+
+	/// @return `true` if the implementation is unstable or the API is subject to change.
+	public boolean isUnstable() {
+		return this.equals(EXPERIMENTAL);
+	}
 }

@@ -9,7 +9,6 @@
 
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material.chunk;
 
-import java.util.Arrays;
 import java.util.function.Predicate;
 
 import com.llamalad7.mixinextras.expression.Definition;

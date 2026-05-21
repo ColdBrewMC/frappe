@@ -9,14 +9,9 @@
 
 package gay.sylv.frappe.mocha.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
@@ -26,30 +21,16 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 import net.fabricmc.loader.api.FabricLoader;
 
+import gay.sylv.frappe.api.base.extension.RendererExtensionMetadata;
 import gay.sylv.frappe.mocha.impl.base.MochaExtensionPackage;
 
 public class MochaMixinConfigPlugin implements IMixinConfigPlugin {
 	private static final Set<String> INDIGO_DISABLED_MIXINS = Set.of(
 	);
 	private static @Nullable Boolean sodiumLoaded;
-	private static @Nullable Properties properties;
-	// FIXME: find a viable alternative to this manual set
-	private static Set<String> EXPERIMENTAL_EXTENSIONS = Set.of("frappe-ext-terrain-material");
 	private static final Map<String, String> PKG_2_ID = new HashMap<>();
 
 	private static boolean isExtensionLoaded(String clazzName) {
-		if (properties == null) {
-			properties = new Properties();
-
-			try (InputStream inputStream = Files.newInputStream(FabricLoader.getInstance().getConfigDir().resolve("frappe.properties"))) {
-				properties.load(inputStream);
-			} catch (NoSuchFileException _) {
-				// Ignored
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
 		String[] split = clazzName
 				.replace("gay.sylv.frappe.mocha.mixin.", "")
 				.split("(sodium|indigo)");
@@ -84,8 +65,7 @@ public class MochaMixinConfigPlugin implements IMixinConfigPlugin {
 			}
 		});
 
-		boolean enabledByDefault = !EXPERIMENTAL_EXTENSIONS.contains(id);
-		return Boolean.parseBoolean(properties.getProperty(id + ".enabled", Boolean.toString(enabledByDefault)));
+		return RendererExtensionMetadata.isExtensionEnabled(id);
 	}
 
 	@Override

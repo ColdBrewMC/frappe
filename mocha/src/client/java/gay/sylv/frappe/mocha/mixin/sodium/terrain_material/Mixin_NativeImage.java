@@ -11,7 +11,6 @@ package gay.sylv.frappe.mocha.mixin.sodium.terrain_material;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.platform.NativeImage;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Final;

@@ -11,7 +11,6 @@ package gay.sylv.frappe.impl.ext.fabric_renderer;
 
 import gay.sylv.frappe.api.base.extension.RendererExtension;
 import gay.sylv.frappe.api.base.extension.RendererExtensionManager;
-import gay.sylv.frappe.api.base.extension.RendererExtensionType;
 import gay.sylv.frappe.impl.base.extension.ExtensionRegistryImpl;
 
 public final class RendererExtensionManagerImpl implements RendererExtensionManager {
@@ -23,7 +22,7 @@ public final class RendererExtensionManagerImpl implements RendererExtensionMana
 	}
 
 	@Override
-	public <T extends RendererExtensionType> boolean frappe$isExtensionLoaded(Class<T> clazz) {
+	public <T extends RendererExtension> boolean frappe$isExtensionLoaded(Class<T> clazz) {
 		return frappe$isExtensionLoaded(ExtensionRegistryImpl.getId(clazz));
 	}
 

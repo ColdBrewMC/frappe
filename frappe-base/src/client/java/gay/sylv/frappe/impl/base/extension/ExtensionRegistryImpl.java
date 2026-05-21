@@ -9,16 +9,12 @@
 
 package gay.sylv.frappe.impl.base.extension;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.jspecify.annotations.Nullable;
@@ -26,16 +22,17 @@ import org.jspecify.annotations.Nullable;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 
+import gay.sylv.frappe.api.base.config.FrappeConfigUtil;
 import gay.sylv.frappe.api.base.extension.RendererExtension;
-import gay.sylv.frappe.api.base.extension.RendererExtensionType;
+import gay.sylv.frappe.api.base.extension.RendererExtensionMetadata;
 import gay.sylv.frappe.api.base.extension.RendererInfo;
 import gay.sylv.frappe.api.base.extension.SupportTier;
+import gay.sylv.frappe.impl.base.FrappeExtensionMetadataUtil;
 import gay.sylv.frappe.impl.base.FrappeInitializer;
 
 public final class ExtensionRegistryImpl {
 	private static final Map<Class<? extends RendererExtension>, String> CLASS_2_IMPL_ID = new HashMap<>();
-	private static final Map<Class<? extends RendererExtensionType>, String> CLASS_2_ID = new HashMap<>();
-	private static final Map<Class<? extends RendererExtensionType>, EntrypointContainer<RendererExtensionType>> TYPE_2_ENTRYPOINT = new HashMap<>();
+	private static final Map<Class<? extends RendererExtension>, String> CLASS_2_ID = new HashMap<>();
 	private static final Map<String, RendererExtension> EXTENSIONS = new HashMap<>();
 	public static final String UNSUPPORTED = "The current Renderer implementation is not supported by Frappé; try adding a mod that supports the current rendering optimization (Sodium, VulkanMod, etc.) or renderer mod.";
 
@@ -44,18 +41,12 @@ public final class ExtensionRegistryImpl {
 	private ExtensionRegistryImpl() {
 	}
 
-	@SuppressWarnings("unchecked") // Type matches when checked in parameter
-	public static <T extends RendererExtensionType> EntrypointContainer<T> getEntrypoint(Class<T> clazz) {
-		loadExtensions();
-		return (EntrypointContainer<T>) TYPE_2_ENTRYPOINT.get(clazz);
-	}
-
 	public static <T extends RendererExtension> String getImplId(Class<T> clazz) {
 		loadExtensions();
 		return CLASS_2_IMPL_ID.get(clazz);
 	}
 
-	public static <T extends RendererExtensionType> String getId(Class<T> clazz) {
+	public static <T extends RendererExtension> String getId(Class<T> clazz) {
 		loadExtensions();
 		return CLASS_2_ID.get(clazz);
 	}
@@ -80,26 +71,16 @@ public final class ExtensionRegistryImpl {
 		if (loaded) return;
 		loaded = true;
 
-		Properties properties = new Properties();
+		Collection<RendererExtensionType> rendererExtensionTypes = new ArrayList<>();
 
-		try (InputStream inputStream = Files.newInputStream(FabricLoader.getInstance().getConfigDir().resolve("frappe.properties"))) {
-			properties.load(inputStream);
-		} catch (NoSuchFileException _) {
-			// ignored
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		for (RendererExtensionMetadata metadata : FrappeExtensionMetadataUtil.METADATA) {
+			rendererExtensionTypes.add(new RendererExtensionTypeImpl(metadata));
 		}
 
-		List<EntrypointContainer<RendererExtensionType>> typeContainers = FabricLoader.getInstance()
-				.getEntrypointContainers(
-						"frappe-base:renderer_extension_type",
-						RendererExtensionType.class
-				);
-		for (EntrypointContainer<RendererExtensionType> typeContainer : typeContainers) {
-			TYPE_2_ENTRYPOINT.put(typeContainer.getEntrypoint().getClass(), typeContainer);
-			RendererExtensionType type = typeContainer.getEntrypoint();
-			String typeId = type.id();
-			CLASS_2_ID.put(type.getClass(), typeId);
+		for (RendererExtensionType type : rendererExtensionTypes) {
+			RendererExtensionMetadata metadata = type.getMetadata();
+			String typeId = metadata.id();
+			CLASS_2_ID.put(type.implClass(), typeId);
 			//noinspection unchecked // Safe downcast
 			Class<RendererExtension> implClass = (Class<RendererExtension>) type.implClass();
 			Deque<EntrypointContainer<RendererExtension>> extensionContainers = new ConcurrentLinkedDeque<>(FabricLoader.getInstance()
@@ -118,33 +99,79 @@ public final class ExtensionRegistryImpl {
 				}
 			}
 
-			boolean enabledByDefault = type.enabledByDefault();
-			boolean unloaded = extensionContainers.isEmpty() || !Boolean.parseBoolean(properties.getProperty(typeId + ".enabled", Boolean.toString(enabledByDefault)));
+			boolean enabledByDefault = metadata.enabled();
+			boolean unloaded = extensionContainers.isEmpty() || !FrappeConfigUtil.getBooleanProperty(typeId + ".enabled", enabledByDefault);
 
 			if (unloaded) {
-				if (type.supportTier().equals(SupportTier.CORE)) {
-					FrappeInitializer.LOGGER.error("====================================================");
-					FrappeInitializer.LOGGER.error("                       Frappé                       ");
-					FrappeInitializer.LOGGER.error("A core renderer extension is unimplemented.         ");
-					FrappeInitializer.LOGGER.error("This is strictly unsupported. Consider asking the   ");
-					FrappeInitializer.LOGGER.error("developers of your renderer mod or compatibility mod");
-					FrappeInitializer.LOGGER.error("to add support for the {}", typeId);
-					FrappeInitializer.LOGGER.error("extension.                                          ");
-					FrappeInitializer.LOGGER.error("====================================================");
+				String crashMissing = "frappe-base.extension.crash-if-missing-tier";
+				String logMissing = "frappe-base.extension.log-if-missing-tier";
 
-					// Exempt dev envs from crashing
-					if (!FabricLoader.getInstance().isDevelopmentEnvironment()) {
+				if (metadata.supportTier().equals(SupportTier.CORE)) {
+					if (FrappeConfigUtil.getBooleanProperty(logMissing + ".core", true)) {
+						FrappeInitializer.LOGGER.error("====================================================");
+						FrappeInitializer.LOGGER.error("                       Frappé                       ");
+						FrappeInitializer.LOGGER.error("A core renderer extension is unimplemented.         ");
+						FrappeInitializer.LOGGER.error("This is strictly unsupported. Consider asking the   ");
+						FrappeInitializer.LOGGER.error("developers of your renderer mod or compatibility mod");
+						FrappeInitializer.LOGGER.error("to add support for the {}", typeId);
+						FrappeInitializer.LOGGER.error("extension.                                          ");
+						FrappeInitializer.LOGGER.error("====================================================");
+					}
+
+					if (FrappeConfigUtil.getBooleanProperty(crashMissing + ".core", true)) {
 						throw new UnsupportedOperationException("A core tier renderer extension is unimplemented. See the above Frappé error message for more details.");
 					}
-				} else if (type.supportTier().equals(SupportTier.STANDARD)) {
-					FrappeInitializer.LOGGER.warn("====================================================");
-					FrappeInitializer.LOGGER.warn("                       Frappé                       ");
-					FrappeInitializer.LOGGER.warn("A standard renderer extension is unimplemented.     ");
-					FrappeInitializer.LOGGER.warn("This is bad for compatibility. Consider asking the  ");
-					FrappeInitializer.LOGGER.warn("developers of your renderer mod or compatibility mod");
-					FrappeInitializer.LOGGER.warn("to add support for the {}", typeId);
-					FrappeInitializer.LOGGER.warn("extension.                                          ");
-					FrappeInitializer.LOGGER.warn("====================================================");
+				} else if (metadata.supportTier().equals(SupportTier.STANDARD)) {
+					if (FrappeConfigUtil.getBooleanProperty(logMissing + ".standard", true)) {
+						FrappeInitializer.LOGGER.warn("====================================================");
+						FrappeInitializer.LOGGER.warn("                       Frappé                       ");
+						FrappeInitializer.LOGGER.warn("A standard renderer extension is unimplemented.     ");
+						FrappeInitializer.LOGGER.warn("This is bad for compatibility. Consider asking the  ");
+						FrappeInitializer.LOGGER.warn("developers of your renderer mod or compatibility mod");
+						FrappeInitializer.LOGGER.warn("to add support for the {}", typeId);
+						FrappeInitializer.LOGGER.warn("extension.                                          ");
+						FrappeInitializer.LOGGER.warn("====================================================");
+					}
+
+					if (FrappeConfigUtil.getBooleanProperty(crashMissing + ".standard", false)) {
+						throw new UnsupportedOperationException("A standard tier renderer extension is unimplemented. See the above Frappé error message for more details.");
+					}
+				} else if (metadata.supportTier().equals(SupportTier.NON_STANDARD)) {
+					boolean crash = FrappeConfigUtil.getBooleanProperty(crashMissing + ".non_standard", false);
+					boolean log = FrappeConfigUtil.getBooleanProperty(logMissing + ".non_standard", false);
+
+					if (crash || log) {
+						FrappeInitializer.LOGGER.warn("====================================================");
+						FrappeInitializer.LOGGER.warn("                       Frappé                       ");
+						FrappeInitializer.LOGGER.warn("A non-standard renderer extension is unimplemented. ");
+						FrappeInitializer.LOGGER.warn("This is bad for compatibility. Consider asking the  ");
+						FrappeInitializer.LOGGER.warn("developers of your renderer mod or compatibility mod");
+						FrappeInitializer.LOGGER.warn("to add support for the {}", typeId);
+						FrappeInitializer.LOGGER.warn("extension.                                          ");
+						FrappeInitializer.LOGGER.warn("====================================================");
+					}
+
+					if (crash) {
+						throw new UnsupportedOperationException("A non-standard tier renderer extension is unimplemented. See the above Frappé error message for more details.");
+					}
+				} else if (metadata.supportTier().equals(SupportTier.EXPERIMENTAL)) {
+					boolean crash = FrappeConfigUtil.getBooleanProperty(crashMissing + ".experimental", false);
+					boolean log = FrappeConfigUtil.getBooleanProperty(logMissing + ".experimental", false);
+
+					if (crash || log) {
+						FrappeInitializer.LOGGER.warn("====================================================");
+						FrappeInitializer.LOGGER.warn("                       Frappé                       ");
+						FrappeInitializer.LOGGER.warn("An experimental renderer extension is unimplemented.");
+						FrappeInitializer.LOGGER.warn("This is bad for compatibility. Consider asking the  ");
+						FrappeInitializer.LOGGER.warn("developers of your renderer mod or compatibility mod");
+						FrappeInitializer.LOGGER.warn("to add support for the {}", typeId);
+						FrappeInitializer.LOGGER.warn("extension.                                          ");
+						FrappeInitializer.LOGGER.warn("====================================================");
+					}
+
+					if (crash) {
+						throw new UnsupportedOperationException("An experimental tier renderer extension is unimplemented. See the above Frappé error message for more details.");
+					}
 				}
 
 				continue;

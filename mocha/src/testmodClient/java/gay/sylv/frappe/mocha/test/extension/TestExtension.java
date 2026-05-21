@@ -7,9 +7,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-@ApiStatus.Internal
-@NullMarked
-package gay.sylv.frappe.impl.ext.terrain_material;
+package gay.sylv.frappe.mocha.test.extension;
 
-import org.jetbrains.annotations.ApiStatus;
-import org.jspecify.annotations.NullMarked;
+import gay.sylv.frappe.api.base.extension.RendererExtension;
+
+public interface TestExtension extends RendererExtension {
+}

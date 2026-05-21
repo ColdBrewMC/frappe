@@ -10,7 +10,6 @@
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material;
 
 import java.util.Map;
-import java.util.Objects;
 
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
@@ -35,7 +34,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.GameRenderState;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
 import gay.sylv.frappe.mocha.impl.sodium.Ext_ChunkShaderInterface;

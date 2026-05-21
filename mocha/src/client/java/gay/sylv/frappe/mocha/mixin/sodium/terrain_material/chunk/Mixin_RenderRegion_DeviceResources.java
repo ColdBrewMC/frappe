@@ -10,7 +10,6 @@
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material.chunk;
 
 import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
 import java.util.OptionalDouble;
 
 import com.mojang.blaze3d.platform.NativeImage;
@@ -28,7 +27,6 @@ import net.caffeinemc.mods.sodium.client.gl.buffer.GlBufferStreamer;
 import net.caffeinemc.mods.sodium.client.gl.device.CommandList;
 import net.caffeinemc.mods.sodium.client.render.chunk.region.RenderRegion;
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;

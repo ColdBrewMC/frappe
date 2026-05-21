@@ -13,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import org.jspecify.annotations.Nullable;
 
@@ -48,11 +49,14 @@ import net.fabricmc.fabric.api.client.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadAtlas;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadEmitter;
 
+import gay.sylv.frappe.api.base.extension.RendererExtensionManager;
 import gay.sylv.frappe.api.ext.quad_view.FrappeMutableQuadView;
 import gay.sylv.frappe.api.ext.terrain_material.MQV_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialRegistryEntrypoint;
+import gay.sylv.frappe.mocha.test.extension.TestExperimentalExtension;
+import gay.sylv.frappe.mocha.test.extension.TestExtension;
 
 public final class MochaTest implements ClientModInitializer, TerrainMaterialRegistryEntrypoint {
 	private static Block testBlock;
@@ -83,6 +87,9 @@ public final class MochaTest implements ClientModInitializer, TerrainMaterialReg
 
 	@Override
 	public void onInitializeClient() {
+		Preconditions.checkState(!RendererExtensionManager.isExtensionLoaded(TestExperimentalExtension.class), "Experimental extensions must be disabled by default");
+		Preconditions.checkState(RendererExtensionManager.isExtensionLoaded(TestExtension.class), "Non-standard extensions must be enabled by default");
+
 		ResourceKey<Block> key = ResourceKey.create(
 				BuiltInRegistries.BLOCK.key(),
 				modId("test_block")

@@ -19,16 +19,16 @@ public interface RendererExtensionManager {
 		return RendererExtensionManagerImpl.INSTANCE;
 	}
 
-	/// @param id the [String] of the [RendererExtensionType].
-	/// @return whether the [RendererExtensionType] is loaded.
+	/// @param id the [String] of the [RendererExtension].
+	/// @return whether the [RendererExtension] is loaded.
 	static boolean isExtensionLoaded(String id) {
 		return get().frappe$isExtensionLoaded(id);
 	}
 
-	/// @param <T> the type of the [RendererExtensionType].
-	/// @param clazz the [Class] of the [RendererExtensionType].
-	/// @return whether the [RendererExtensionType] is loaded.
-	static <T extends RendererExtensionType> boolean isExtensionLoaded(Class<T> clazz) {
+	/// @param <T> the type of the [RendererExtension].
+	/// @param clazz the [Class] of the [RendererExtension].
+	/// @return whether the [RendererExtension] is loaded.
+	static <T extends RendererExtension> boolean isExtensionLoaded(Class<T> clazz) {
 		return get().frappe$isExtensionLoaded(clazz);
 	}
 
@@ -53,7 +53,7 @@ public interface RendererExtensionManager {
 
 	/// @see #isExtensionLoaded(Class)
 	@ApiStatus.OverrideOnly
-	<T extends RendererExtensionType> boolean frappe$isExtensionLoaded(Class<T> clazz);
+	<T extends RendererExtension> boolean frappe$isExtensionLoaded(Class<T> clazz);
 
 	/// @see #getExtension(String)
 	@ApiStatus.OverrideOnly

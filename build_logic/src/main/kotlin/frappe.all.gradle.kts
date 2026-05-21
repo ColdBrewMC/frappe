@@ -10,6 +10,8 @@ plugins {
 // https://github.com/gradle/gradle/issues/15383#issuecomment-779893192
 val libs = the<LibrariesForLibs>()
 
+val mod_id: String by project
+
 repositories {
 	// Add repositories to retrieve artifacts from in here.
 	// You should only use this when depending on other mods because
@@ -30,7 +32,7 @@ repositories {
 	}
 
 	maven {
-		name = "JellySquid's Excuse To Get Modrinth Points"
+		name = "CaffeineMC"
 		url = uri("https://maven.caffeinemc.net/releases")
 	}
 }
@@ -58,6 +60,20 @@ loom {
 	}
 
 	sourceSets {
+		register("mixinConfig") {
+			compileClasspath += configurations.loaderLibraries.get()
+		}
+
+		getByName("main") {
+			compileClasspath += sourceSets["mixinConfig"].output
+			runtimeClasspath += sourceSets["mixinConfig"].output
+		}
+
+		getByName("client") {
+			compileClasspath += sourceSets["mixinConfig"].output
+			runtimeClasspath += sourceSets["mixinConfig"].output
+		}
+
 		register("testmodClient") {
 			compileClasspath += sourceSets["main"].compileClasspath
 			runtimeClasspath += sourceSets["main"].runtimeClasspath
@@ -69,6 +85,19 @@ loom {
 			compileClasspath += sourceSets["testmodClient"].compileClasspath
 			runtimeClasspath += sourceSets["testmodClient"].runtimeClasspath
 		}
+	}
+
+	configurations {
+		configurations["implementation"].extendsFrom(configurations["mixinConfigImplementation"])
+		configurations["runtimeOnly"].extendsFrom(configurations["mixinConfigRuntimeOnly"])
+		configurations["clientImplementation"].extendsFrom(configurations["mixinConfigImplementation"])
+		configurations["clientRuntimeOnly"].extendsFrom(configurations["mixinConfigRuntimeOnly"])
+	}
+
+	dependencies {
+		"mixinConfigImplementation"(libs.fabric.loader)
+		"mixinConfigImplementation"(libs.jspecify)
+		"mixinConfigImplementation"(libs.jannotations)
 	}
 
 	runs {
@@ -88,6 +117,11 @@ java {
 	// This line generates javadocs for the mod.
 	withJavadocJar()
 
+	registerFeature("mixinConfig") {
+		withSourcesJar()
+		usingSourceSet(sourceSets["mixinConfig"])
+	}
+
 	sourceCompatibility = JavaVersion.VERSION_25
 	targetCompatibility = JavaVersion.VERSION_25
 }
@@ -104,6 +138,10 @@ tasks {
 
 	withType<JavaCompile> {
 		options.release.set(25)
+	}
+
+	withType<Jar> {
+		from(sourceSets["mixinConfig"].output)
 	}
 }
 
@@ -132,7 +170,10 @@ publishing {
 	publications {
 		create<MavenPublication>("mavenJava") {
 			artifactId = base.archivesName.get()
-			from(components["java"])
+			val client = artifact(tasks.jar)
+			client.classifier = ""
+			val mixinConfig = artifact(tasks[sourceSets["mixinConfig"].jarTaskName])
+			mixinConfig.classifier = "mixin-config"
 		}
 	}
 

@@ -15,6 +15,50 @@
 	"environment": "client",
 	"entrypoints": {
 		"client": ["gay.sylv.frappe.mocha.test.MochaTest"],
-		"frappe-ext-terrain-material:registry": ["gay.sylv.frappe.mocha.test.MochaTest"]
+		"frappe-ext-terrain-material:registry": ["gay.sylv.frappe.mocha.test.MochaTest"],
+		"frappe:mocha-test-extension": ["gay.sylv.frappe.mocha.test.extension.MochaTestExtension"],
+		"frappe:mocha-test-experimental-extension": ["gay.sylv.frappe.mocha.test.extension.MochaTestExperimentalExtension"]
+	},
+	"custom": {
+		"frappe": [
+			{
+				"schemaVersion": 0,
+				"id": "mocha-test-extension",
+				"version": "1.0.0",
+				"supportTier": "non_standard",
+				"implType": "gay.sylv.frappe.mocha.test.extension.TestExtension",
+				"name": "Mocha Test Extension"
+			},
+			{
+				"schemaVersion": 0,
+				"version": "0.1.0-beta.2",
+				"id": "mocha-test-experimental-extension",
+				"supportTier": "experimental",
+				"implType": "gay.sylv.frappe.mocha.test.extension.TestExperimentalExtension",
+				"name": "Mocha Test Experimental Extension"
+			},
+			{
+				"schemaVersion": 0,
+				"override": true,
+				"config": {
+					"frappe-base.extension": {
+						"crash-if-missing-tier": {
+							"core": true,
+							"standard": true,
+							"non_standard": true
+						},
+						"log-if-missing-tier": {
+							"core": true,
+							"standard": true,
+							"non_standard": true,
+							"experimental": true
+						}
+					},
+					"frappe-ext-terrain-material": {
+						"enabled": true
+					}
+				}
+			}
+		]
 	}
 }

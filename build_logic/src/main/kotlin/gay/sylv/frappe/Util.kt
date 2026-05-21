@@ -3,6 +3,7 @@ package gay.sylv.frappe
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.kotlin.dsl.DependencyHandlerScope
+import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.project
 
 fun DependencyHandlerScope.frappe(module: String): ProjectDependency {
@@ -10,19 +11,30 @@ fun DependencyHandlerScope.frappe(module: String): ProjectDependency {
 }
 
 fun DependencyHandlerScope.module(module: String, include: Boolean = false, api: Boolean = true, prefix: Boolean = true): Dependency? {
-	val prefixer = if (prefix) { this::frappe } else {
+	val dependencyPrefixer = if (prefix) { this::frappe } else {
 		module -> dependencies.project(module, configuration = "default")
+	}
+	val dependencyPrefixerMixinConfig = if (prefix) {
+		module -> dependencies.project(":frappe-$module")
+	} else {
+		module: String -> dependencies.project(module)
 	}
 
 	if (include) {
-		add("include", prefixer(module))
+		add("include", dependencyPrefixer(module))
+	}
+
+	add("mixinConfigImplementation", dependencyPrefixerMixinConfig(module)) {
+		capabilities {
+			requireFeature("mixin-config")
+		}
 	}
 
 	return if (!api) {
 		// Ensure dependents don't get unwanted TAWs or extension classes
-		add("implementation", prefixer(module))
+		add("implementation", dependencyPrefixer(module))
 	} else {
-		add("api", prefixer(module))
+		add("api", dependencyPrefixer(module))
 	}
 }
 
