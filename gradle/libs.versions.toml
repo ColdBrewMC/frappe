@@ -7,7 +7,8 @@ minecraft = "26.1.2"
 fabric_loader = "0.19.2"
 
 # Libraries
-fabric_api = "0.148.0+26.1.2"
+fabric_api = "0.149.1+26.1.2"
+fabric_api_renderer = "13.0.4+c80601bb4c"
 jspecify = "1.0.0"
 jannotations = "26.0.2"
 
@@ -24,6 +25,7 @@ fabric_loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric_l
 
 # Libraries
 fabric_api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric_api" }
+fabric_api_renderer = { module = "net.fabricmc.fabric-api:fabric-renderer-api-v1", version.ref = "fabric_api_renderer" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 jannotations = { module = "org.jetbrains:annotations", version.ref = "jannotations" }
 

@@ -41,7 +41,8 @@ dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft(libs.minecraft)
 	implementation(libs.fabric.loader)
-	implementation(libs.fabric.api)
+	runtimeOnly(libs.fabric.api)
+	compileOnly(libs.fabric.api.renderer)
 
 	implementation(libs.sodium)
 	compileOnly(libs.sodium)
