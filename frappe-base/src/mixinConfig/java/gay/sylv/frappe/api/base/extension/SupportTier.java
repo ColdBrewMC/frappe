@@ -30,7 +30,7 @@ public enum SupportTier {
 	/// the mod it's defined in. An extension of this tier MAY have limited adoption, especially when
 	/// domain-specific.
 	///
-	/// In addition to SemVer restrictions, Standard extensions MUST NOT break API or ABI outside
+	/// In addition to SemVer restrictions, non-standard extensions MUST NOT break API or ABI outside
 	/// minor Minecraft versions.
 	///
 	/// All relevant conditions of [#EXPERIMENTAL] apply unless otherwise specified.
