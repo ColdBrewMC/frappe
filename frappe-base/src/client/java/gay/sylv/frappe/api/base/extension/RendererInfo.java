@@ -24,7 +24,6 @@ import gay.sylv.frappe.impl.base.FrappeInitializer;
 public interface RendererInfo {
 	/// @return the mod ID of the currently loaded renderer
 	static String getModId() {
-		//noinspection DataFlowIssue // checked when the RendererInfo is seeked out
 		return FrappeInitializer.getRendererInfo().getLoadedRendererModId();
 	}
 
