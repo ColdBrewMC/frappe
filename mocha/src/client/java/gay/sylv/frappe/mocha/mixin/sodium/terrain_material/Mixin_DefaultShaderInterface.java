@@ -9,57 +9,39 @@
 
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material;
 
-import java.util.Map;
-
 import com.mojang.blaze3d.textures.GpuSampler;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniformFloat;
 import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniformFloat2v;
 import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniformFloat3v;
-import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniformInt;
 import net.caffeinemc.mods.sodium.client.render.chunk.shader.ChunkShaderOptions;
-import net.caffeinemc.mods.sodium.client.render.chunk.shader.ChunkShaderTextureSlot;
 import net.caffeinemc.mods.sodium.client.render.chunk.shader.DefaultShaderInterface;
 import net.caffeinemc.mods.sodium.client.render.chunk.shader.ShaderBindingContext;
 import net.caffeinemc.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import net.caffeinemc.mods.sodium.client.util.FogParameters;
 import org.jspecify.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.GameRenderState;
-import net.minecraft.client.renderer.state.level.LevelRenderState;
-import net.minecraft.world.phys.Vec3;
-
-import gay.sylv.frappe.mocha.impl.sodium.Ext_ChunkShaderInterface;
+import net.minecraft.client.renderer.state.OptionsRenderState;
 
 @Mixin(DefaultShaderInterface.class)
-public abstract class Mixin_DefaultShaderInterface implements Ext_ChunkShaderInterface {
-	@Shadow
-	@Final
-	private Map<ChunkShaderTextureSlot, GlUniformInt> uniformTextures;
-
-	@Shadow
-	@Deprecated(forRemoval = true)
-	protected abstract void bindTexture(
-			ChunkShaderTextureSlot slot,
-			GpuTextureView textureView,
-			GpuSampler sampler
-	);
-
+public abstract class Mixin_DefaultShaderInterface {
 	@Unique
 	private @Nullable GlUniformFloat2v uniformTextureSize;
 	@Unique
-	private @Nullable GpuSampler samplerMaterialInfo;
-	@Unique
-	private @Nullable GpuTextureView textureMaterialInfo;
-	@Unique
 	private @Nullable GlUniformFloat3v uniformCameraOffset;
+	@Unique
+	private @Nullable GlUniformFloat uniformGlintAlpha;
+	@Unique
+	private @Nullable GlUniformFloat uniformGlintSpeed;
+	@Unique
+	private @Nullable GlUniformFloat uniformLevelTime;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(
@@ -67,10 +49,10 @@ public abstract class Mixin_DefaultShaderInterface implements Ext_ChunkShaderInt
 			ChunkShaderOptions options,
 			CallbackInfo ci
 	) {
-		ChunkShaderTextureSlot slot = ChunkShaderTextureSlot.valueOf("MOCHA_MATERIAL_INFO");
-		this.uniformTextures.put(slot, context.bindUniform("u_MochaTex", GlUniformInt::new));
 		this.uniformTextureSize = context.bindUniformOptional("u_FrappeCompatTextureSize", GlUniformFloat2v::new);
-		this.uniformCameraOffset = context.bindUniformOptional("u_MochaCameraOffset", GlUniformFloat3v::new);
+		this.uniformGlintAlpha = context.bindUniformOptional("u_FrappeCompatGlintAlpha", GlUniformFloat::new);
+		this.uniformGlintSpeed = context.bindUniformOptional("u_FrappeCompatGlintSpeed", GlUniformFloat::new);
+		this.uniformLevelTime = context.bindUniformOptional("u_FrappeCompatLevelTime", GlUniformFloat::new);
 	}
 
 	@Inject(method = "setupState", at = @At("RETURN"))
@@ -85,22 +67,21 @@ public abstract class Mixin_DefaultShaderInterface implements Ext_ChunkShaderInt
 			this.uniformTextureSize.set(atlas.mocha$getWidth(), atlas.mocha$getHeight());
 		}
 
-		if (this.uniformCameraOffset != null) {
-			GameRenderState gameRenderState = Minecraft.getInstance().gameRenderer.getGameRenderState();
-			LevelRenderState levelRenderState = gameRenderState.levelRenderState;
-			Vec3 position = levelRenderState.cameraRenderState.pos;
-			this.uniformCameraOffset.set((float) position.x(), (float) position.y(), (float) position.z());
-		}
-	}
+		GameRenderState gameRenderState = Minecraft.getInstance().gameRenderer.getGameRenderState();
+		OptionsRenderState optionsRenderState = gameRenderState.optionsRenderState;
 
-	@Override
-	public void mocha$bindMeshMaterials(GpuSampler samplerMaterialInfo, GpuTextureView textureMaterialInfo) {
-		if (samplerMaterialInfo.equals(this.samplerMaterialInfo) && textureMaterialInfo.equals(this.textureMaterialInfo)) {
-			return;
+		if (this.uniformGlintAlpha != null) {
+			this.uniformGlintAlpha.set((float) optionsRenderState.glintStrength);
 		}
 
-		this.bindTexture(ChunkShaderTextureSlot.valueOf("MOCHA_MATERIAL_INFO"), textureMaterialInfo, samplerMaterialInfo);
-		this.samplerMaterialInfo = samplerMaterialInfo;
-		this.textureMaterialInfo = textureMaterialInfo;
+		if (this.uniformGlintSpeed != null) {
+			this.uniformGlintSpeed.set((float) optionsRenderState.glintSpeed);
+		}
+
+		if (this.uniformLevelTime != null) {
+			long gameTime = gameRenderState.levelRenderState.gameTime;
+			DeltaTracker deltaTracker = Minecraft.getInstance().getDeltaTracker();
+			this.uniformLevelTime.set(((float) (gameTime % 24000L) + deltaTracker.getGameTimeDeltaPartialTick(false)) / 24000.0F);
+		}
 	}
 }

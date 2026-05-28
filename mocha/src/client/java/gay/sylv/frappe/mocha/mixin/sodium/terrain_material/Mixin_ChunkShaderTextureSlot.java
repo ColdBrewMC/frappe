@@ -12,8 +12,10 @@ package gay.sylv.frappe.mocha.mixin.sodium.terrain_material;
 import net.caffeinemc.mods.sodium.client.render.chunk.shader.ChunkShaderTextureSlot;
 import org.spongepowered.asm.mixin.Mixin;
 
+@SuppressWarnings("AddedEnumConstantsNamePattern") // Mocha is the mod ID
 @Mixin(ChunkShaderTextureSlot.class)
 public enum Mixin_ChunkShaderTextureSlot {
-	@SuppressWarnings("AddedEnumConstantsNamePattern") // MCDev bug
-	MOCHA_MATERIAL_INFO
+	MOCHA_TEX_0,
+	MOCHA_TEX_1,
+	MOCHA_TEX_2
 }

@@ -175,34 +175,34 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 					if (material.simple()) {
 						shader = shader
 								.replaceFirst("#version [0-9]{3}", "")
-								.replaceFirst("(?<=vec4 )frappe_simple_pre_fragment(?=\\()", "_frappe_simple_pre_fragment_" + i)
-								.replaceFirst("(?<=vec4 )frappe_pre_fragment(?=\\()", RandomStringUtils.secure().nextAlphabetic(24));
+								.replaceFirst("(?<=vec4 )frp_simple_pre_fragment(?=\\()", "_frp_simple_pre_fragment_" + i)
+								.replaceFirst("(?<=vec4 )frp_pre_fragment(?=\\()", RandomStringUtils.secure().nextAlphabetic(24));
 
-						if (shader.contains("_frappe_simple_pre_fragment_")) {
+						if (shader.contains("_frp_simple_pre_fragment_")) {
 							preFragmentSimpleBuilder.append(preFragmentSimpleTemplate
-									.replaceAll("_FRAPPE_MATERIAL_ID", Integer.toString(i)));
+									.replaceAll("_FRP_MATERIAL_ID", Integer.toString(i)));
 							preFragmentSimpleFunctions.append(shader);
 						}
 					} else {
 						shader = shader
 								.replaceFirst("#version [0-9]{3}", "")
-								.replaceFirst("(?<=vec4 )frappe_pre_fragment(?=\\()", "_frappe_pre_fragment_" + i)
-								.replaceFirst("(?<=vec4 )frappe_simple_pre_fragment(?=\\()", RandomStringUtils.secure().nextAlphabetic(24));
+								.replaceFirst("(?<=vec4 )frp_pre_fragment(?=\\()", "_frp_pre_fragment_" + i)
+								.replaceFirst("(?<=vec4 )frp_simple_pre_fragment(?=\\()", RandomStringUtils.secure().nextAlphabetic(24));
 
-						if (shader.contains("_frappe_pre_fragment_")) {
+						if (shader.contains("_frp_pre_fragment_")) {
 							preFragmentBuilder.append(preFragmentTemplate
-									.replaceAll("_FRAPPE_MATERIAL_ID", Integer.toString(i)));
+									.replaceAll("_FRP_MATERIAL_ID", Integer.toString(i)));
 							preFragmentFunctions.append(shader);
 						}
 					}
 
 					for (RenderPipeline.Builder builder : builders) {
-						builder.withShaderDefine("_FRAPPE_FRAGMENT");
+						builder.withShaderDefine("_FRP_FRAGMENT");
 
-						if (shader.contains("_frappe_simple_pre_fragment_")) {
-							builder.withShaderDefine("_FRAPPE_SIMPLE_PRE_FRAGMENT");
-						} else if (shader.contains("_frappe_pre_fragment_")) {
-							builder.withShaderDefine("_FRAPPE_PRE_FRAGMENT");
+						if (shader.contains("_frp_simple_pre_fragment_")) {
+							builder.withShaderDefine("_FRP_SIMPLE_PRE_FRAGMENT");
+						} else if (shader.contains("_frp_pre_fragment_")) {
+							builder.withShaderDefine("_FRP_PRE_FRAGMENT");
 						}
 					}
 				}
@@ -213,19 +213,19 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 
 					shader = shader
 							.replaceFirst("#version [0-9]{3}", "")
-							.replaceFirst("(?<=vec2 )frappe_modify_uv(?=\\()", "_frappe_modify_uv_" + i);
+							.replaceFirst("(?<=vec2 )frp_modify_uv(?=\\()", "_frp_modify_uv_" + i);
 
-					if (shader.contains("_frappe_modify_uv_")) {
+					if (shader.contains("_frp_modify_uv_")) {
 						frappeUvBuilder.append(frappeUvTemplate
-								.replaceAll("_FRAPPE_MATERIAL_ID", Integer.toString(i)));
+								.replaceAll("_FRP_MATERIAL_ID", Integer.toString(i)));
 						frappeUvFunctions.append(shader);
 					}
 
 					for (RenderPipeline.Builder builder : builders) {
-						builder.withShaderDefine("_FRAPPE_VERTEX");
+						builder.withShaderDefine("_FRP_VERTEX");
 
-						if (shader.contains("_frappe_modify_uv_")) {
-							builder.withShaderDefine("_FRAPPE_MODIFY_UV");
+						if (shader.contains("_frp_modify_uv_")) {
+							builder.withShaderDefine("_FRP_MODIFY_UV");
 						}
 					}
 				}
@@ -304,9 +304,9 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 	}
 
 	private static String findFunction(String shader, String functionName) {
-		String fun = Pattern.quote("_frappe_" + functionName);
-		String def = Pattern.quote("_FRAPPE_" + functionName.toUpperCase(Locale.ROOT));
-		Pattern pattern = Pattern.compile("(?s)(?<=#ifdef " + def + ")(?!._FRAPPE_)(.*" + fun + "[\\w\\t\\n(),=+-; ]+)(?=#endif)");
+		String fun = Pattern.quote("_frp_" + functionName);
+		String def = Pattern.quote("_FRP_" + functionName.toUpperCase(Locale.ROOT));
+		Pattern pattern = Pattern.compile("(?s)(?<=#ifdef " + def + ")(?!._FRP_)(.*" + fun + "[\\w\\t\\n(),=+\\-;<>0-9. ]+)(?=#endif)");
 		Matcher matcher = pattern.matcher(shader);
 
 		if (!matcher.find()) {
@@ -317,12 +317,12 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 	}
 
 	private static String substituteFunction(String shader, String functionName, String functions, String calls, String varName) {
-		String fun = Pattern.quote("_frappe_" + functionName);
-		String def = Pattern.quote("_FRAPPE_" + functionName.toUpperCase(Locale.ROOT));
+		String fun = Pattern.quote("_frp_" + functionName);
+		String def = Pattern.quote("_FRP_" + functionName.toUpperCase(Locale.ROOT));
 		String varNameQ = Pattern.quote(varName);
 		return shader
 				.replaceFirst("(?<=#ifdef " + def + "\n)" + def + "_FUNCTION_DEFS(?=\n#endif)", functions)
-				.replaceFirst("(?<=#ifdef " + def + "[\\n\\t]{1,3})(?!._FRAPPE_)" + varNameQ + " = " + fun + ".*\\(.*\\);", calls);
+				.replaceFirst("(?<=#ifdef " + def + "[\\n\\t]{1,3})(?!._FRP_)" + varNameQ + " = " + fun + ".*\\(.*\\);", calls);
 	}
 
 	private static Optional<Path> getShaderPath(Identifier shaderId, String extension) {

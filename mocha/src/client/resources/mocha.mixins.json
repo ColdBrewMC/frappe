@@ -31,19 +31,14 @@
 		"sodium.terrain_material.Mixin_DefaultTerrainRenderPasses",
 		"sodium.terrain_material.Mixin_ShaderParser",
 		"sodium.terrain_material.Mixin_QuadViewImpl",
-		"sodium.terrain_material.chunk.Mixin_RenderRegion_DeviceResources",
 		"sodium.terrain_material.Mixin_CompactChunkVertex",
-		"sodium.terrain_material.chunk.Mixin_BakedChunkModelBuilder",
 		"sodium.terrain_material.chunk.Mixin_BlockRenderer",
-		"sodium.terrain_material.chunk.Mixin_BuiltSectionMeshParts",
-		"sodium.terrain_material.chunk.Mixin_ChunkBuildBuffers",
-		"sodium.terrain_material.chunk.Mixin_ChunkModelBuilder",
-		"sodium.terrain_material.chunk.Mixin_RenderRegionManager",
 		"sodium.terrain_material.chunk.Mixin_BuiltSectionInfo$Mixin_Builder",
 		"sodium.terrain_material.chunk.Mixin_BuiltSectionInfo",
-		"sodium.terrain_material.chunk.Mixin_DefaultChunkRenderer",
 		"sodium.terrain_material.Mixin_ChunkShaderTextureSlot",
-		"sodium.terrain_material.Mixin_NativeImage"
+		"sodium.terrain_material.Mixin_NativeImage",
+		"sodium.terrain_material.Mixin_RenderSectionManager",
+		"sodium.terrain_material.Mixin_RenderRegion_DeviceResources"
 	],
 	"injectors": {
 		"defaultRequire": 1

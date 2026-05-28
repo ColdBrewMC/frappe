@@ -4,6 +4,23 @@
 #moj_import <minecraft:globals.glsl>
 #moj_import <minecraft:chunksection.glsl>
 
+// Standard FRP uniforms
+
+// Experimental FRP uniforms
+#define frp_exp_GlintAlpha GlintAlpha
+#define frp_exp_FogColor FogColor
+#define frp_exp_LevelTime GameTime
+#define frp_exp_RGSSEnabled UseRgss
+#define frp_exp_BlockAtlasTexture Sampler0
+#define frp_exp_AtlasTextureSize TextureSize
+
+// Standard FRP vertex data
+#define v_frp_MaterialID v_FrappeMaterialId
+
+// Experimental FRP vertex data
+#define v_frp_exp_ChunkFade ChunkVisibility
+#define v_frp_exp_UV v_FrappeUV
+
 uniform sampler2D Sampler0;
 
 in float sphericalVertexDistance;
@@ -94,10 +111,10 @@ vec4 sampleRGSS(sampler2D source, vec2 uv, vec2 pixelSize) {
 void main() {
 	vec4 color = (UseRgss == 1 ? sampleRGSS(Sampler0, texCoord0, 1.0f / TextureSize) : sampleNearest(Sampler0, texCoord0, 1.0f / TextureSize)) * vertexColor;
 	#ifdef _FRAPPE_SIMPLE_MATERIAL
-	color = _frappe_simple_pre_fragment(color);
+	color = _frp_simple_pre_fragment(color);
 	#endif
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
-	color = _frappe_pre_fragment(color);
+	color = _frp_pre_fragment(color);
 	#endif
 	color = mix(FogColor * vec4(1, 1, 1, color.a), color, ChunkVisibility);
 	#ifdef ALPHA_CUTOUT

@@ -1,27 +1,27 @@
 #version 330 core
 
-#define _FRAPPE_SIMPLE_PRE_FRAGMENT
-#define _FRAPPE_SIMPLE_MATERIAL
-
 #import <sodium:include/fog.glsl>
 #import <sodium:include/chunk_material.glsl>
 
-// Sodium and Minecraft compatibility
-#define Color v_Color;
-#define UV0 v_TexCoord
-#define TextureSize u_FrappeCompatTextureSize
-#define ChunkVisibility fadeFactor
-#define FogColor u_FogColor
-#define sphericalVertexDistance v_FragDistance
-#define cylindricalVertexDistance v_FragDistance
-#define Sampler0 u_BlockTex
-#define FogEnvironmentalStart u_EnvironmentFog.x
-#define FogEnvironmentalEnd u_EnvironmentFog.y
-#define FogRenderDistanceStart u_RenderFog.x
-#define FogRenderDistanceEnd u_RenderFog.y
-#define UseRgss uint(u_UseRGSS)
-#define GameTime float(u_CurrentTime)
+// Duct tape
 #define moj_import import
+
+// Standard FRP uniforms
+
+// Experimental FRP uniforms
+#define frp_exp_GlintAlpha u_FrappeCompatGlintAlpha
+#define frp_exp_FogColor u_FogColor
+#define frp_exp_LevelTime u_FrappeCompatLevelTime
+#define frp_exp_RGSSEnabled u_UseRGSS
+#define frp_exp_BlockAtlasTexture u_BlockTex
+#define frp_exp_AtlasTextureSize ivec2(int(u_FrappeCompatTextureSize.x), int(u_FrappeCompatTextureSize.y))
+
+// Standard FRP vertex data
+#define v_frp_MaterialID v_FrappeMaterialId
+
+// Experimental FRP vertex data
+#define v_frp_exp_ChunkFade fadeFactor
+#define v_frp_exp_UV v_FrappeUV
 
 in vec4 v_Color; // The interpolated vertex color
 in vec2 v_TexCoord; // The interpolated block texture coordinates
@@ -42,6 +42,8 @@ uniform vec2 u_RenderFog; // The start and end position for border fog
 uniform vec2 u_TexelSize;
 uniform bool u_UseRGSS;
 uniform vec2 u_FrappeCompatTextureSize;
+uniform float u_FrappeCompatGlintAlpha;
+uniform float u_FrappeCompatLevelTime;
 
 uniform int u_CurrentTime;
 
@@ -115,15 +117,12 @@ vec4 sampleRGSS(sampler2D source, vec2 uv, vec2 pixelSize) {
 void main() {
 	vec4 color = u_UseRGSS ? sampleRGSS(u_BlockTex, v_TexCoord, u_TexelSize) : sampleNearest(u_BlockTex, v_TexCoord, u_TexelSize);
 	color *= v_Color; // Apply per-vertex color modulator
-	// fix: unused v_FrappeMaterialId resulting in u_MochaTex never getting used
-	color.r += float(v_FrappeMaterialId);
-	color.r -= float(v_FrappeMaterialId);
 
 	#ifdef _FRAPPE_SIMPLE_MATERIAL
-	color = _frappe_simple_pre_fragment(color);
+	color = _frp_simple_pre_fragment(color);
 	#endif
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
-	color = _frappe_pre_fragment(color);
+	color = _frp_pre_fragment(color);
 	#endif
 
 	#ifdef USE_FRAGMENT_DISCARD

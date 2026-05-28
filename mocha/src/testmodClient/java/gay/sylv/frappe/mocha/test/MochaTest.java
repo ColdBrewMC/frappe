@@ -76,7 +76,7 @@ public final class MochaTest implements ClientModInitializer, TerrainMaterialReg
 			dynamicUniforms = new TestDynamicUniforms();
 		});
 		testMaterial = TerrainMaterial.Builder.of(modId("test_glint"))
-				.complexity(TerrainMaterial.Complexity.SIMPLE)
+				.complexity(TerrainMaterial.Complexity.COMPLEX)
 				.build();
 		testGreenGlassMaterial = TerrainMaterial.Builder.of(modId("test_terrain"))
 				.complexity(TerrainMaterial.Complexity.SIMPLE)

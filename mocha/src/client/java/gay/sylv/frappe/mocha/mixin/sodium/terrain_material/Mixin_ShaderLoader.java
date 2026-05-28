@@ -35,7 +35,7 @@ public abstract class Mixin_ShaderLoader {
 		try {
 			if (name.getNamespace().equals("sodium")) {
 				return switch (name.getPath()) {
-					case "blocks/block_layer_opaque.vsh", "blocks/block_layer_opaque.fsh" -> {
+					case "blocks/block_layer_opaque.vsh", "blocks/block_layer_opaque.fsh", "include/chunk_vertex.glsl" -> {
 						String altPath = String.format("/assets/mocha/shaders/%s", name.getPath());
 
 						try (InputStream inputStream = Mocha.class.getResourceAsStream(altPath)) {

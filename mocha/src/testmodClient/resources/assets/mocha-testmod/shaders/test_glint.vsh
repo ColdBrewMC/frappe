@@ -6,12 +6,12 @@
 #define GLINT_SPEED 1.0
 
 #ifdef _FRAPPE_ISOLATE_MATERIAL // TODO make this unnecessary via regex shader transforming
-#moj_import <mocha-testmod:dynamictransforms.glsl>
+//#import <mocha-testmod:dynamictransforms.glsl>
 #endif
 
 #if false
-uniform vec2 TextureSize;
-uniform float GameTime;
+uniform vec2 frp_exp_AtlasTextureSize;
+uniform float frp_exp_LevelTime;
 #endif
 
 vec4 rotateX(vec4 vec, float angle) {
@@ -32,7 +32,7 @@ vec4 rotateY(vec4 vec, float angle) {
 	);
 }
 
-vec2 frappe_modify_uv(vec2 oldUv, float isMaterial) {
+vec2 frp_modify_uv(vec2 oldUv, float isMaterial) {
 	vec4 uv = vec4(oldUv, 0.0, 1.0);
 	#ifdef _FRAPPE_ISOLATE_MATERIAL
 //	uv = rotateY(uv, PI);
@@ -41,9 +41,9 @@ vec2 frappe_modify_uv(vec2 oldUv, float isMaterial) {
 //	uv = (TextureMat * 0.5 * uv);
 //	uv /= vec4(TextureSize / 128.0, 1.0, 1.0);
 	#endif
-	float interp = GLINT_SPEED * 125 * GameTime;
-	float dx = (mix(-64, 64, mod(interp, 1)) / TextureSize.x);
-	float dy = (mix(-64, 64, mod(interp, 1)) / TextureSize.y);
+	float interp = GLINT_SPEED * 125 * frp_exp_LevelTime;
+	float dx = (mix(-64, 64, mod(interp, 1)) / frp_exp_AtlasTextureSize.x);
+	float dy = (mix(-64, 64, mod(interp, 1)) / frp_exp_AtlasTextureSize.y);
 	uv.x += dx;
 	uv.y += dy;
 	return uv.xy;

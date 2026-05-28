@@ -7,7 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package gay.sylv.frappe.mocha.impl.sodium;
+package gay.sylv.frappe.mocha.impl.sodium.vertex.format;
 
 public final class MochaChunkShaderBindingPoints {
 	public static final int FRAPPE_UV = 4;
