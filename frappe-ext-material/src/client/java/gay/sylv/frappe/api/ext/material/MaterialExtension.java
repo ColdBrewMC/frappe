@@ -7,9 +7,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-@ApiStatus.Internal
-@NullMarked
-package gay.sylv.frappe.mixin.ext.quad_view;
+package gay.sylv.frappe.api.ext.material;
 
-import org.jetbrains.annotations.ApiStatus;
-import org.jspecify.annotations.NullMarked;
+import gay.sylv.frappe.api.base.extension.RendererExtension;
+
+public interface MaterialExtension extends RendererExtension {
+}

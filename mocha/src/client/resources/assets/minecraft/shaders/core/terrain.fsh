@@ -106,8 +106,6 @@ vec4 sampleRGSS(sampler2D source, vec2 uv, vec2 pixelSize) {
 	return mix(nearestColor, rgssColor, blendFactor);
 }
 
-#moj_import <mocha:fragment.glsl>
-
 void main() {
 	vec4 color = (UseRgss == 1 ? sampleRGSS(Sampler0, texCoord0, 1.0f / TextureSize) : sampleNearest(Sampler0, texCoord0, 1.0f / TextureSize)) * vertexColor;
 	#ifdef _FRAPPE_SIMPLE_MATERIAL

@@ -9,6 +9,8 @@ base.archivesName = "mocha"
 
 dependencies {
 	module("base")
+	extension("material")
 	extension("terrain-material")
 	extension("quad-view")
+	extension("render-pipeline")
 }

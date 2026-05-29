@@ -28,6 +28,7 @@ import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadEmitter;
 
+import gay.sylv.frappe.api.ext.material.Material;
 import gay.sylv.frappe.api.ext.terrain_material.QE_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
@@ -48,13 +49,13 @@ public abstract class Mixin_MutableQuadViewWrapper extends QuadViewWrapper imple
 
 	@Override
 	public QE_ExtTerrainMaterial frappe$terrainMaterial(TerrainMaterial material) {
-		if (material.complexity().equals(TerrainMaterial.Complexity.COMPLEX)) {
+		if (material.complexity().equals(Material.Complexity.COMPLEX)) {
 			if (Objects.equals(this.chunkLayer(), ChunkSectionLayer.SOLID)) {
 				this.shadow$chunkLayer(MOCHA_SOLID);
 			} else if (Objects.equals(this.chunkLayer(), ChunkSectionLayer.CUTOUT)) {
 				this.shadow$chunkLayer(MOCHA_CUTOUT);
 			}
-		} else if (material.complexity().equals(TerrainMaterial.Complexity.ISOLATE)) {
+		} else if (material.complexity().equals(Material.Complexity.ISOLATE)) {
 			this.shadow$chunkLayer(((IndigoTerrainMaterial) material).getChunkLayer());
 
 			if (Objects.equals(this.chunkLayer(), MOCHA_CUTOUT) || Objects.equals(this.chunkLayer(), MOCHA_SOLID)) {

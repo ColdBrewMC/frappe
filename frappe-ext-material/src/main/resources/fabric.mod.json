@@ -1,0 +1,25 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}-ext-material",
+	"version": "${mod_version}",
+	"name": "Frappé Extension - Material",
+	"description": "Defines a generic API for handling FRP materials and shaders therein.",
+	"authors": [
+		"Sylv <contact@sylv.gay>"
+	],
+	"license": "${mod_license}",
+	"icon": "assets/frappe-ext-material/icon.png",
+	"environment": "client",
+	"custom": {
+		"frappe": {
+			"schemaVersion": 0,
+			"supportTier": "experimental",
+			"implType": "gay.sylv.frappe.api.ext.material.MaterialExtension"
+		},
+		"frappe-ext-render-pipeline:shader-format": {
+			"shaderFormats": [
+				"shader-formats/frp-material"
+			]
+		}
+	}
+}

@@ -1,8 +1,10 @@
 {
 	"required": true,
-	"package": "gay.sylv.frappe.mixin.ext.terrain_material",
+	"package": "gay.sylv.frappe.mixin.ext.render_pipeline",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
+		"Accessor_ManyStatement",
+		"Mixin_ASTNode"
 	],
 	"injectors": {
 		"defaultRequire": 1

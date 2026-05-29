@@ -1,0 +1,6 @@
+{
+	"schema_version": 0,
+	"frappe_extension": "frappe-ext-terrain-material",
+	"vertex_format": "frp-terrain-material.vsh",
+	"fragment_format": "frp-terrain-material.fsh"
+}

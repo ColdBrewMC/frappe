@@ -14,33 +14,34 @@ import java.io.Reader;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.shaders.ShaderType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
+import net.minecraft.client.renderer.ShaderManager;
 import net.minecraft.resources.Identifier;
 
 import gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension;
 
-// This is used to transform Mocha's template shaders.
-@Mixin(targets = "net.minecraft.client.renderer.ShaderManager$1")
-public abstract class Mixin_ShaderManager1 {
-	@WrapOperation(method = "applyImport", at = @At(
+@Mixin(ShaderManager.class)
+public abstract class Mixin_ShaderManager {
+	@WrapOperation(method = "loadShader", at = @At(
 			value = "INVOKE",
 			target = "Lorg/apache/commons/io/IOUtils;toString(Ljava/io/Reader;)Ljava/lang/String;"
 			))
-	private String processMochaImport(Reader sw, Operation<String> original, @Local(name = "location") Identifier location) {
-		String origShader = original.call(sw);
-
-		if (location.getNamespace().equals("mocha")) {
-			if (location.getPath().endsWith("fragment.glsl")) {
-				IndigoTerrainMaterialExtension.resolveMaterials(true);
-				return IndigoTerrainMaterialExtension.mochaFragmentShader;
-			} else if (location.getPath().endsWith("vertex.glsl")) {
-				IndigoTerrainMaterialExtension.resolveMaterials(true);
-				return IndigoTerrainMaterialExtension.mochaVertexShader;
-			}
+	private static String useMochaShaders(
+			Reader reader,
+			Operation<String> original,
+			@Local(name = "location", argsOnly = true) Identifier location,
+			@Local(name = "type", argsOnly = true) ShaderType type
+	) {
+		if (location.getPath().startsWith("terrain") && location.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
+			return switch (type) {
+				case VERTEX -> IndigoTerrainMaterialExtension.mochaVertexShader;
+				case FRAGMENT -> IndigoTerrainMaterialExtension.mochaFragmentShader;
+			};
 		}
 
-		return origShader;
+		return original.call(reader);
 	}
 }

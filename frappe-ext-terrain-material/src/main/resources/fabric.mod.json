@@ -10,17 +10,24 @@
 	"license": "${mod_license}",
 	"icon": "assets/frappe-ext-terrain-material/icon.png",
 	"environment": "client",
-	"mixins": [
-		{
-			"config": "frappe-ext-terrain-material.mixins.json",
-			"environment": "client"
-		}
-	],
 	"custom": {
 		"frappe": {
 			"schemaVersion": 0,
 			"supportTier": "experimental",
-			"implType": "gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension"
+			"implType": "gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension",
+			"config": {
+				"frappe-ext-render-pipeline": {
+					"enabled": true
+				},
+				"frappe-ext-material": {
+					"enabled": true
+				}
+			}
+		},
+		"frappe-ext-render-pipeline:shader-format": {
+			"shaderFormats": [
+				"shader-formats/frp-terrain-material"
+			]
 		}
 	}
 }

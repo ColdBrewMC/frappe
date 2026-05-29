@@ -17,7 +17,8 @@
 		"client": ["gay.sylv.frappe.mocha.test.MochaTest"],
 		"frappe-ext-terrain-material:registry": ["gay.sylv.frappe.mocha.test.MochaTest"],
 		"frappe:mocha-test-extension": ["gay.sylv.frappe.mocha.test.extension.MochaTestExtension"],
-		"frappe:mocha-test-experimental-extension": ["gay.sylv.frappe.mocha.test.extension.MochaTestExperimentalExtension"]
+		"frappe:mocha-test-experimental-extension": ["gay.sylv.frappe.mocha.test.extension.MochaTestExperimentalExtension"],
+		"frappe-base:renderer_ready": ["gay.sylv.frappe.mocha.test.MochaTest"]
 	},
 	"custom": {
 		"frappe": [
@@ -59,6 +60,11 @@
 					}
 				}
 			}
-		]
+		],
+		"frappe-ext-render-pipeline:shader-format": {
+			"shaderFormats": [
+				"assets/mocha-testmod/shaders/include/mocha-testmod-glint"
+			]
+		}
 	}
 }

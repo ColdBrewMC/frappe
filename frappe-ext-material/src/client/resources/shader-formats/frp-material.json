@@ -1,0 +1,6 @@
+{
+	"schema_version": 0,
+	"frappe_extension": "frappe-ext-material",
+	"vertex_format": "frp-material.vsh",
+	"fragment_format": "frp-material.fsh"
+}

@@ -200,7 +200,7 @@ public abstract class Mixin_ChunkSectionLayer implements Ext_ChunkSectionLayer {
 			IndigoTerrainMaterial material =
 					(IndigoTerrainMaterial) MochaIndigoEncodingFormat.TERRAIN_MATERIALS[i];
 
-			if (!material.complexity().equals(TerrainMaterial.Complexity.ISOLATE)) {
+			if (!material.complexity().equals(gay.sylv.frappe.api.ext.material.Material.Complexity.ISOLATE)) {
 				continue;
 			}
 

@@ -1,27 +1,8 @@
 #version 330 core
 
-#import <sodium:include/fog.glsl>
-#import <sodium:include/chunk_vertex.glsl>
-#import <sodium:include/chunk_matrices.glsl>
-
-// Duct tape
-#define moj_import import
-
-// Standard FRP uniforms
-
-// Experimental FRP uniforms
-#define frp_exp_GlintAlpha u_FrappeCompatGlintAlpha
-#define frp_exp_FogColor u_FogColor
-#define frp_exp_LevelTime u_FrappeCompatLevelTime
-#define frp_exp_RGSSEnabled u_UseRGSS
-#define frp_exp_AtlasTextureSize ivec2(int(u_FrappeCompatTextureSize.x), int(u_FrappeCompatTextureSize.y))
-
-// Standard FRP vertex data
-#define v_frp_MaterialID _frappe_material_id
-
-// Experimental FRP vertex data
-#define v_frp_exp_ChunkFade fadeFactor
-#define v_frp_exp_UV v_FrappeUV
+#custom import <sodium:include/fog.glsl>
+#custom import <sodium:include/chunk_vertex.glsl>
+#custom import <sodium:include/chunk_matrices.glsl>
 
 out vec4 v_Color;
 out vec2 v_TexCoord;
@@ -37,6 +18,9 @@ out vec2 v_FrappeUV;
 #endif
 flat out uint v_FrappeMaterialId;
 
+// Extra uniforms included by Frappé
+uniform vec4 u_FogColor; // The color of the shader fog
+
 uniform vec3 u_RegionOffset;
 uniform vec2 u_TexCoordShrink;
 uniform vec2 u_FrappeCompatTextureSize;
@@ -51,7 +35,7 @@ layout(std140) uniform ChunkData {
 	ivec4 u_chunkFades[64]; // Packing into ivec4 is needed to avoid wasting 3KB...
 };
 
-#import <mocha:vertex.glsl>
+#custom frp_imports
 
 uvec3 _get_relative_chunk_coord(uint pos) {
 	// Packing scheme is defined by LocalSectionIndex
@@ -63,15 +47,36 @@ vec3 _get_draw_translation(uint pos) {
 }
 
 void main() {
+	// ==== UniformGetter Initialization ====
+	frp_fogColor = u_FogColor;
+	frp_levelTime = u_FrappeCompatLevelTime;
+	frp_atlasTextureSize = ivec2(int(u_FrappeCompatTextureSize.x), int(u_FrappeCompatTextureSize.y));
+
+	// ==== Vertex Input ====
 	_vert_init();
+	frp_vertColor = _vert_color;
+	frp_quadMaterialId = _frappe_material_id;
 
 	// Transform the chunk-local vertex position into world model space
 	vec3 translation = u_RegionOffset + _get_draw_translation(_draw_id);
 	vec3 position = _vert_position + translation;
 
+	frp_vertPosition = position;
+
 	#ifdef USE_FOG
 	v_FragDistance = getFragDistance(position);
+	frp_vertDistance = v_FragDistance.y;
+	#else
+	frp_vertDistance = 0.0;
+	#endif
 
+	#ifdef _FRAPPE_COMPLEX_MATERIAL
+	ftm_vertUv = _vert_frappe_uv;
+	#endif
+
+	frp_inputVertex();
+
+	#ifdef USE_FOG
 	int chunkId = int(_draw_id);
 	int chunkFade = u_chunkFades[chunkId >> 2][chunkId & 3];
 	int fadeTime = u_CurrentTime - chunkFade;
@@ -80,19 +85,23 @@ void main() {
 	fadeFactor = (chunkFade < 0) ? 1.0 : fade;
 	#endif
 
-	// Transform the vertex position into model-view-projection space
-	gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(position, 1.0);
-
 	// Add the light color to the vertex color, and pass the texture coordinates to the fragment shader
-	v_Color = _vert_color * texture(u_LightTex, _vert_tex_light_coord);
+	frp_vertColor = frp_vertColor * texture(u_LightTex, _vert_tex_light_coord);
 	v_TexCoord = (_vert_tex_diffuse_coord_bias * u_TexCoordShrink) + _vert_tex_diffuse_coord; // FMA for precision
+
+	// ==== Vertex Output ====
+	frp_outputVertex();
+	v_Color = frp_vertColor;
+
+	// Transform the vertex position into model-view-projection space
+	gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(frp_vertPosition, 1.0);
 
 	v_Material = _material_params & 7u;
 
 	// Unpack material ID byte
-	v_FrappeMaterialId = v_frp_MaterialID;
+	v_FrappeMaterialId = frp_quadMaterialId;
 
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
-	_vert_frappe_uv = _frp_modify_uv(_vert_frappe_uv);
+	v_FrappeUV = ftm_vertUv;
 	#endif
 }

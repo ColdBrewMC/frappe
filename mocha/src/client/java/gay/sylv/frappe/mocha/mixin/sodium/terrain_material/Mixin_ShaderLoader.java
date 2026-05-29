@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.resources.Identifier;
 
 import gay.sylv.frappe.mocha.impl.Mocha;
+import gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension;
 
 @Mixin(ShaderLoader.class)
 public abstract class Mixin_ShaderLoader {
@@ -35,7 +36,9 @@ public abstract class Mixin_ShaderLoader {
 		try {
 			if (name.getNamespace().equals("sodium")) {
 				return switch (name.getPath()) {
-					case "blocks/block_layer_opaque.vsh", "blocks/block_layer_opaque.fsh", "include/chunk_vertex.glsl" -> {
+					case "blocks/block_layer_opaque.vsh" -> IndigoTerrainMaterialExtension.mochaVertexShader;
+					case "blocks/block_layer_opaque.fsh" -> IndigoTerrainMaterialExtension.mochaFragmentShader;
+					case "include/chunk_vertex.glsl" -> {
 						String altPath = String.format("/assets/mocha/shaders/%s", name.getPath());
 
 						try (InputStream inputStream = Mocha.class.getResourceAsStream(altPath)) {

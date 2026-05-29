@@ -11,6 +11,7 @@ fabric_api = "0.149.1+26.1.2"
 fabric_api_renderer = "13.0.4+c80601bb4c"
 jspecify = "1.0.0"
 jannotations = "26.0.2"
+glsl-transformer = "3.0.0-pre3"
 
 # Mod Integrations
 sodium = "0.8.12-beta.2+mc26.1.2"
@@ -28,6 +29,7 @@ fabric_api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fab
 fabric_api_renderer = { module = "net.fabricmc.fabric-api:fabric-renderer-api-v1", version.ref = "fabric_api_renderer" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 jannotations = { module = "org.jetbrains:annotations", version.ref = "jannotations" }
+glsl-transformer = { module = "io.github.douira:glsl-transformer", version.ref = "glsl-transformer" }
 
 # Mod Integrations
 sodium = { module = "net.caffeinemc:sodium-fabric", version.ref = "sodium" }

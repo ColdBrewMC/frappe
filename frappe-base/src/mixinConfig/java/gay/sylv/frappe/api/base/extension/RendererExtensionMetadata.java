@@ -65,6 +65,9 @@ public interface RendererExtensionMetadata {
 		return FrappeExtensionMetadataUtil.ID_2_METADATA.get(id);
 	}
 
+	/// This method is safe to call as early as Mixin config plugins.
+	///
+	/// @return whether an extension with the given ID is enabled and will be loaded.
 	static boolean isExtensionEnabled(String id) {
 		RendererExtensionMetadata metadata = RendererExtensionMetadata.get(id);
 

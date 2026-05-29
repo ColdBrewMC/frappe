@@ -9,13 +9,7 @@
 
 package gay.sylv.frappe.api.ext.terrain_material;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
-
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.systems.RenderPass;
 import org.jetbrains.annotations.ApiStatus;
-import org.jspecify.annotations.Nullable;
 
 import net.minecraft.resources.Identifier;
 
@@ -44,12 +38,7 @@ public interface TerrainMaterialExtension extends RendererExtension {
 	TerrainMaterial createChunkLayer(
 			Identifier shaderId,
 			String label,
-			TerrainMaterial.Complexity complexity,
-			@Nullable Function<RenderPipeline.Builder, RenderPipeline.Builder> renderPipelineModifier,
-			@Nullable Runnable preRenderPassState,
-			@Nullable Runnable postRenderPassState,
-			@Nullable Consumer<RenderPass> renderPassSetup,
-			@Nullable Consumer<RenderPass> renderPassCleanup
+			TerrainMaterial.Complexity complexity
 	);
 
 	/// @see #registerMaterial(TerrainMaterial)

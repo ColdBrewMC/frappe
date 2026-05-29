@@ -1,0 +1,6 @@
+{
+	"schema_version": 0,
+	"frappe_extension": "frappe-ext-render-pipeline",
+	"vertex_format": "frp-base.vsh",
+	"fragment_format": "frp-base.fsh"
+}

@@ -1,27 +1,7 @@
 #version 330 core
 
-#import <sodium:include/fog.glsl>
-#import <sodium:include/chunk_material.glsl>
-
-// Duct tape
-#define moj_import import
-
-// Standard FRP uniforms
-
-// Experimental FRP uniforms
-#define frp_exp_GlintAlpha u_FrappeCompatGlintAlpha
-#define frp_exp_FogColor u_FogColor
-#define frp_exp_LevelTime u_FrappeCompatLevelTime
-#define frp_exp_RGSSEnabled u_UseRGSS
-#define frp_exp_BlockAtlasTexture u_BlockTex
-#define frp_exp_AtlasTextureSize ivec2(int(u_FrappeCompatTextureSize.x), int(u_FrappeCompatTextureSize.y))
-
-// Standard FRP vertex data
-#define v_frp_MaterialID v_FrappeMaterialId
-
-// Experimental FRP vertex data
-#define v_frp_exp_ChunkFade fadeFactor
-#define v_frp_exp_UV v_FrappeUV
+#custom import <sodium:include/fog.glsl>
+#custom import <sodium:include/chunk_material.glsl>
 
 in vec4 v_Color; // The interpolated vertex color
 in vec2 v_TexCoord; // The interpolated block texture coordinates
@@ -42,12 +22,13 @@ uniform vec2 u_RenderFog; // The start and end position for border fog
 uniform vec2 u_TexelSize;
 uniform bool u_UseRGSS;
 uniform vec2 u_FrappeCompatTextureSize;
-uniform float u_FrappeCompatGlintAlpha;
 uniform float u_FrappeCompatLevelTime;
 
 uniform int u_CurrentTime;
 
 out vec4 fragColor; // The output fragment for the color framebuffer
+
+#custom frp_imports
 
 vec4 sampleNearest(sampler2D sampler, vec2 uv, vec2 pixelSize, vec2 du, vec2 dv, vec2 texelScreenSize) {
 	// Convert our UV back up to texel coordinates and find out how far over we are from the center of each pixel
@@ -112,18 +93,27 @@ vec4 sampleRGSS(sampler2D source, vec2 uv, vec2 pixelSize) {
 	return mix(nearestColor, rgssColor, blendFactor);
 }
 
-#import <mocha:fragment.glsl>
-
 void main() {
-	vec4 color = u_UseRGSS ? sampleRGSS(u_BlockTex, v_TexCoord, u_TexelSize) : sampleNearest(u_BlockTex, v_TexCoord, u_TexelSize);
-	color *= v_Color; // Apply per-vertex color modulator
+	// ==== UniformGetter Initialization ====
+	frp_fogColor = u_FogColor;
+	frp_levelTime = u_FrappeCompatLevelTime;
+	ftm_blockAtlasTextureSize = ivec2(int(u_FrappeCompatTextureSize.x), int(u_FrappeCompatTextureSize.y));
+	ftm_blockAtlasTexture = u_BlockTex;
 
-	#ifdef _FRAPPE_SIMPLE_MATERIAL
-	color = _frp_simple_pre_fragment(color);
+	// ==== Fragment Input ====
+	frp_vertDistance = v_FragDistance.y;
+	frp_vertColor = v_Color;
+	frp_fragColor = frp_vertColor;
+	frp_quadMaterialId = v_FrappeMaterialId;
+
+	#ifdef _FRAPPE_COMPLEX_TERRAIN_MATERIAL
+	ftm_vertUv = v_FrappeUV;
 	#endif
-	#ifdef _FRAPPE_COMPLEX_MATERIAL
-	color = _frp_pre_fragment(color);
-	#endif
+
+	frp_inputFragment();
+
+	vec4 color = u_UseRGSS ? sampleRGSS(u_BlockTex, v_TexCoord, u_TexelSize) : sampleNearest(u_BlockTex, v_TexCoord, u_TexelSize);
+	color *= frp_fragColor; // Apply per-vertex color modulator
 
 	#ifdef USE_FRAGMENT_DISCARD
 	if (color.a < _material_alpha_cutoff(v_Material)) {
@@ -131,5 +121,12 @@ void main() {
 	}
 	#endif
 
-	fragColor = _linearFog(color, v_FragDistance, u_FogColor, u_EnvironmentFog, u_RenderFog, fadeFactor);
+	// ==== Fog Application ====
+	frp_fragColor = _linearFog(color, vec2(v_FragDistance.x, frp_vertDistance), u_FogColor, u_EnvironmentFog, u_RenderFog, fadeFactor);
+	frp_applyFogFragment();
+
+	// ==== Fragment Output ====
+	frp_outputFragment();
+
+	fragColor = frp_fragColor;
 }

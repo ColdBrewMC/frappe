@@ -9,15 +9,22 @@
 
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.mojang.blaze3d.textures.GpuSampler;
 import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniformFloat;
 import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniformFloat2v;
 import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniformFloat3v;
+import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniformFloat4v;
 import net.caffeinemc.mods.sodium.client.render.chunk.shader.ChunkShaderOptions;
 import net.caffeinemc.mods.sodium.client.render.chunk.shader.DefaultShaderInterface;
 import net.caffeinemc.mods.sodium.client.render.chunk.shader.ShaderBindingContext;
 import net.caffeinemc.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
 import net.caffeinemc.mods.sodium.client.util.FogParameters;
+import org.joml.Vector2fc;
+import org.joml.Vector3fc;
+import org.joml.Vector4fc;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -28,20 +35,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.GameRenderState;
-import net.minecraft.client.renderer.state.OptionsRenderState;
+
+import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline;
+import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.UniformType;
 
 @Mixin(DefaultShaderInterface.class)
 public abstract class Mixin_DefaultShaderInterface {
 	@Unique
 	private @Nullable GlUniformFloat2v uniformTextureSize;
 	@Unique
-	private @Nullable GlUniformFloat3v uniformCameraOffset;
-	@Unique
-	private @Nullable GlUniformFloat uniformGlintAlpha;
-	@Unique
-	private @Nullable GlUniformFloat uniformGlintSpeed;
-	@Unique
 	private @Nullable GlUniformFloat uniformLevelTime;
+	@Unique
+	private final Map<String, GlUniformFloat> floatUniforms = new HashMap<>();
+	@Unique
+	private final Map<String, GlUniformFloat2v> vec2Uniforms = new HashMap<>();
+	@Unique
+	private final Map<String, GlUniformFloat3v> vec3Uniforms = new HashMap<>();
+	@Unique
+	private final Map<String, GlUniformFloat4v> vec4Uniforms = new HashMap<>();
+	@Unique
+	private final Map<String, FrappeRenderPipeline.UniformGetter<?>> uniformGetters = new HashMap<>();
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void onInit(
@@ -50,9 +63,50 @@ public abstract class Mixin_DefaultShaderInterface {
 			CallbackInfo ci
 	) {
 		this.uniformTextureSize = context.bindUniformOptional("u_FrappeCompatTextureSize", GlUniformFloat2v::new);
-		this.uniformGlintAlpha = context.bindUniformOptional("u_FrappeCompatGlintAlpha", GlUniformFloat::new);
-		this.uniformGlintSpeed = context.bindUniformOptional("u_FrappeCompatGlintSpeed", GlUniformFloat::new);
 		this.uniformLevelTime = context.bindUniformOptional("u_FrappeCompatLevelTime", GlUniformFloat::new);
+
+		for (FrappeRenderPipeline pipeline : FrappeRenderPipeline.getAllPipelines()) {
+			for (Map.Entry<String, UniformType<?>> entry : pipeline.uniformTypes().entrySet()) {
+				String identifier = entry.getKey();
+				UniformType<?> type = entry.getValue();
+
+				if (type.equals(UniformType.FLOAT)) {
+					GlUniformFloat uniformFloat = context.bindUniformOptional(identifier, GlUniformFloat::new);
+
+					if (uniformFloat == null) {
+						continue;
+					}
+
+					this.floatUniforms.put(identifier, uniformFloat);
+				} else if (type.equals(UniformType.VEC2)) {
+					GlUniformFloat2v uniformFloat = context.bindUniformOptional(identifier, GlUniformFloat2v::new);
+
+					if (uniformFloat == null) {
+						continue;
+					}
+
+					this.vec2Uniforms.put(identifier, uniformFloat);
+				} else if (type.equals(UniformType.VEC3)) {
+					GlUniformFloat3v uniformFloat = context.bindUniformOptional(identifier, GlUniformFloat3v::new);
+
+					if (uniformFloat == null) {
+						continue;
+					}
+
+					this.vec3Uniforms.put(identifier, uniformFloat);
+				} else if (type.equals(UniformType.VEC4)) {
+					GlUniformFloat4v uniformFloat = context.bindUniformOptional(identifier, GlUniformFloat4v::new);
+
+					if (uniformFloat == null) {
+						continue;
+					}
+
+					this.vec4Uniforms.put(identifier, uniformFloat);
+				}
+
+				this.uniformGetters.put(identifier, pipeline.uniformGetters().get(identifier));
+			}
+		}
 	}
 
 	@Inject(method = "setupState", at = @At("RETURN"))
@@ -68,14 +122,24 @@ public abstract class Mixin_DefaultShaderInterface {
 		}
 
 		GameRenderState gameRenderState = Minecraft.getInstance().gameRenderer.getGameRenderState();
-		OptionsRenderState optionsRenderState = gameRenderState.optionsRenderState;
 
-		if (this.uniformGlintAlpha != null) {
-			this.uniformGlintAlpha.set((float) optionsRenderState.glintStrength);
+		for (Map.Entry<String, GlUniformFloat> entry : this.floatUniforms.entrySet()) {
+			this.floatUniforms.get(entry.getKey()).set((Float) this.uniformGetters.get(entry.getKey()).getValue(gameRenderState));
 		}
 
-		if (this.uniformGlintSpeed != null) {
-			this.uniformGlintSpeed.set((float) optionsRenderState.glintSpeed);
+		for (Map.Entry<String, GlUniformFloat2v> entry : this.vec2Uniforms.entrySet()) {
+			Vector2fc value = (Vector2fc) this.uniformGetters.get(entry.getKey()).getValue(gameRenderState);
+			this.vec2Uniforms.get(entry.getKey()).set(value.x(), value.y());
+		}
+
+		for (Map.Entry<String, GlUniformFloat3v> entry : this.vec3Uniforms.entrySet()) {
+			Vector3fc value = (Vector3fc) this.uniformGetters.get(entry.getKey()).getValue(gameRenderState);
+			this.vec3Uniforms.get(entry.getKey()).set(value.x(), value.y(), value.z());
+		}
+
+		for (Map.Entry<String, GlUniformFloat4v> entry : this.vec4Uniforms.entrySet()) {
+			Vector4fc value = (Vector4fc) this.uniformGetters.get(entry.getKey()).getValue(gameRenderState);
+			this.vec4Uniforms.get(entry.getKey()).set(value.x(), value.y(), value.z(), value.w());
 		}
 
 		if (this.uniformLevelTime != null) {

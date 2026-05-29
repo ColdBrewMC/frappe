@@ -20,4 +20,5 @@ dependencies {
 	// FIXME: why in the ever living fuck do dependencies not dependency
 	runtimeOnly("net.fabricmc.fabric-api:fabric-api:${libs.fabric.api.asProvider().get().version}")
 	compileOnly("net.fabricmc.fabric-api:fabric-renderer-api-v1:${libs.fabric.api.renderer.get().version}")
+	runtimeOnly("io.github.douira:glsl-transformer:${libs.glsl.transformer.get().version}")
 }

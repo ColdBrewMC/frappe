@@ -26,3 +26,11 @@ already quite difficult to maintain when it breaks. Please do not bother the FRA
 No, absolutely not. Frappé's API is not in scope for individual renderer mods, and Mocha—Frappé's
 default Indigo and Sodium implementation—is licensed MPL-2.0. Unless an agreement is made on labor
 and licensing, Mocha/Frappé will remain a separate mod.
+
+## Attribution
+[glsl-transformer](https://github.com/IrisShaders/glsl-transformer) by [douira](https://github.com/douira)
+
+## Licenses
+Frappé and Mocha: MPL-2.0
+
+glsl-transformer: AGPL-3.0 and the additional license grant in `licenses/glsl-transformer.md`

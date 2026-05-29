@@ -47,6 +47,13 @@ public interface RendererExtensionManager {
 		return get().frappe$getExtension(clazz);
 	}
 
+	/// @param clazz the [Class] of the [RendererExtension].
+	/// @return if present, the extension ID associated with the given [Class].
+	/// @throws NullPointerException if the [RendererExtension] is not loaded.
+	static String getExtensionId(Class<? extends RendererExtension> clazz) {
+		return get().frappe$getExtensionId(clazz);
+	}
+
 	/// @see #isExtensionLoaded(String)
 	@ApiStatus.OverrideOnly
 	boolean frappe$isExtensionLoaded(String id);
@@ -62,4 +69,8 @@ public interface RendererExtensionManager {
 	/// @see #getExtension(Class)
 	@ApiStatus.OverrideOnly
 	<T extends RendererExtension> T frappe$getExtension(Class<T> clazz);
+
+	/// @see #getExtensionId(Class)
+	@ApiStatus.OverrideOnly
+	String frappe$getExtensionId(Class<? extends RendererExtension> clazz);
 }

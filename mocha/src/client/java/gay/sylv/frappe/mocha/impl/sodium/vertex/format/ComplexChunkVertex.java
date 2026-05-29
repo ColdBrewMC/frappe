@@ -43,12 +43,18 @@ public class ComplexChunkVertex extends CompactChunkVertex {
 					.call(() -> encoder.write(initialPtr, materialBits, vertices, section));
 
 			for (int i = 0; i < 4; i++) {
-				ChunkVertexEncoder.Vertex vertex = vertices[i];
+				// FIXME: we tried just casting it without checking, but it throws a cast exception,
+				//  so we have to check it with instanceof (expensive here).
+				if (!(vertices[i] instanceof ComplexVertex vertex)) {
+					MemoryIntrinsics.putInt(ptr + 20, Float.floatToIntBits(0.0f));
+					MemoryIntrinsics.putInt(ptr + 24, Float.floatToIntBits(0.0f));
 
-				if (vertex instanceof ComplexVertex complexVertex) {
-					MemoryIntrinsics.putInt(ptr + 20, Float.floatToIntBits(complexVertex.frappeU));
-					MemoryIntrinsics.putInt(ptr + 24, Float.floatToIntBits(complexVertex.frappeV));
+					ptr += 28;
+					continue;
 				}
+
+				MemoryIntrinsics.putInt(ptr + 20, Float.floatToIntBits(vertex.frappeU));
+				MemoryIntrinsics.putInt(ptr + 24, Float.floatToIntBits(vertex.frappeV));
 
 				ptr += 28;
 			}

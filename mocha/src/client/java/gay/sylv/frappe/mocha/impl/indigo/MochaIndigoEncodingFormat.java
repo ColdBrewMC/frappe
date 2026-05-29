@@ -17,6 +17,7 @@ import net.minecraft.util.Mth;
 
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.EncodingFormat;
 
+import gay.sylv.frappe.api.ext.material.Material;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -43,7 +44,7 @@ public final class MochaIndigoEncodingFormat {
 	static {
 		TERRAIN_MATERIALS[0] = TerrainMaterial.Builder.of(Identifier.fromNamespaceAndPath("frappe-ext-terrain-material", "default"))
 				.label("Default")
-				.complexity(TerrainMaterial.Complexity.SIMPLE)
+				.complexity(Material.Complexity.SIMPLE)
 				.build();
 		TERRAIN_MATERIAL_2_INDEX.put(TERRAIN_MATERIALS[0], 0);
 	}

@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}-ext-render-pipeline",
+	"version": "${mod_version}",
+	"name": "Frappé Extension - Render Pipeline",
+	"description": "Creates an abstraction over RenderPipeline and shader formats.",
+	"authors": [
+		"Sylv <contact@sylv.gay>"
+	],
+	"license": "${mod_license}",
+	"icon": "assets/frappe-ext-render-pipeline/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"main": ["gay.sylv.frappe.impl.ext.render_pipeline.shader.FrappeRenderPipelineMod"]
+	},
+	"mixins": [
+		{
+			"environment": "client",
+			"config": "frappe-ext-render-pipeline.mixins.json"
+		}
+	],
+	"custom": {
+		"frappe": {
+			"schemaVersion": 0,
+			"supportTier": "experimental",
+			"implType": "gay.sylv.frappe.api.ext.render_pipeline.RenderPipelineExtension"
+		},
+		"frappe-ext-render-pipeline:shader-format": {
+			"shaderFormats": [
+				"shader-formats/frp-base"
+			]
+		}
+	}
+}

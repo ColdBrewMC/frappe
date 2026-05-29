@@ -17,15 +17,14 @@ import static net.minecraft.client.renderer.RenderPipelines.TRANSLUCENT_TERRAIN;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,10 +32,7 @@ import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.PolygonMode;
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +43,11 @@ import net.minecraft.resources.Identifier;
 
 import net.fabricmc.loader.api.FabricLoader;
 
+import gay.sylv.frappe.api.ext.material.MaterialExtension;
+import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline;
+import gay.sylv.frappe.api.ext.render_pipeline.RenderPipelineExtension;
+import gay.sylv.frappe.api.ext.render_pipeline.shader.PipelineStage;
+import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderFormat;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialRegistryEntrypoint;
@@ -61,8 +62,6 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 	private static final Logger LOGGER = LoggerFactory.getLogger("Mocha/Indigo/frappe-ext-terrain-material");
 	public static String mochaFragmentShader = "";
 	public static String mochaVertexShader = "";
-	public static Runnable chunkSectionLayerInit;
-	public static Runnable chunkSectionLayerGroupInit;
 	public static ChunkSectionLayerGroup MOCHA_OPAQUE_SOLID;
 	public static ChunkSectionLayerGroup MOCHA_OPAQUE_CUTOUT;
 	public static ChunkSectionLayer MOCHA_SOLID;
@@ -79,22 +78,17 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 	public TerrainMaterial createChunkLayer(
 			Identifier shaderId,
 			String label,
-			TerrainMaterial.Complexity complexity,
-			@Nullable Function<RenderPipeline.Builder, RenderPipeline.Builder> renderPipelineModifier,
-			@Nullable Runnable preRenderPassState,
-			@Nullable Runnable postRenderPassState,
-			@Nullable Consumer<RenderPass> renderPassSetup,
-			@Nullable Consumer<RenderPass> renderPassCleanup
+			TerrainMaterial.Complexity complexity
 	) {
 		return new IndigoTerrainMaterial(
 				shaderId,
 				label,
 				complexity,
-				renderPipelineModifier,
-				preRenderPassState,
-				postRenderPassState,
-				renderPassSetup,
-				renderPassCleanup
+				null,
+				null,
+				null,
+				null,
+				null
 		);
 	}
 
@@ -142,8 +136,13 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 
 		// Load Mocha's fragment/vertex shader so we can modify it.
 		try {
-			mochaFragmentShader = Files.readString(getShaderPath(modId("include/fragment"), "glsl").orElseThrow());
-			mochaVertexShader = Files.readString(getShaderPath(modId("include/vertex"), "glsl").orElseThrow());
+			if (FabricLoader.getInstance().isModLoaded("sodium")) {
+				mochaFragmentShader = Files.readString(getShaderPath(modId("blocks/block_layer_opaque"), "fsh").orElseThrow());
+				mochaVertexShader = Files.readString(getShaderPath(modId("blocks/block_layer_opaque"), "vsh").orElseThrow());
+			} else {
+				mochaFragmentShader = Files.readString(getShaderPath(Identifier.withDefaultNamespace("core/terrain"), "fsh").orElseThrow());
+				mochaVertexShader = Files.readString(getShaderPath(Identifier.withDefaultNamespace("core/terrain"), "vsh").orElseThrow());
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -151,92 +150,54 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 		mochaFragmentShader = fuckOffWindows(mochaFragmentShader);
 		mochaVertexShader = fuckOffWindows(mochaVertexShader);
 
-		String preFragmentSimpleTemplate = findFunction(mochaFragmentShader, "simple_pre_fragment");
-		StringBuilder preFragmentSimpleFunctions = new StringBuilder();
-		StringBuilder preFragmentSimpleBuilder = new StringBuilder();
-		String preFragmentTemplate = findFunction(mochaFragmentShader, "pre_fragment");
-		StringBuilder preFragmentFunctions = new StringBuilder();
-		StringBuilder preFragmentBuilder = new StringBuilder();
-		String frappeUvTemplate = findFunction(mochaVertexShader, "modify_uv");
-		StringBuilder frappeUvFunctions = new StringBuilder();
-		StringBuilder frappeUvBuilder = new StringBuilder();
+		List<ShaderFormat> shaderFormats = new ArrayList<>(List.of(
+				ShaderFormat.getExtensionFormats("frp-base", RenderPipelineExtension.class),
+				ShaderFormat.getExtensionFormats("frp-material", MaterialExtension.class),
+				ShaderFormat.getExtensionFormats("frp-terrain-material", TerrainMaterialExtension.class)
+		));
+
+		for (FrappeRenderPipeline pipeline : FrappeRenderPipeline.getAllPipelines()) {
+			shaderFormats.add(pipeline.shaderFormat());
+		}
+
+		ShaderFormat shaderFormat = ShaderFormat.union(shaderFormats.toArray(ShaderFormat[]::new));
+
+		Map<String, String> vertexShaderSources = new HashMap<>();
+		Map<String, String> fragmentShaderSources = new HashMap<>();
+		Map<String, Map<String, String>> perPipelineDefines = new HashMap<>();
 
 		for (int i = 0; i < MochaIndigoEncodingFormat.terrainMaterialCount; i++) {
-			TerrainMaterial material = MochaIndigoEncodingFormat.TERRAIN_MATERIALS[i];
-			Identifier shaderId = material.shaderId();
-			Optional<Path> fragmentShaderPath = getShaderPath(shaderId, "fsh");
-			Optional<Path> vertexShaderPath = getShaderPath(shaderId, "vsh");
+			Identifier shaderId = MochaIndigoEncodingFormat.TERRAIN_MATERIALS[i].shaderId();
+			String id = shaderId + "_" + i;
+			Optional<Path> vertexPath = getShaderPath(shaderId, "vsh");
+			Optional<Path> fragmentPath = getShaderPath(shaderId, "fsh");
 
-			try {
-				if (fragmentShaderPath.isPresent()) {
-					String shader = Files.readString(fragmentShaderPath.get());
-					shader = fuckOffWindows(shader);
+			perPipelineDefines.computeIfAbsent(id, _ -> new HashMap<>())
+					.put("FRP_MATERIAL_ID", i + "u");
 
-					if (material.simple()) {
-						shader = shader
-								.replaceFirst("#version [0-9]{3}", "")
-								.replaceFirst("(?<=vec4 )frp_simple_pre_fragment(?=\\()", "_frp_simple_pre_fragment_" + i)
-								.replaceFirst("(?<=vec4 )frp_pre_fragment(?=\\()", RandomStringUtils.secure().nextAlphabetic(24));
-
-						if (shader.contains("_frp_simple_pre_fragment_")) {
-							preFragmentSimpleBuilder.append(preFragmentSimpleTemplate
-									.replaceAll("_FRP_MATERIAL_ID", Integer.toString(i)));
-							preFragmentSimpleFunctions.append(shader);
-						}
-					} else {
-						shader = shader
-								.replaceFirst("#version [0-9]{3}", "")
-								.replaceFirst("(?<=vec4 )frp_pre_fragment(?=\\()", "_frp_pre_fragment_" + i)
-								.replaceFirst("(?<=vec4 )frp_simple_pre_fragment(?=\\()", RandomStringUtils.secure().nextAlphabetic(24));
-
-						if (shader.contains("_frp_pre_fragment_")) {
-							preFragmentBuilder.append(preFragmentTemplate
-									.replaceAll("_FRP_MATERIAL_ID", Integer.toString(i)));
-							preFragmentFunctions.append(shader);
-						}
-					}
-
-					for (RenderPipeline.Builder builder : builders) {
-						builder.withShaderDefine("_FRP_FRAGMENT");
-
-						if (shader.contains("_frp_simple_pre_fragment_")) {
-							builder.withShaderDefine("_FRP_SIMPLE_PRE_FRAGMENT");
-						} else if (shader.contains("_frp_pre_fragment_")) {
-							builder.withShaderDefine("_FRP_PRE_FRAGMENT");
-						}
-					}
+			if (vertexPath.isPresent()) {
+				try {
+					vertexShaderSources.put(id, Files.readString(vertexPath.get()));
+				} catch (NoSuchFileException _) {
+					// ignored
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
+			}
 
-				if (vertexShaderPath.isPresent()) {
-					String shader = Files.readString(vertexShaderPath.get());
-					shader = fuckOffWindows(shader);
-
-					shader = shader
-							.replaceFirst("#version [0-9]{3}", "")
-							.replaceFirst("(?<=vec2 )frp_modify_uv(?=\\()", "_frp_modify_uv_" + i);
-
-					if (shader.contains("_frp_modify_uv_")) {
-						frappeUvBuilder.append(frappeUvTemplate
-								.replaceAll("_FRP_MATERIAL_ID", Integer.toString(i)));
-						frappeUvFunctions.append(shader);
-					}
-
-					for (RenderPipeline.Builder builder : builders) {
-						builder.withShaderDefine("_FRP_VERTEX");
-
-						if (shader.contains("_frp_modify_uv_")) {
-							builder.withShaderDefine("_FRP_MODIFY_UV");
-						}
-					}
+			if (fragmentPath.isPresent()) {
+				try {
+					fragmentShaderSources.put(id, Files.readString(fragmentPath.get()));
+				} catch (NoSuchFileException _) {
+					// ignored
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
-			} catch (IOException e) {
-				LOGGER.error("An error occurred while parsing terrain material shaders", e);
 			}
 		}
 
-		mochaFragmentShader = substituteFunction(mochaFragmentShader, "simple_pre_fragment", preFragmentSimpleFunctions.toString(), preFragmentSimpleBuilder.toString(), "color");
-		mochaFragmentShader = substituteFunction(mochaFragmentShader, "pre_fragment", preFragmentFunctions.toString(), preFragmentBuilder.toString(), "color");
-		mochaVertexShader = substituteFunction(mochaVertexShader, "modify_uv", frappeUvFunctions.toString(), frappeUvBuilder.toString(), "uv");
+		mochaVertexShader = shaderFormat.transformAndCombineShaders(PipelineStage.VERTEX, mochaVertexShader, vertexShaderSources, perPipelineDefines);
+		mochaFragmentShader = shaderFormat.transformAndCombineShaders(PipelineStage.FRAGMENT, mochaFragmentShader, fragmentShaderSources, perPipelineDefines);
 
 		RenderPipeline.Snippet solidSnippet = solid.buildSnippet();
 		RenderPipeline.Snippet cutoutSnippet = cutout.buildSnippet();
@@ -301,28 +262,6 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 				ChunkSectionLayer.CUTOUT, VANILLA_2_MOCHA_TERRAIN_PIPELINES.get(CUTOUT_TERRAIN),
 				ChunkSectionLayer.TRANSLUCENT, VANILLA_2_MOCHA_TERRAIN_PIPELINES.get(TRANSLUCENT_TERRAIN)
 		);
-	}
-
-	private static String findFunction(String shader, String functionName) {
-		String fun = Pattern.quote("_frp_" + functionName);
-		String def = Pattern.quote("_FRP_" + functionName.toUpperCase(Locale.ROOT));
-		Pattern pattern = Pattern.compile("(?s)(?<=#ifdef " + def + ")(?!._FRP_)(.*" + fun + "[\\w\\t\\n(),=+\\-;<>0-9. ]+)(?=#endif)");
-		Matcher matcher = pattern.matcher(shader);
-
-		if (!matcher.find()) {
-			throw new NullPointerException("Mocha failed to find " + functionName + " in its template shader");
-		}
-
-		return matcher.group();
-	}
-
-	private static String substituteFunction(String shader, String functionName, String functions, String calls, String varName) {
-		String fun = Pattern.quote("_frp_" + functionName);
-		String def = Pattern.quote("_FRP_" + functionName.toUpperCase(Locale.ROOT));
-		String varNameQ = Pattern.quote(varName);
-		return shader
-				.replaceFirst("(?<=#ifdef " + def + "\n)" + def + "_FUNCTION_DEFS(?=\n#endif)", functions)
-				.replaceFirst("(?<=#ifdef " + def + "[\\n\\t]{1,3})(?!._FRP_)" + varNameQ + " = " + fun + ".*\\(.*\\);", calls);
 	}
 
 	private static Optional<Path> getShaderPath(Identifier shaderId, String extension) {

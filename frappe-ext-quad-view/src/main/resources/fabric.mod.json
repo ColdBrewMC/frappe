@@ -10,12 +10,6 @@
 	"license": "${mod_license}",
 	"icon": "assets/frappe-ext-quad-view/icon.png",
 	"environment": "client",
-	"mixins": [
-		{
-			"config": "frappe-ext-quad-view.mixins.json",
-			"environment": "client"
-		}
-	],
 	"custom": {
 		"frappe": {
 			"schemaVersion": 0,

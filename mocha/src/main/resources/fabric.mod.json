@@ -16,8 +16,10 @@
 	"environment": "client",
 	"entrypoints": {
 		"frappe-base:renderer_info": ["gay.sylv.frappe.mocha.impl.base.MochaRendererInfo"],
+		"frappe:frappe-ext-material": ["gay.sylv.frappe.mocha.impl.indigo.material.IndiumMaterialExtension"],
 		"frappe:frappe-ext-terrain-material": ["gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension"],
-		"frappe:frappe-ext-quad-view": ["gay.sylv.frappe.mocha.impl.indigo.quad_view.IndigoQuadViewExtension"]
+		"frappe:frappe-ext-quad-view": ["gay.sylv.frappe.mocha.impl.indigo.quad_view.IndigoQuadViewExtension"],
+		"frappe:frappe-ext-render-pipeline": ["gay.sylv.frappe.mocha.impl.indium.render_pipeline.IndiumRenderPipelineExtension"]
 	},
 	"mixins": [
 		{

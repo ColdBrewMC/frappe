@@ -36,4 +36,9 @@ public final class RendererExtensionManagerImpl implements RendererExtensionMana
 		//noinspection unchecked // Type T will always be the type T of Class<T> of parameter clazz.
 		return (T) frappe$getExtension(ExtensionRegistryImpl.getImplId(clazz));
 	}
+
+	@Override
+	public String frappe$getExtensionId(Class<? extends RendererExtension> clazz) {
+		return ExtensionRegistryImpl.getImplId(clazz);
+	}
 }

@@ -15,7 +15,6 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.caffeinemc.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import net.caffeinemc.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderer;
 import net.caffeinemc.mods.sodium.client.render.chunk.terrain.material.Material;
 import net.caffeinemc.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
@@ -72,8 +71,7 @@ public abstract class Mixin_BlockRenderer {
 	@ModifyExpressionValue(method = "bufferQuad", at = @At(value = "MIXINEXTRAS:EXPRESSION"))
 	private int bufferMochaQuad(
 			int original,
-			@Local(argsOnly = true, name = "quad") MutableQuadViewImpl quad,
-			@Local(name = "builder") ChunkModelBuilder builder
+			@Local(argsOnly = true, name = "quad") MutableQuadViewImpl quad
 	) {
 		return original | (MochaIndigoEncodingFormat.terrainMaterialInt(quad.data[quad.baseIndex + MochaIndigoEncodingFormat.HEADER_MOCHA_BITS]) << 4);
 	}

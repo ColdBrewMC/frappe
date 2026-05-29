@@ -42,8 +42,6 @@ out vec2 v_FrappeUV;
 #endif
 flat out uint v_FrappeMaterialId;
 
-#moj_import <mocha:vertex.glsl>
-
 void main() {
 	vec3 pos = Position + (ChunkPosition - CameraBlockPos) + CameraOffset;
 	gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);

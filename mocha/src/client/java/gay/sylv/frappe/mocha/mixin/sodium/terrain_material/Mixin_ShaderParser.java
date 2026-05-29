@@ -27,12 +27,12 @@ public abstract class Mixin_ShaderParser {
 			Operation<String> original
 	) {
 		if (name.getNamespace().equals("mocha")) {
-			if (name.getPath().endsWith("fragment.glsl")) {
+			if (name.getPath().endsWith("block_layer_opaque.fsh")) {
 				IndigoTerrainMaterialExtension.resolveMaterials(true);
-				return IndigoTerrainMaterialExtension.mochaFragmentShader.replace("#version 330", "");
-			} else if (name.getPath().endsWith("vertex.glsl")) {
+				return IndigoTerrainMaterialExtension.mochaFragmentShader;
+			} else if (name.getPath().endsWith("block_layer_opaque.vsh")) {
 				IndigoTerrainMaterialExtension.resolveMaterials(true);
-				return IndigoTerrainMaterialExtension.mochaVertexShader.replace("#version 330", "");
+				return IndigoTerrainMaterialExtension.mochaVertexShader;
 			}
 		}
 

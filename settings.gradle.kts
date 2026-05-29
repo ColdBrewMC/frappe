@@ -10,6 +10,12 @@ pluginManagement {
 }
 
 includeBuild("build_logic")
-include("frappe-base", "frappe-ext-terrain-material", "frappe-ext-quad-view")
+include(
+	"frappe-base",
+	"frappe-ext-material",
+	"frappe-ext-quad-view",
+	"frappe-ext-render-pipeline",
+	"frappe-ext-terrain-material",
+)
 
 include("mocha")

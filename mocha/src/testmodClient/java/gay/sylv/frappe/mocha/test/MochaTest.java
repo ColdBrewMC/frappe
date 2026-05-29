@@ -14,7 +14,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.google.common.base.Preconditions;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
@@ -38,7 +37,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
@@ -50,7 +48,11 @@ import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadAtlas;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadEmitter;
 
 import gay.sylv.frappe.api.base.extension.RendererExtensionManager;
+import gay.sylv.frappe.api.base.extension.RendererReadyEntrypoint;
+import gay.sylv.frappe.api.ext.material.Material.Complexity;
 import gay.sylv.frappe.api.ext.quad_view.FrappeMutableQuadView;
+import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline;
+import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderFormat;
 import gay.sylv.frappe.api.ext.terrain_material.MQV_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension;
@@ -58,7 +60,7 @@ import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialRegistryEntrypoin
 import gay.sylv.frappe.mocha.test.extension.TestExperimentalExtension;
 import gay.sylv.frappe.mocha.test.extension.TestExtension;
 
-public final class MochaTest implements ClientModInitializer, TerrainMaterialRegistryEntrypoint {
+public final class MochaTest implements ClientModInitializer, RendererReadyEntrypoint, TerrainMaterialRegistryEntrypoint {
 	private static Block testBlock;
 	private static Block testGrassBlock;
 	private static Block testGreenGlassBlock;
@@ -67,19 +69,25 @@ public final class MochaTest implements ClientModInitializer, TerrainMaterialReg
 	private static Item testGreenGlassBlockItem;
 	private static TerrainMaterial testMaterial;
 	private static TerrainMaterial testGreenGlassMaterial;
-	private static GpuBufferSlice dynamicTransforms;
-	private static TestDynamicUniforms dynamicUniforms;
+
+	@Override
+	public void onRendererReady(Renderer renderer) {
+		// Define glint uniforms
+		FrappeRenderPipeline.getOrCreate(ShaderFormat.getFormatOrThrow("mocha-testmod-glint"))
+				.defineUniform(
+						"mochaTest_glintAlpha",
+						FrappeRenderPipeline.UniformType.FLOAT,
+						gameRenderState -> (float) gameRenderState.optionsRenderState.glintStrength
+				);
+	}
 
 	@Override
 	public void onTerrainMaterialRegistry() {
-		ClientLifecycleEvents.CLIENT_STARTED.register(_ -> {
-			dynamicUniforms = new TestDynamicUniforms();
-		});
 		testMaterial = TerrainMaterial.Builder.of(modId("test_glint"))
-				.complexity(TerrainMaterial.Complexity.COMPLEX)
+				.complexity(Complexity.COMPLEX)
 				.build();
 		testGreenGlassMaterial = TerrainMaterial.Builder.of(modId("test_terrain"))
-				.complexity(TerrainMaterial.Complexity.SIMPLE)
+				.complexity(Complexity.SIMPLE)
 				.build();
 		TerrainMaterialExtension.registerMaterial(testMaterial);
 		TerrainMaterialExtension.registerMaterial(testGreenGlassMaterial);
