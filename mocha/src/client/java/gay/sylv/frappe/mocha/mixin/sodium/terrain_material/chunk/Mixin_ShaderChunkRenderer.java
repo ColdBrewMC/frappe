@@ -17,12 +17,9 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.caffeinemc.mods.sodium.client.gl.shader.GlProgram;
 import net.caffeinemc.mods.sodium.client.gl.shader.ShaderConstants;
 import net.caffeinemc.mods.sodium.client.render.chunk.ShaderChunkRenderer;
-import net.caffeinemc.mods.sodium.client.render.chunk.shader.ChunkFogMode;
 import net.caffeinemc.mods.sodium.client.render.chunk.shader.ChunkShaderInterface;
 import net.caffeinemc.mods.sodium.client.render.chunk.shader.ChunkShaderOptions;
 import net.caffeinemc.mods.sodium.client.render.chunk.shader.ShaderBindingContext;
-import net.caffeinemc.mods.sodium.client.render.chunk.terrain.TerrainRenderPass;
-import net.caffeinemc.mods.sodium.client.render.chunk.vertex.format.ChunkVertexType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
