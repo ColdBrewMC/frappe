@@ -41,13 +41,16 @@ import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 import net.minecraft.resources.Identifier;
 
+import net.fabricmc.fabric.api.client.renderer.v1.Renderer;
 import net.fabricmc.loader.api.FabricLoader;
 
+import gay.sylv.frappe.api.base.extension.RendererInfo;
 import gay.sylv.frappe.api.ext.material.MaterialExtension;
 import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline;
 import gay.sylv.frappe.api.ext.render_pipeline.RenderPipelineExtension;
 import gay.sylv.frappe.api.ext.render_pipeline.shader.PipelineStage;
 import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderFormat;
+import gay.sylv.frappe.api.ext.render_pipeline.shader.TransformOptions;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialRegistryEntrypoint;
@@ -108,13 +111,12 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 		resolveMaterials(false);
 	}
 
-	// TODO: support resource reloading
-	// This is cursed as fuck, but it lets us do cool things:tm:
-	// https://regexlicensing.com
 	public static void resolveMaterials(boolean reload) {
 		if (!VANILLA_2_MOCHA_TERRAIN_PIPELINES.isEmpty() && !reload) {
 			return;
 		}
+
+		Renderer.get(); // Ensure Renderer is ready by this point.
 
 		if (!reload) {
 			FabricLoader.getInstance().invokeEntrypoints(
@@ -140,8 +142,8 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 				mochaFragmentShader = Files.readString(getShaderPath(modId("blocks/block_layer_opaque"), "fsh").orElseThrow());
 				mochaVertexShader = Files.readString(getShaderPath(modId("blocks/block_layer_opaque"), "vsh").orElseThrow());
 			} else {
-				mochaFragmentShader = Files.readString(getShaderPath(Identifier.withDefaultNamespace("core/terrain"), "fsh").orElseThrow());
-				mochaVertexShader = Files.readString(getShaderPath(Identifier.withDefaultNamespace("core/terrain"), "vsh").orElseThrow());
+				mochaFragmentShader = Files.readString(getShaderPath(modId("core/terrain"), "fsh", "mocha").orElseThrow());
+				mochaVertexShader = Files.readString(getShaderPath(modId("core/terrain"), "vsh", "mocha").orElseThrow());
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -196,8 +198,34 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 			}
 		}
 
-		mochaVertexShader = shaderFormat.transformAndCombineShaders(PipelineStage.VERTEX, mochaVertexShader, vertexShaderSources, perPipelineDefines);
-		mochaFragmentShader = shaderFormat.transformAndCombineShaders(PipelineStage.FRAGMENT, mochaFragmentShader, fragmentShaderSources, perPipelineDefines);
+		TransformOptions transformOptions = TransformOptions.of(RendererInfo.getModId()
+				.equals("fabric-renderer-indigo"));
+		mochaVertexShader = shaderFormat.transformAndCombineShaders(PipelineStage.VERTEX, mochaVertexShader, vertexShaderSources, perPipelineDefines, transformOptions);
+		mochaFragmentShader = shaderFormat.transformAndCombineShaders(PipelineStage.FRAGMENT, mochaFragmentShader, fragmentShaderSources, perPipelineDefines, transformOptions);
+
+		if (!FabricLoader.getInstance().isModLoaded("sodium")) {
+			mochaVertexShader = mochaVertexShader.replace("#custom moj_import", "#moj_import");
+			mochaFragmentShader = mochaFragmentShader.replace("#custom moj_import", "#moj_import").replace("ALPHA_CUTOUT;", """
+
+#ifdef ALPHA_CUTOUT
+if (frp_fragColor.a < ALPHA_CUTOUT) {
+	discard;
+}
+#endif
+""");
+
+			IndigoPipelineUniform.INSTANCES.values().forEach(IndigoPipelineUniform::close);
+			IndigoPipelineUniform.INSTANCES.clear();
+		} else {
+			mochaFragmentShader = mochaFragmentShader.replace("ALPHA_CUTOUT;", """
+
+#ifdef USE_FRAGMENT_DISCARD
+if (color.a < _material_alpha_cutoff(v_Material)) {
+	discard;
+}
+#endif
+""");
+		}
 
 		RenderPipeline.Snippet solidSnippet = solid.buildSnippet();
 		RenderPipeline.Snippet cutoutSnippet = cutout.buildSnippet();
@@ -265,11 +293,15 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 	}
 
 	private static Optional<Path> getShaderPath(Identifier shaderId, String extension) {
+		return getShaderPath(shaderId, extension, shaderId.getNamespace());
+	}
+
+	private static Optional<Path> getShaderPath(Identifier shaderId, String extension, String modId) {
 		String path = "assets/" + shaderId.getNamespace() + "/shaders/" + shaderId.getPath() + "." + extension;
 
 		try {
 			return FabricLoader.getInstance()
-					.getModContainer(shaderId.getNamespace())
+					.getModContainer(modId)
 					.orElseThrow()
 					.findPath(path);
 		} catch (NoSuchElementException e) {

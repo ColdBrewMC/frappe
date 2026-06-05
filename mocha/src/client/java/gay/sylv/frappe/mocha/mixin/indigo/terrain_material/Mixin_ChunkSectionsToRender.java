@@ -36,6 +36,7 @@ import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
 
+import gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoPipelineUniform;
 import gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterial;
 
 @Mixin(ChunkSectionsToRender.class)
@@ -89,6 +90,12 @@ public abstract class Mixin_ChunkSectionsToRender {
 						OptionalDouble.empty()
 				)) {
 			RenderSystem.bindDefaultUniforms(renderPass);
+
+			// Bind Frappé Render Pipeline uniforms
+			for (IndigoPipelineUniform<?> uniform : IndigoPipelineUniform.INSTANCES.values()) {
+				renderPass.setUniform("frp_uniformBlock_" + uniform.getIdentifier(), uniform.getBuffer());
+			}
+
 			renderPass.bindTexture(
 					"Sampler0",
 					this.textureView,

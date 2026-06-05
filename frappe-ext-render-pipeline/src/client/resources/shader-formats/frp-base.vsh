@@ -16,11 +16,6 @@
 #define FRP_PASS_SOLID
 
 /*
- * The alpha value of glint as specified in the options.
- */
-const float frp_glintAlpha;
-
-/*
  * The color of fog.
  */
 const vec4 frp_fogColor;
@@ -31,14 +26,19 @@ const vec4 frp_fogColor;
 const float frp_levelTime;
 
 /*
- * The main atlas's texture size.
+ * The projection matrix.
  */
-const ivec2 frp_atlasTextureSize;
+const mat4 frp_projectionMatrix;
 
 /*
- * The vertex's position in the world.
+ * The model-view matrix.
  */
-out vec3 frp_vertPosition;
+const mat4 frp_modelViewMatrix;
+
+/*
+ * The vertex's position.
+ */
+out vec4 frp_vertPosition;
 
 /*
  * The vertex distance from the camera.

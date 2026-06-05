@@ -1,25 +1,8 @@
 #version 330
 
-#moj_import <minecraft:fog.glsl>
-#moj_import <minecraft:globals.glsl>
-#moj_import <minecraft:chunksection.glsl>
-
-// Standard FRP uniforms
-
-// Experimental FRP uniforms
-#define frp_exp_GlintAlpha GlintAlpha
-#define frp_exp_FogColor FogColor
-#define frp_exp_LevelTime GameTime
-#define frp_exp_RGSSEnabled UseRgss
-#define frp_exp_BlockAtlasTexture Sampler0
-#define frp_exp_AtlasTextureSize TextureSize
-
-// Standard FRP vertex data
-#define v_frp_MaterialID v_FrappeMaterialId
-
-// Experimental FRP vertex data
-#define v_frp_exp_ChunkFade ChunkVisibility
-#define v_frp_exp_UV v_FrappeUV
+#custom moj_import <minecraft:fog.glsl>
+#custom moj_import <minecraft:globals.glsl>
+#custom moj_import <minecraft:chunksection.glsl>
 
 uniform sampler2D Sampler0;
 
@@ -33,6 +16,8 @@ in vec2 v_FrappeUV;
 flat in uint v_FrappeMaterialId;
 
 out vec4 fragColor;
+
+#custom frp_imports
 
 vec4 sampleNearest(sampler2D source, vec2 uv, vec2 pixelSize, vec2 du, vec2 dv, vec2 texelScreenSize) {
 	// Convert our UV back up to texel coordinates and find out how far over we are from the center of each pixel
@@ -107,18 +92,31 @@ vec4 sampleRGSS(sampler2D source, vec2 uv, vec2 pixelSize) {
 }
 
 void main() {
-	vec4 color = (UseRgss == 1 ? sampleRGSS(Sampler0, texCoord0, 1.0f / TextureSize) : sampleNearest(Sampler0, texCoord0, 1.0f / TextureSize)) * vertexColor;
-	#ifdef _FRAPPE_SIMPLE_MATERIAL
-	color = _frp_simple_pre_fragment(color);
+	// ==== Uniform Initialization ====
+	frp_fogColor = FogColor;
+	frp_levelTime = GameTime;
+	ftm_blockAtlasTextureSize = TextureSize;
+	ftm_blockAtlasTexture = Sampler0;
+
+	// ==== Fragment Input ====
+	frp_vertDistance = sphericalVertexDistance;
+	frp_vertColor = vertexColor;
+	frp_fragColor = frp_vertColor;
+	frp_quadMaterialId = v_FrappeMaterialId;
+	#ifdef _FRAPPE_COMPLEX_TERRAIN_MATERIAL
+	ftm_vertUv = v_FrappeUV;
 	#endif
-	#ifdef _FRAPPE_COMPLEX_MATERIAL
-	color = _frp_pre_fragment(color);
-	#endif
-	color = mix(FogColor * vec4(1, 1, 1, color.a), color, ChunkVisibility);
-	#ifdef ALPHA_CUTOUT
-	if (color.a < ALPHA_CUTOUT) {
-		discard;
-	}
-	#endif
-	fragColor = apply_fog(color, sphericalVertexDistance, cylindricalVertexDistance, FogEnvironmentalStart, FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, FogColor);
+	frp_inputFragment();
+
+	frp_fragColor *= (UseRgss == 1 ? sampleRGSS(Sampler0, texCoord0, 1.0f / TextureSize) : sampleNearest(Sampler0, texCoord0, 1.0f / TextureSize));
+	ALPHA_CUTOUT;
+
+	// ==== Fog Application ====
+	frp_fragColor = mix(FogColor * vec4(1, 1, 1, frp_fragColor.a), frp_fragColor, ChunkVisibility);
+	frp_fragColor = apply_fog(frp_fragColor, frp_vertDistance, cylindricalVertexDistance, FogEnvironmentalStart, FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, FogColor);
+	frp_applyFogFragment();
+
+	// ==== Fragment Output ====
+	frp_outputFragment();
+	fragColor = frp_fragColor;
 }

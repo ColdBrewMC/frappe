@@ -172,7 +172,7 @@ public class FrappeRenderPipelineMod implements ModInitializer {
 
 		// hack in case it's in the same folder
 		if (source == null) {
-			source = readFile(modContainer, formatPath + "/../" + pathString);
+			source = readFile(modContainer, Path.of(formatPath).getParent().resolve(pathString).toString());
 		}
 
 		if (source == null) {
@@ -249,9 +249,18 @@ public class FrappeRenderPipelineMod implements ModInitializer {
 		}
 
 		specifierName = specifierName
+				.toUpperCase(Locale.ROOT)
 				.replace("F32", "")
 				.replace("32", "");
-		Specifier specifier = Specifier.valueOf(specifierName.toUpperCase(Locale.ROOT));
+
+		specifierName = switch (specifierName) {
+			case "MAT4" -> specifierName + "X4";
+			case "MAT3" -> specifierName + "X3";
+			case "MAT2" -> specifierName + "X2";
+			default -> specifierName;
+		};
+
+		Specifier specifier = Specifier.valueOf(specifierName);
 		Set<Qualifier> qualifiers = new HashSet<>();
 
 		if (fullySpecifiedType.typeQualifier() != null) {

@@ -1,0 +1,7 @@
+{
+	"pack": {
+		"description": "Built-in Mocha terrain material runtime resource pack.",
+		"min_format": 84,
+		"max_format": 9999
+	}
+}

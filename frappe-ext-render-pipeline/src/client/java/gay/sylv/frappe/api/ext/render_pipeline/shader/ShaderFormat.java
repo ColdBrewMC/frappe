@@ -89,9 +89,9 @@ public interface ShaderFormat {
 
 	String transformSingleShader(PipelineStage pipelineStage, String shaderSource, String id, Map<String, String> perPipelineDefines);
 
-	String transformCombinedShader(PipelineStage pipelineStage, String shaderSource);
+	String transformCombinedShader(PipelineStage pipelineStage, String shaderSource, TransformOptions transformOptions);
 
-	default String transformAndCombineShaders(PipelineStage pipelineStage, String mainShaderSource, Map<String, String> shaderSources, Map<String, Map<String, String>> perPipelineDefines) {
+	default String transformAndCombineShaders(PipelineStage pipelineStage, String mainShaderSource, Map<String, String> shaderSources, Map<String, Map<String, String>> perPipelineDefines, TransformOptions transformOptions) {
 		Map<String, String> transformedSources = new HashMap<>(shaderSources.size());
 
 		for (Map.Entry<String, String> shaderSource : shaderSources.entrySet()) {
@@ -101,7 +101,7 @@ public interface ShaderFormat {
 			);
 		}
 
-		return this.transformCombinedShader(pipelineStage, this.combineShaders(pipelineStage, mainShaderSource, transformedSources)).replace("#custom import", "#import");
+		return this.transformCombinedShader(pipelineStage, this.combineShaders(pipelineStage, mainShaderSource, transformedSources), transformOptions).replace("#custom import", "#import");
 	}
 
 	/// @return this format's IDs.

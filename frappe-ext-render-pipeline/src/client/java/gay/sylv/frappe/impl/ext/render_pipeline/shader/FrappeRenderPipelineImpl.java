@@ -23,12 +23,13 @@ public record FrappeRenderPipelineImpl(
 	public static final Map<String, FrappeRenderPipeline> SHADER_FORMAT_ID_2_PIPELINE = new HashMap<>();
 
 	@Override
-	public <T> void defineUniform(
+	public <T> FrappeRenderPipeline defineUniform(
 			String identifier,
 			UniformType<T> uniformType,
 			UniformGetter<T> uniformGetter
 	) {
 		this.uniformTypes.put(identifier, uniformType);
 		this.uniformGetters.put(identifier, uniformGetter);
+		return this;
 	}
 }

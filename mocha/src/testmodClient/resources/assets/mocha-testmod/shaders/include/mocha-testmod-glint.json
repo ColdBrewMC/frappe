@@ -1,4 +1,5 @@
 {
 	"schema_version": 0,
+	"vertex_format": "mocha-testmod-glint.vsh",
 	"fragment_format": "mocha-testmod-glint.fsh"
 }

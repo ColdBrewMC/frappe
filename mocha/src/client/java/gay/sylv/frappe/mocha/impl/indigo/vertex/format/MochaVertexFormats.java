@@ -50,14 +50,16 @@ public final class MochaVertexFormats {
 			.add("_vert_frappe_simple_material_info", SIMPLE_MATERIAL_INFO) // 2
 			.padding(2) // 2
 			.build(); // 40
+	// FIXME: after glsl-preprocessor is used, don't define _vert_frappe_uv
 	public static final VertexFormat SIMPLE_TERRAIN = VertexFormat.builder()
 			.add("Position", VertexFormatElement.POSITION) // 12
 			.add("Color", VertexFormatElement.COLOR) // 4
 			.add("UV0", VertexFormatElement.UV0) // 8
 			.add("UV2", VertexFormatElement.UV2) // 4
+			.add("_vert_frappe_uv", UV3) // 8
 			.add("_vert_frappe_simple_material_info", SIMPLE_MATERIAL_INFO) // 2
 			.padding(2) // 2
-			.build(); // 32
+			.build(); // 40
 
 	private MochaVertexFormats() {
 	}

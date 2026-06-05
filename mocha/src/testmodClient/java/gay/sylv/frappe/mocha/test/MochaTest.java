@@ -78,6 +78,11 @@ public final class MochaTest implements ClientModInitializer, RendererReadyEntry
 						"mochaTest_glintAlpha",
 						FrappeRenderPipeline.UniformType.FLOAT,
 						gameRenderState -> (float) gameRenderState.optionsRenderState.glintStrength
+				)
+				.defineUniform(
+						"mochaTest_glintSpeed",
+						FrappeRenderPipeline.UniformType.FLOAT,
+						gameRenderState -> (float) gameRenderState.optionsRenderState.glintSpeed
 				);
 	}
 

@@ -26,6 +26,7 @@ import io.github.douira.glsl_transformer.ast.node.Identifier;
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
 import io.github.douira.glsl_transformer.ast.node.declaration.DeclarationMember;
 import io.github.douira.glsl_transformer.ast.node.declaration.FunctionDeclaration;
+import io.github.douira.glsl_transformer.ast.node.declaration.InterfaceBlockDeclaration;
 import io.github.douira.glsl_transformer.ast.node.declaration.TypeAndInitDeclaration;
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.node.expression.ReferenceExpression;
@@ -38,6 +39,8 @@ import io.github.douira.glsl_transformer.ast.node.statement.Statement;
 import io.github.douira.glsl_transformer.ast.node.statement.terminal.ExpressionStatement;
 import io.github.douira.glsl_transformer.ast.node.type.FullySpecifiedType;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.InterpolationQualifier;
+import io.github.douira.glsl_transformer.ast.node.type.qualifier.LayoutQualifier;
+import io.github.douira.glsl_transformer.ast.node.type.qualifier.NamedLayoutQualifierPart;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.StorageQualifier;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.TypeQualifier;
 import io.github.douira.glsl_transformer.ast.node.type.qualifier.TypeQualifierPart;
@@ -46,6 +49,9 @@ import io.github.douira.glsl_transformer.ast.node.type.specifier.BuiltinFixedTyp
 import io.github.douira.glsl_transformer.ast.node.type.specifier.BuiltinNumericTypeSpecifier;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.FunctionPrototype;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.TypeSpecifier;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructBody;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructDeclarator;
+import io.github.douira.glsl_transformer.ast.node.type.struct.StructMember;
 import io.github.douira.glsl_transformer.ast.query.Root;
 import io.github.douira.glsl_transformer.ast.transform.ASTInjectionPoint;
 import io.github.douira.glsl_transformer.ast.transform.GroupedASTTransformer;
@@ -63,6 +69,7 @@ import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderEvent;
 import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderFormat;
 import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderGlobal;
 import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderItem;
+import gay.sylv.frappe.api.ext.render_pipeline.shader.TransformOptions;
 import gay.sylv.frappe.mixin.ext.render_pipeline.Accessor_ManyStatement;
 
 public record ShaderFormatImpl(
@@ -280,7 +287,8 @@ public record ShaderFormatImpl(
 	@Override
 	public String transformCombinedShader(
 			PipelineStage pipelineStage,
-			String shaderSource
+			String shaderSource,
+			TransformOptions transformOptions
 	) {
 		var transformer = new SingleASTTransformer<>((translationUnit, root) -> {
 			// set up templates
@@ -344,6 +352,7 @@ public record ShaderFormatImpl(
 						declarationMember.setArraySpecifier(new ArraySpecifier(null));
 					}
 
+					boolean isUniform = false;
 					ShaderFormat shaderFormat = ShaderFormat.getFormat(format.shaderFormatId());
 
 					// declare it as a uniform if a uniform is assigned to this global
@@ -351,17 +360,44 @@ public record ShaderFormatImpl(
 						FrappeRenderPipeline renderPipeline = FrappeRenderPipeline.getOrCreate(shaderFormat);
 
 						if (renderPipeline.uniformTypes().containsKey(global.identifier())) {
-							fullySpecifiedType.getTypeQualifier().getParts().add(root.indexNodes(() -> new StorageQualifier(StorageQualifier.StorageType.UNIFORM)));
+							isUniform = true;
+
+							//CHECKSTYLE.OFF: MatchXpath
+							if (!transformOptions.useUniformBlocks()) {
+								fullySpecifiedType.getTypeQualifier().getParts().add(root.indexNodes(() -> new StorageQualifier(StorageQualifier.StorageType.UNIFORM)));
+							}
+
+							//CHECKSTYLE.ON: MatchXpath
 						}
 					}
 
-					TypeAndInitDeclaration declaration = typeAndInitDeclarationTemplate.getInstanceFor(root);
-					declaration.setType(fullySpecifiedType);
-					declaration.getMembers().clear();
-					declaration.getMembers().add(declarationMember);
 					DeclarationExternalDeclaration declarationExternalDeclaration =
 							declarationExternalDeclarationTemplate.getInstanceFor(root);
-					declarationExternalDeclaration.setDeclaration(declaration);
+
+					if (!isUniform || !transformOptions.useUniformBlocks()) {
+						TypeAndInitDeclaration declaration = typeAndInitDeclarationTemplate.getInstanceFor(root);
+						declaration.setType(fullySpecifiedType);
+						declaration.getMembers().clear();
+						declaration.getMembers().add(declarationMember);
+						declarationExternalDeclaration.setDeclaration(declaration);
+					} else {
+						InterfaceBlockDeclaration declaration = root.indexNodes(() -> new InterfaceBlockDeclaration(
+								null,
+								new Identifier("frp_uniformBlock_" + declarationMember.getName().getName()),
+								null
+						));
+						declaration.setTypeQualifier(root.indexNodes(() -> new TypeQualifier(Stream.of(
+								new LayoutQualifier(Stream.of(
+										new NamedLayoutQualifierPart(new Identifier("std140")))),
+								new StorageQualifier(StorageQualifier.StorageType.UNIFORM)
+						))));
+						declaration.setStructBody(root.indexNodes(() -> new StructBody(Stream.of(new StructMember(
+								fullySpecifiedType,
+								Stream.of(new StructDeclarator(declarationMember.getName().cloneInto(root)))
+						)))));
+						declarationExternalDeclaration.setDeclaration(declaration);
+					}
+
 					translationUnit.injectNode(ASTInjectionPoint.BEFORE_DECLARATIONS, declarationExternalDeclaration);
 				}
 			}

@@ -47,10 +47,12 @@ vec3 _get_draw_translation(uint pos) {
 }
 
 void main() {
-	// ==== UniformGetter Initialization ====
+	// ==== Uniform Initialization ====
 	frp_fogColor = u_FogColor;
 	frp_levelTime = u_FrappeCompatLevelTime;
-	frp_atlasTextureSize = ivec2(int(u_FrappeCompatTextureSize.x), int(u_FrappeCompatTextureSize.y));
+	frp_projectionMatrix = u_ProjectionMatrix;
+	frp_modelViewMatrix = u_ModelViewMatrix;
+	ftm_blockAtlasTextureSize = ivec2(int(u_FrappeCompatTextureSize.x), int(u_FrappeCompatTextureSize.y));
 
 	// ==== Vertex Input ====
 	_vert_init();
@@ -61,13 +63,13 @@ void main() {
 	vec3 translation = u_RegionOffset + _get_draw_translation(_draw_id);
 	vec3 position = _vert_position + translation;
 
-	frp_vertPosition = position;
+	frp_vertPosition = vec4(position, 1.0);
 
 	#ifdef USE_FOG
 	v_FragDistance = getFragDistance(position);
 	frp_vertDistance = v_FragDistance.y;
 	#else
-	frp_vertDistance = 0.0;
+//	frp_vertDistance = 0.0;
 	#endif
 
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
@@ -89,12 +91,13 @@ void main() {
 	frp_vertColor = frp_vertColor * texture(u_LightTex, _vert_tex_light_coord);
 	v_TexCoord = (_vert_tex_diffuse_coord_bias * u_TexCoordShrink) + _vert_tex_diffuse_coord; // FMA for precision
 
+	// Transform the vertex position into model-view-projection space
+	frp_vertPosition = frp_projectionMatrix * frp_modelViewMatrix * frp_vertPosition;
+
 	// ==== Vertex Output ====
 	frp_outputVertex();
+	gl_Position = frp_vertPosition;
 	v_Color = frp_vertColor;
-
-	// Transform the vertex position into model-view-projection space
-	gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * vec4(frp_vertPosition, 1.0);
 
 	v_Material = _material_params & 7u;
 

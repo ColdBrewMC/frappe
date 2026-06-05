@@ -9,6 +9,8 @@
 
 package gay.sylv.frappe.mocha.mixin.indigo.terrain_material;
 
+import static net.minecraft.resources.Identifier.DEFAULT_NAMESPACE;
+
 import java.io.Reader;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -35,7 +37,7 @@ public abstract class Mixin_ShaderManager {
 			@Local(name = "location", argsOnly = true) Identifier location,
 			@Local(name = "type", argsOnly = true) ShaderType type
 	) {
-		if (location.getPath().startsWith("terrain") && location.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
+		if (location.getPath().startsWith("terrain") && location.getNamespace().equals(DEFAULT_NAMESPACE)) {
 			return switch (type) {
 				case VERTEX -> IndigoTerrainMaterialExtension.mochaVertexShader;
 				case FRAGMENT -> IndigoTerrainMaterialExtension.mochaFragmentShader;

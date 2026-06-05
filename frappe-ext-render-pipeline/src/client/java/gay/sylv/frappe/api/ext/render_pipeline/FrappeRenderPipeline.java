@@ -59,7 +59,7 @@ public interface FrappeRenderPipeline {
 	/// Define a uniform's value with a [UniformGetter].
 	///
 	/// This method must be called in a [gay.sylv.frappe.api.base.extension.RendererReadyEntrypoint].
-	<T> void defineUniform(String identifier, UniformType<T> uniformType, UniformGetter<T> uniformGetter);
+	<T> FrappeRenderPipeline defineUniform(String identifier, UniformType<T> uniformType, UniformGetter<T> uniformGetter);
 
 	/// @return this pipeline's shader format.
 	ShaderFormat shaderFormat();

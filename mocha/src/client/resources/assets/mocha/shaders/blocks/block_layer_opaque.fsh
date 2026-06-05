@@ -94,7 +94,7 @@ vec4 sampleRGSS(sampler2D source, vec2 uv, vec2 pixelSize) {
 }
 
 void main() {
-	// ==== UniformGetter Initialization ====
+	// ==== Uniform Initialization ====
 	frp_fogColor = u_FogColor;
 	frp_levelTime = u_FrappeCompatLevelTime;
 	ftm_blockAtlasTextureSize = ivec2(int(u_FrappeCompatTextureSize.x), int(u_FrappeCompatTextureSize.y));
@@ -115,11 +115,7 @@ void main() {
 	vec4 color = u_UseRGSS ? sampleRGSS(u_BlockTex, v_TexCoord, u_TexelSize) : sampleNearest(u_BlockTex, v_TexCoord, u_TexelSize);
 	color *= frp_fragColor; // Apply per-vertex color modulator
 
-	#ifdef USE_FRAGMENT_DISCARD
-	if (color.a < _material_alpha_cutoff(v_Material)) {
-		discard;
-	}
-	#endif
+	ALPHA_CUTOUT;
 
 	// ==== Fog Application ====
 	frp_fragColor = _linearFog(color, vec2(v_FragDistance.x, frp_vertDistance), u_FogColor, u_EnvironmentFog, u_RenderFog, fadeFactor);
