@@ -22,7 +22,6 @@ vec4 rotateY(vec4 vec, float angle) {
 }
 
 void frp_inputVertex() {
-//	float interp = GLINT_SPEED * 125 * frp_levelTime; // FIXME: glsl-preprocessor
 	float interp = mochaTest_glintSpeed * 125 * frp_levelTime;
 	float dx = (mix(-64, 64, mod(interp, 1)) / ftm_blockAtlasTextureSize.x);
 	float dy = (mix(-64, 64, mod(interp, 1)) / ftm_blockAtlasTextureSize.y);
