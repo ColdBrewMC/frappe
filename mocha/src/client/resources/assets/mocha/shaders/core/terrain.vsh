@@ -40,7 +40,8 @@ void main() {
 	frp_vertDistance = fog_spherical_distance(pos);
 	frp_vertColor = Color * sample_lightmap(Sampler2, UV2);
 	frp_quadMaterialId = _vert_frappe_simple_material_info.x;
-	ftm_vertUv = _vert_frappe_uv;
+	frp_texCoord = UV0;
+	ftm_texCoord = _vert_frappe_uv;
 	frp_inputVertex();
 
 	// ==== Vertex Output ====

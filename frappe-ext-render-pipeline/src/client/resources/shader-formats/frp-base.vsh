@@ -51,6 +51,11 @@ out float frp_vertDistance;
 out vec4 frp_vertColor;
 
 /*
+ * The primary texture coordinates.
+ */
+out vec2 frp_texCoord;
+
+/*
  * Called right after vertex inputs are processed, before
  * any vertex events have occurred.
  */

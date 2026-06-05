@@ -105,9 +105,10 @@ void main() {
 	frp_vertColor = v_Color;
 	frp_fragColor = frp_vertColor;
 	frp_quadMaterialId = v_FrappeMaterialId;
+	frp_texCoord = v_TexCoord;
 
-	#ifdef _FRAPPE_COMPLEX_TERRAIN_MATERIAL
-	ftm_vertUv = v_FrappeUV;
+	#ifdef _FRAPPE_COMPLEX_MATERIAL
+	ftm_texCoord = v_FrappeUV;
 	#endif
 
 	frp_inputFragment();

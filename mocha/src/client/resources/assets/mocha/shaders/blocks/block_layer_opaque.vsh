@@ -58,6 +58,7 @@ void main() {
 	_vert_init();
 	frp_vertColor = _vert_color;
 	frp_quadMaterialId = _frappe_material_id;
+	frp_texCoord = (_vert_tex_diffuse_coord_bias * u_TexCoordShrink) + _vert_tex_diffuse_coord; // FMA for precision
 
 	// Transform the chunk-local vertex position into world model space
 	vec3 translation = u_RegionOffset + _get_draw_translation(_draw_id);
@@ -73,7 +74,7 @@ void main() {
 	#endif
 
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
-	ftm_vertUv = _vert_frappe_uv;
+	ftm_texCoord = _vert_frappe_uv;
 	#endif
 
 	frp_inputVertex();
@@ -87,9 +88,8 @@ void main() {
 	fadeFactor = (chunkFade < 0) ? 1.0 : fade;
 	#endif
 
-	// Add the light color to the vertex color, and pass the texture coordinates to the fragment shader
+	// Add the light color to the vertex color
 	frp_vertColor = frp_vertColor * texture(u_LightTex, _vert_tex_light_coord);
-	v_TexCoord = (_vert_tex_diffuse_coord_bias * u_TexCoordShrink) + _vert_tex_diffuse_coord; // FMA for precision
 
 	// Transform the vertex position into model-view-projection space
 	frp_vertPosition = frp_projectionMatrix * frp_modelViewMatrix * frp_vertPosition;
@@ -98,6 +98,9 @@ void main() {
 	frp_outputVertex();
 	gl_Position = frp_vertPosition;
 	v_Color = frp_vertColor;
+
+	// Pass the texture coordinates to the fragment shader
+	v_TexCoord = frp_texCoord;
 
 	v_Material = _material_params & 7u;
 

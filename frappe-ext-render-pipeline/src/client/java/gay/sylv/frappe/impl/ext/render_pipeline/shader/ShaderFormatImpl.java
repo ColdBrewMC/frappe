@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.github.douira.glsl_transformer.ast.data.ChildNodeList;
@@ -315,6 +316,13 @@ public record ShaderFormatImpl(
 			for (PipelineStageFormat format : this.getStageFormats(pipelineStage)) {
 				// declare globals
 				for (ShaderGlobal global : format.globals()) {
+					// substitute aliases
+					for (String alias : global.aliases()) {
+						root.identifierIndex.getStream(alias)
+								.toList() // so it doesn't concurrently modify the stream
+								.forEach(id -> id.setName(global.identifier()));
+					}
+
 					if (global.type().specifier().isOpaque()) {
 						if (!global.type().qualifiers().contains(ShaderItem.Qualifier.CONST)) {
 							throw new IllegalStateException("Error at shader global '" + global.identifier() + "': Opaque types must be const in GLSL as they can only be uniforms.");

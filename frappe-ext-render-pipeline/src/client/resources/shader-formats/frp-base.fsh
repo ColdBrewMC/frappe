@@ -21,6 +21,11 @@ const in float frp_vertDistance;
 const in vec4 frp_vertColor;
 
 /*
+ * The primary texture coordinates.
+ */
+const in vec2 frp_texCoord;
+
+/*
  * The fragment's color interpolated from the vertex's color.
  *
  * Set this to change the fragment's final color.

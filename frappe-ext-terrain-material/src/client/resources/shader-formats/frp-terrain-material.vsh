@@ -3,7 +3,7 @@
 /*
  * Custom texture coordinates.
  */
-out vec2 ftm_vertUv;
+out vec2 ftm_texCoord, ftm_vertUv;
 
 /*
  * The block atlas's texture size.

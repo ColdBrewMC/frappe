@@ -216,10 +216,15 @@ public class FrappeRenderPipelineMod implements ModInitializer {
 			@Override
 			public PartialStageFormat visitTypeAndInitDeclaration(GLSLParser.TypeAndInitDeclarationContext ctx) {
 				Type type = parseType(ctx.fullySpecifiedType());
+				List<String> identifiers = new ArrayList<>();
 
 				for (GLSLParser.DeclarationMemberContext declarationMember : ctx.declarationMember()) {
-					this.globals.add(new ShaderGlobalImpl(declarationMember.IDENTIFIER().getText(), type, List.of()));
+					identifiers.add(declarationMember.IDENTIFIER().getText());
 				}
+
+				String first = identifiers.getFirst();
+				identifiers.removeFirst();
+				this.globals.add(new ShaderGlobalImpl(first, type, List.copyOf(identifiers)));
 
 				return super.visitTypeAndInitDeclaration(ctx);
 			}
