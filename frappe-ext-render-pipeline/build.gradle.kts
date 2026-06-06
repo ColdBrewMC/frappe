@@ -9,6 +9,7 @@ base.archivesName = "frappe-ext-render-pipeline"
 dependencies {
 	module("base")
 
+	include(libs.antlr)
 	include(libs.glsl.transformer)
 	implementation(libs.glsl.transformer)
 }
