@@ -28,10 +28,8 @@ public abstract class Mixin_ShaderParser {
 	) {
 		if (name.getNamespace().equals("mocha")) {
 			if (name.getPath().endsWith("block_layer_opaque.fsh")) {
-				IndigoTerrainMaterialExtension.resolveMaterials(true);
 				return IndigoTerrainMaterialExtension.mochaFragmentShader;
 			} else if (name.getPath().endsWith("block_layer_opaque.vsh")) {
-				IndigoTerrainMaterialExtension.resolveMaterials(true);
 				return IndigoTerrainMaterialExtension.mochaVertexShader;
 			}
 		}

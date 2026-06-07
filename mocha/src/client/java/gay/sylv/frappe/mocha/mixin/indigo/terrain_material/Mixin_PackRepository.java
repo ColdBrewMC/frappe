@@ -15,18 +15,29 @@ import java.util.List;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.PackRepository;
 
+import gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension;
 import gay.sylv.frappe.mocha.impl.indigo.terrain_material.TerrainMaterialResourcePack;
 
 @Mixin(PackRepository.class)
 public abstract class Mixin_PackRepository {
+	@Unique
+	private static int loadCount = 0;
+
 	@WrapMethod(method = "openAllSelected")
 	private List<PackResources> addMochaPack(Operation<List<PackResources>> original) {
 		List<PackResources> packResources = new ArrayList<>(original.call());
 		packResources.add(TerrainMaterialResourcePack.INSTANCE);
+		loadCount++;
+
+		if (loadCount > 1) {
+			IndigoTerrainMaterialExtension.resolveMaterials(true);
+		}
+
 		return packResources;
 	}
 }
