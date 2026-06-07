@@ -39,3 +39,6 @@ replay_*.log
 *.hprof
 *.jfr
 /src/generated/
+**/frp/*.fsh
+**/frp/*.vsh
+**/frp/*.glsl

@@ -14,6 +14,7 @@ import net.caffeinemc.mods.sodium.client.render.vertex.VertexFormatAttribute;
 
 public final class MochaChunkMeshAttributes {
 	public static final VertexFormatAttribute FRAPPE_UV = new VertexFormatAttribute("FRAPPE_UV", GlVertexAttributeFormat.FLOAT, 2, false, false);
+	public static final VertexFormatAttribute FRAPPE_AO = new VertexFormatAttribute("FRAPPE_AO", GlVertexAttributeFormat.FLOAT, 1, false, false);
 
 	private MochaChunkMeshAttributes() {
 	}

@@ -15,6 +15,7 @@
 		"indigo.terrain_material.Mixin_LevelRenderer",
 		"indigo.terrain_material.Mixin_BufferBuilder",
 		"indigo.terrain_material.Mixin_GlProgram",
+		"indigo.terrain_material.Mixin_AltModelBlockRendererImpl",
 		"indigo.Mixin_EncodingFormat",
 		"indigo.quad_view.Mixin_QuadViewImpl",
 		"indigo.quad_view.Mixin_MutableQuadViewImpl",

@@ -18,12 +18,13 @@ import net.caffeinemc.mods.sodium.client.render.chunk.vertex.format.impl.Default
 /// An extension of [CompactChunkVertex] providing more vertex information for complex terrain materials.
 public class ComplexChunkVertex extends CompactChunkVertex {
 	public static final GlVertexFormat VERTEX_FORMAT = GlVertexFormat
-			.builder(28)
+			.builder(32)
 			.addElement(DefaultChunkMeshAttributes.POSITION, 0, 0)
 			.addElement(DefaultChunkMeshAttributes.COLOR, 1, 8)
 			.addElement(DefaultChunkMeshAttributes.TEXTURE, 2, 12)
 			.addElement(DefaultChunkMeshAttributes.LIGHT_MATERIAL_INDEX, 3, 16)
 			.addElement(MochaChunkMeshAttributes.FRAPPE_UV, MochaChunkShaderBindingPoints.FRAPPE_UV, 20)
+			.addElement(MochaChunkMeshAttributes.FRAPPE_AO, MochaChunkShaderBindingPoints.FRAPPE_AO, 28)
 			.build();
 	public static final ComplexChunkVertex INSTANCE = new ComplexChunkVertex();
 	public static final ScopedValue<Integer> STRIDE_OFFSET = ScopedValue.newInstance();
@@ -39,7 +40,7 @@ public class ComplexChunkVertex extends CompactChunkVertex {
 
 		return (ptr, materialBits, vertices, section) -> {
 			final long initialPtr = ptr;
-			ScopedValue.where(STRIDE_OFFSET, 8)
+			ScopedValue.where(STRIDE_OFFSET, 12)
 					.call(() -> encoder.write(initialPtr, materialBits, vertices, section));
 
 			for (int i = 0; i < 4; i++) {
@@ -48,15 +49,17 @@ public class ComplexChunkVertex extends CompactChunkVertex {
 				if (!(vertices[i] instanceof ComplexVertex vertex)) {
 					MemoryIntrinsics.putInt(ptr + 20, Float.floatToIntBits(0.0f));
 					MemoryIntrinsics.putInt(ptr + 24, Float.floatToIntBits(0.0f));
+					MemoryIntrinsics.putInt(ptr + 28, Float.floatToIntBits(vertices[i].ao));
 
-					ptr += 28;
+					ptr += 32;
 					continue;
 				}
 
 				MemoryIntrinsics.putInt(ptr + 20, Float.floatToIntBits(vertex.frappeU));
 				MemoryIntrinsics.putInt(ptr + 24, Float.floatToIntBits(vertex.frappeV));
+				MemoryIntrinsics.putInt(ptr + 28, Float.floatToIntBits(vertex.ao));
 
-				ptr += 28;
+				ptr += 32;
 			}
 
 			return ptr;

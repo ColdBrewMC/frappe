@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 import io.github.douira.glsl_transformer.ast.data.ChildNodeList;
 import io.github.douira.glsl_transformer.ast.node.Identifier;
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
+import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
 import io.github.douira.glsl_transformer.ast.node.declaration.DeclarationMember;
 import io.github.douira.glsl_transformer.ast.node.declaration.FunctionDeclaration;
 import io.github.douira.glsl_transformer.ast.node.declaration.InterfaceBlockDeclaration;
@@ -184,12 +185,16 @@ public record ShaderFormatImpl(
 					}
 
 					// define invoker (i.e. the event impl)
+					FunctionDefinition mainFunctionDefinition = root.nodeIndex.getStream(FunctionDefinition.class)
+							.filter(functionDefinition1 -> functionDefinition1.getFunctionPrototype().getName().getName().equals("main"))
+							.findFirst()
+							.orElseThrow();
 					CompoundStatement compoundStatement = compoundStatementTemplate.getInstanceFor(root);
 					((Accessor_ManyStatement) compoundStatement).frappe_ext_render_pipeline$setStatements(ChildNodeList.collect(statements.stream(), compoundStatement));
 					FunctionDefinition functionDefinition = functionDefinitionTemplate.getInstanceFor(root);
 					functionDefinition.setFunctionPrototype(functionPrototype);
 					functionDefinition.setBody(compoundStatement);
-					mainTranslationUnit.injectNode(ASTInjectionPoint.BEFORE_FUNCTIONS, functionDefinition);
+					mainTranslationUnit.getChildren().add(mainTranslationUnit.getChildren().indexOf(mainFunctionDefinition), functionDefinition);
 
 					// reorder callbacks
 					for (Map.Entry<String, TranslationUnit> entry : translationUnitMap.entrySet()) {
@@ -199,7 +204,7 @@ public record ShaderFormatImpl(
 							continue;
 						}
 
-						FunctionDefinition callbackDefinition = findFunctionDefinitionStartsWith(mainTranslationUnit, getCallbackName(functionPrototype.getName().getName(), id));
+						FunctionDefinition callbackDefinition = findFunctionDefinitionStartsWith(mainTranslationUnit, getScopedName(functionPrototype.getName().getName(), id));
 
 						if (callbackDefinition == null) {
 							continue;
@@ -208,7 +213,7 @@ public record ShaderFormatImpl(
 						CompoundStatement body = callbackDefinition.getBody().cloneInto(root);
 						callbackDefinition.getBody().detachAndDelete();
 						callbackDefinition.detachAndDelete();
-						mainTranslationUnit.injectNode(ASTInjectionPoint.BEFORE_FUNCTIONS, root.indexNodes(() -> {
+						mainTranslationUnit.getChildren().add(mainTranslationUnit.getChildren().indexOf(functionDefinition), root.indexNodes(() -> {
 							callbackDefinition.setBody(body);
 							return callbackDefinition;
 						}));
@@ -248,7 +253,7 @@ public record ShaderFormatImpl(
 		return functionCallExpression;
 	}
 
-	private static String getCallbackName(String name, String id) {
+	private static String getScopedName(String name, String id) {
 		return name + "_" + id.replaceAll("[^\\w_0-9]", "_");
 	}
 
@@ -266,7 +271,33 @@ public record ShaderFormatImpl(
 					root.process(
 							root.identifierIndex.getStream(event.identifier())
 									.filter(identifier -> identifier.hasAncestor(FunctionDefinition.class)),
-							identifier -> identifier.setName(getCallbackName(identifier.getName(), id))
+							identifier -> identifier.setName(getScopedName(identifier.getName(), id))
+					);
+				}
+
+				// scope functions
+				Map<String, String> functionNames = new HashMap<>();
+
+				String suffix = getScopedName("", id);
+				root.process(
+						root.nodeIndex.getStream(FunctionDefinition.class)
+								.map(FunctionDefinition::getFunctionPrototype)
+								.map(FunctionPrototype::getName)
+								.filter(name -> !name.getName().endsWith(suffix)),
+						identifier -> {
+							String scopedName = getScopedName(identifier.getName(), id);
+							functionNames.put(identifier.getName(), scopedName);
+							identifier.setName(scopedName);
+						}
+				);
+				functionNames.forEach(root::rename);
+
+				// delete duplicate globals
+				for (ShaderGlobal global : format.globals()) {
+					root.process(
+							root.identifierIndex.getStream(global.identifier())
+									.map(identifier -> identifier.getAncestor(DeclarationExternalDeclaration.class)),
+							ASTNode::detachAndDelete
 					);
 				}
 
@@ -317,9 +348,10 @@ public record ShaderFormatImpl(
 				for (ShaderGlobal global : format.globals()) {
 					// substitute aliases
 					for (String alias : global.aliases()) {
-						root.identifierIndex.getStream(alias)
-								.toList() // so it doesn't concurrently modify the stream
-								.forEach(id -> id.setName(global.identifier()));
+						root.process(
+								alias,
+								id -> id.setName(global.identifier())
+						);
 					}
 
 					if (global.type().specifier().isOpaque()) {

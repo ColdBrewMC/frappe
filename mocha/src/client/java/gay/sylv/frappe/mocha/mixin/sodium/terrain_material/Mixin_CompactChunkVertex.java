@@ -14,6 +14,7 @@ import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.caffeinemc.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import net.caffeinemc.mods.sodium.client.render.chunk.vertex.format.impl.CompactChunkVertex;
@@ -51,6 +52,21 @@ public abstract class Mixin_CompactChunkVertex {
 						vertices,
 						section
 				));
+	}
+
+	@Definition(id = "mulRGB", method = "Lnet/caffeinemc/mods/sodium/api/util/ColorARGB;mulRGB(IF)I")
+	@Definition(
+			id = "color",
+			field = "Lnet/caffeinemc/mods/sodium/client/render/chunk/vertex/format/ChunkVertexEncoder$Vertex;color:I"
+	)
+	@Definition(
+			id = "ao",
+			field = "Lnet/caffeinemc/mods/sodium/client/render/chunk/vertex/format/ChunkVertexEncoder$Vertex;ao:F"
+	)
+	@Expression("mulRGB(?.color, ?.ao)")
+	@WrapOperation(method = "lambda$getEncoder$0", at = @At("MIXINEXTRAS:EXPRESSION"))
+	private static int dontMultiplyAo(int color, float factor, Operation<Integer> original) {
+		return color;
 	}
 
 	@Definition(id = "ptr", local = @Local(type = long.class, name = "ptr", argsOnly = true))

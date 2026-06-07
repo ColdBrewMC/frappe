@@ -6,6 +6,11 @@
 const in vec2 ftm_texCoord, ftm_vertUv;
 
 /*
+ * The interpolated ambient occlusion multiplier.
+ */
+const in float ftm_vertAo;
+
+/*
  * The block atlas texture.
  */
 const sampler2D ftm_blockAtlasTexture;

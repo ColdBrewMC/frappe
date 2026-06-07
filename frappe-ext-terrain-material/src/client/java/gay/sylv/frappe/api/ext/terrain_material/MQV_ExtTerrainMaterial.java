@@ -21,6 +21,9 @@ public interface MQV_ExtTerrainMaterial extends FrappeMutableQuadView, QV_ExtTer
 	/// @see #uv(int, float, float)
 	MQV_ExtTerrainMaterial frappe$uv(int vertexIndex, float u, float v);
 
+	/// @see #frappe$ao(int)
+	MQV_ExtTerrainMaterial frappe$ao(int vertexIndex, float ao);
+
 	/// @see #frappe$uv(int, float, float)
 	default MQV_ExtTerrainMaterial frappe$uv(int vertexIndex, Vector2f uv) {
 		return frappe$uv(vertexIndex, uv.x, uv.y);

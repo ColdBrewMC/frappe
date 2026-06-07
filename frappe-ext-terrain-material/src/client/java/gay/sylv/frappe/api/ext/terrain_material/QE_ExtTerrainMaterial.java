@@ -36,4 +36,7 @@ public interface QE_ExtTerrainMaterial extends FrappeQuadEmitter, MQV_ExtTerrain
 				uv
 		);
 	}
+
+	@Override
+	QE_ExtTerrainMaterial frappe$ao(int vertexIndex, float ao);
 }

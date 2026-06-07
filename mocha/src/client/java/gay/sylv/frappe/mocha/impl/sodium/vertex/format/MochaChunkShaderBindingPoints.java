@@ -11,6 +11,7 @@ package gay.sylv.frappe.mocha.impl.sodium.vertex.format;
 
 public final class MochaChunkShaderBindingPoints {
 	public static final int FRAPPE_UV = 4;
+	public static final int FRAPPE_AO = 5;
 
 	private MochaChunkShaderBindingPoints() {
 	}

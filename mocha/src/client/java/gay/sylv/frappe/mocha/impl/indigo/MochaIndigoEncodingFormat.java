@@ -22,10 +22,14 @@ import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class MochaIndigoEncodingFormat {
-	public static final int DELTA_HEADER_STRIDE = 12;
 	public static final int HEADER_MOCHA_BITS = 4;
+	private static final int VERTEX_COUNT = 4;
+	private static final int HEADER_MOCHA_UV_LENGTH = 2 * VERTEX_COUNT;
+	private static final int HEADER_MOCHA_AO_LENGTH = 4;
+	public static final int DELTA_HEADER_STRIDE = HEADER_MOCHA_BITS + HEADER_MOCHA_UV_LENGTH + HEADER_MOCHA_AO_LENGTH;
 	public static final int FRAPPE_U_0 = 1;
 	public static final int FRAPPE_V_0 = 2;
+	public static final int FRAPPE_AO = HEADER_MOCHA_UV_LENGTH + 1;
 	public static final int HEADER_STRIDE = EncodingFormat.HEADER_STRIDE + DELTA_HEADER_STRIDE;
 
 	public static final Map<TerrainMaterial, Integer> TERRAIN_MATERIAL_2_INDEX = new HashMap<>();
@@ -39,7 +43,7 @@ public final class MochaIndigoEncodingFormat {
 	private static final int TERRAIN_MATERIAL_MASK = bitMask(
 			TERRAIN_MATERIAL_BIT_LENGTH,
 			TERRAIN_MATERIAL_BIT_OFFSET
-	);
+	);;
 
 	static {
 		TERRAIN_MATERIALS[0] = TerrainMaterial.Builder.of(Identifier.fromNamespaceAndPath("frappe-ext-terrain-material", "default"))

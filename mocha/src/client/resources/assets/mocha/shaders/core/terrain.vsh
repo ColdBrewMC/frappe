@@ -42,7 +42,12 @@ void main() {
 	frp_quadMaterialId = _vert_frappe_simple_material_info.x;
 	frp_texCoord = UV0;
 	ftm_texCoord = _vert_frappe_uv;
+	ftm_vertAo = 1.0;
 	frp_inputVertex();
+
+	// ==== Ambient Occlusion ====
+	ftm_setupAoVertex();
+	ftm_applyAoVertex();
 
 	// ==== Vertex Output ====
 	frp_vertPosition = frp_projectionMatrix * frp_modelViewMatrix * frp_vertPosition;

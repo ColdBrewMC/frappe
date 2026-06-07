@@ -19,6 +19,8 @@ uint _material_params;
 
 vec2 _vert_frappe_uv;
 
+float _vert_frappe_ao;
+
 // This vertex's material ID
 uint _frappe_material_id;
 
@@ -39,6 +41,7 @@ in vec4 a_Color;
 in uvec2 a_TexCoord;
 in uvec4 a_LightAndData;
 in vec2 a_FrappeUV;
+in float a_FrappeAO;
 
 uvec3 _deinterleave_u20x3(uvec2 data) {
 	uvec3 hi = (uvec3(data.x) >> uvec3(0u, 10u, 20u)) & 0x3FFu;
@@ -66,6 +69,7 @@ void _vert_init() {
 	_material_params = a_LightAndData[2];
 	_draw_id = a_LightAndData[3];
 	_vert_frappe_uv = a_FrappeUV;
+	_vert_frappe_ao = a_FrappeAO;
 	_frappe_material_id = ((_material_params >> 4u) | ((a_Position.y >> 30u) << 2u) | ((a_Position.x >> 30u) << 4u));
 }
 

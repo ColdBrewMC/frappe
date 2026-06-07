@@ -16,6 +16,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import org.lwjgl.system.MemoryUtil;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,7 +34,8 @@ public abstract class Mixin_BufferBuilder implements ExtTerrainMaterial_BufferBu
 
 	@WrapOperation(method = "endLastVertex", at = @At(
 			value = "FIELD",
-			target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;elementsToFill:I"
+			target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;elementsToFill:I",
+			opcode = Opcodes.GETFIELD
 			))
 	private int addRemainingCustomElements(BufferBuilder instance, Operation<Integer> original) {
 		boolean onlyCustomRemaining = VertexFormatElement.elementsFromMask(this.elementsToFill)
@@ -84,5 +86,16 @@ public abstract class Mixin_BufferBuilder implements ExtTerrainMaterial_BufferBu
 		}
 
 		return (VertexConsumer) this;
+	}
+
+	@Override
+	public boolean frappe$setAo(float ao) {
+		long pointer = this.beginElement(VertexFormatElement.LINE_WIDTH);
+
+		if (pointer != -1) {
+			MemoryUtil.memPutFloat(pointer, ao);
+		}
+
+		return pointer != 1;
 	}
 }

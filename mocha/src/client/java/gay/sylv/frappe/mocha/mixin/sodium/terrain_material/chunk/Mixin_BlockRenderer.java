@@ -94,7 +94,7 @@ public abstract class Mixin_BlockRenderer {
 	)
 	@Expression("out.light = quad.getLight(?)")
 	@Inject(method = "bufferQuad", at = @At("MIXINEXTRAS:EXPRESSION"))
-	private void setFrappeUv(
+	private void setFrappeProperties(
 			MutableQuadViewImpl quad,
 			float[] brightnesses,
 			Material material,
@@ -105,5 +105,10 @@ public abstract class Mixin_BlockRenderer {
 		ComplexVertex complexVertex = (ComplexVertex) out;
 		complexVertex.frappeU = Float.intBitsToFloat(quad.data[quad.baseIndex + MochaIndigoEncodingFormat.HEADER_MOCHA_BITS + MochaIndigoEncodingFormat.FRAPPE_U_0 + srcIndex * 2]);
 		complexVertex.frappeV = Float.intBitsToFloat(quad.data[quad.baseIndex + MochaIndigoEncodingFormat.HEADER_MOCHA_BITS + MochaIndigoEncodingFormat.FRAPPE_V_0 + srcIndex * 2]);
+		float ao = Float.intBitsToFloat(quad.data[quad.baseIndex + MochaIndigoEncodingFormat.HEADER_MOCHA_BITS + MochaIndigoEncodingFormat.FRAPPE_AO + srcIndex]);
+
+		if (ao != 0.0f) {
+			complexVertex.ao = ao;
+		}
 	}
 }

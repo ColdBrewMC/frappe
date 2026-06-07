@@ -16,6 +16,7 @@ out float fadeFactor;
 #ifdef _FRAPPE_COMPLEX_MATERIAL
 out vec2 v_FrappeUV;
 #endif
+out float v_FrappeAO;
 flat out uint v_FrappeMaterialId;
 
 // Extra uniforms included by Frappé
@@ -57,6 +58,7 @@ void main() {
 	// ==== Vertex Input ====
 	_vert_init();
 	frp_vertColor = _vert_color;
+	ftm_vertAo = _vert_frappe_ao;
 	frp_quadMaterialId = _frappe_material_id;
 	frp_texCoord = (_vert_tex_diffuse_coord_bias * u_TexCoordShrink) + _vert_tex_diffuse_coord; // FMA for precision
 
@@ -88,6 +90,11 @@ void main() {
 	fadeFactor = (chunkFade < 0) ? 1.0 : fade;
 	#endif
 
+	// ==== Ambient Occlusion ====
+	ftm_setupAoVertex();
+	frp_vertColor.rgb *= ftm_vertAo;
+	ftm_applyAoVertex();
+
 	// Add the light color to the vertex color
 	frp_vertColor = frp_vertColor * texture(u_LightTex, _vert_tex_light_coord);
 
@@ -110,4 +117,5 @@ void main() {
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
 	v_FrappeUV = ftm_vertUv;
 	#endif
+	v_FrappeAO = ftm_vertAo;
 }

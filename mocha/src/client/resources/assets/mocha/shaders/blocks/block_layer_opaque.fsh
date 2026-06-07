@@ -10,6 +10,7 @@ in float fadeFactor;
 #ifdef _FRAPPE_COMPLEX_MATERIAL
 in vec2 v_FrappeUV;
 #endif
+in float v_FrappeAO;
 
 flat in uint v_Material;
 flat in uint v_FrappeMaterialId;
@@ -106,6 +107,7 @@ void main() {
 	frp_fragColor = frp_vertColor;
 	frp_quadMaterialId = v_FrappeMaterialId;
 	frp_texCoord = v_TexCoord;
+	ftm_vertAo = v_FrappeAO;
 
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
 	ftm_texCoord = v_FrappeUV;

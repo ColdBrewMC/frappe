@@ -21,4 +21,7 @@ public interface QV_ExtTerrainMaterial extends FrappeQuadView {
 	/// The V coordinate of the extra UVs present on quads supporting {@link TerrainMaterial}.
 	/// @see #v(int)
 	float frappe$v(int vertexIndex);
+
+	/// The color of ambient occlusion as applied to this vertex.
+	float frappe$ao(int vertexIndex);
 }

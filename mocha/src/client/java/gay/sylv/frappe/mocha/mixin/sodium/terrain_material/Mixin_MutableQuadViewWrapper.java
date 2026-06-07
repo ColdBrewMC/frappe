@@ -9,6 +9,7 @@
 
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material;
 
+import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE_AO;
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE_U_0;
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE_V_0;
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.HEADER_MOCHA_BITS;
@@ -72,6 +73,12 @@ public abstract class Mixin_MutableQuadViewWrapper extends QuadViewWrapper imple
 	public QE_ExtTerrainMaterial frappe$uv(int vertexIndex, float u, float v) {
 		this.mutableQuad.data[this.mutableQuad.baseIndex + HEADER_MOCHA_BITS + FRAPPE_U_0 + vertexIndex * 2] = Float.floatToIntBits(u);
 		this.mutableQuad.data[this.mutableQuad.baseIndex + HEADER_MOCHA_BITS + FRAPPE_V_0 + vertexIndex * 2] = Float.floatToIntBits(v);
+		return this;
+	}
+
+	@Override
+	public QE_ExtTerrainMaterial frappe$ao(int vertexIndex, float ao) {
+		this.mutableQuad.data[this.mutableQuad.baseIndex + HEADER_MOCHA_BITS + FRAPPE_AO + vertexIndex] = Float.floatToIntBits(ao);
 		return this;
 	}
 }

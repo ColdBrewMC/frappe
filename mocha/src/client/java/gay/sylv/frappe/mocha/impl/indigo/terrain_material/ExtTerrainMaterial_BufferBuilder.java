@@ -19,4 +19,8 @@ public interface ExtTerrainMaterial_BufferBuilder {
 	default VertexConsumer frappe$setMaterialId(byte id) {
 		throw new UnsupportedOperationException("Implemented via Mixin.");
 	}
+
+	default boolean frappe$setAo(float ao) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
 }

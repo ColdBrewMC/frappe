@@ -9,11 +9,13 @@
 
 package gay.sylv.frappe.mocha.test;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.google.common.base.Preconditions;
+import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
@@ -28,6 +30,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -38,6 +41,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.model.loading.v1.ExtraModelKey;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.PreparableModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.SimpleUnbakedExtraModel;
 import net.fabricmc.fabric.api.client.model.loading.v1.wrapper.WrapperBlockStateModel;
@@ -46,6 +50,7 @@ import net.fabricmc.fabric.api.client.renderer.v1.mesh.MutableMesh;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadAtlas;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadEmitter;
+import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 
 import gay.sylv.frappe.api.base.extension.RendererExtensionManager;
 import gay.sylv.frappe.api.base.extension.RendererReadyEntrypoint;
@@ -69,6 +74,8 @@ public final class MochaTest implements ClientModInitializer, RendererReadyEntry
 	private static Item testGreenGlassBlockItem;
 	private static TerrainMaterial testMaterial;
 	private static TerrainMaterial testGreenGlassMaterial;
+	private static TerrainMaterial grassMaterial;
+	private static final RenderStateDataKey<Vector3fc> GRASS_RAMP_COLOR_KEY = RenderStateDataKey.create();
 
 	@Override
 	public void onRendererReady(Renderer renderer) {
@@ -83,6 +90,11 @@ public final class MochaTest implements ClientModInitializer, RendererReadyEntry
 						"mochaTest_glintSpeed",
 						FrappeRenderPipeline.UniformType.FLOAT,
 						gameRenderState -> (float) gameRenderState.optionsRenderState.glintSpeed
+				)
+				.defineUniform(
+						"mochaTest_skyColor",
+						FrappeRenderPipeline.UniformType.VEC3,
+						gameRenderState -> ARGB.vector3fFromRGB24(gameRenderState.levelRenderState.skyRenderState.skyColor)
 				);
 	}
 
@@ -94,8 +106,12 @@ public final class MochaTest implements ClientModInitializer, RendererReadyEntry
 		testGreenGlassMaterial = TerrainMaterial.Builder.of(modId("test_terrain"))
 				.complexity(Complexity.SIMPLE)
 				.build();
+		grassMaterial = TerrainMaterial.Builder.of(modId("grass"))
+				.complexity(Complexity.SIMPLE)
+				.build();
 		TerrainMaterialExtension.registerMaterial(testMaterial);
 		TerrainMaterialExtension.registerMaterial(testGreenGlassMaterial);
+		TerrainMaterialExtension.registerMaterial(grassMaterial);
 	}
 
 	@Override
@@ -157,6 +173,43 @@ public final class MochaTest implements ClientModInitializer, RendererReadyEntry
 				glassItemKey,
 				new BlockItem(testGreenGlassBlock, new Item.Properties().setId(glassItemKey).useBlockDescriptionPrefix())
 		);
+		ModelLoadingPlugin.register(ctx -> {
+			ctx.modifyBlockModelAfterBake().register((model, context) -> {
+				BlockState state = context.state();
+
+				if (!state.is(Blocks.GRASS_BLOCK)) {
+					return model;
+				}
+
+				return new WrapperBlockStateModel(model) {
+					@Override
+					public void emitQuads(
+							QuadEmitter emitter,
+							BlockAndTintGetter level,
+							BlockPos pos,
+							BlockState state,
+							RandomSource random,
+							Predicate<@Nullable Direction> cullTest
+					) {
+						emitter.pushTransform(quad -> {
+							MQV_ExtTerrainMaterial materialQuad = FrappeMutableQuadView.of(quad)
+									.as(MQV_ExtTerrainMaterial.class);
+							materialQuad.frappe$terrainMaterial(grassMaterial);
+							return true;
+						});
+						super.emitQuads(
+								emitter,
+								level,
+								pos,
+								state,
+								random,
+								cullTest
+						);
+						emitter.popTransform();
+					}
+				};
+			});
+		});
 		PreparableModelLoadingPlugin.register(
 				(store, executor) -> {
 					FileToIdConverter cobble = FileToIdConverter.json("models/block/cobblestone");

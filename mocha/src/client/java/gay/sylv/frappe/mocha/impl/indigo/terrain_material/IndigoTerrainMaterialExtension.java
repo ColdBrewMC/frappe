@@ -32,6 +32,8 @@ import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.PolygonMode;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 
 import net.fabricmc.fabric.api.client.renderer.v1.Renderer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -51,6 +54,7 @@ import gay.sylv.frappe.api.ext.render_pipeline.RenderPipelineExtension;
 import gay.sylv.frappe.api.ext.render_pipeline.shader.PipelineStage;
 import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderFormat;
 import gay.sylv.frappe.api.ext.render_pipeline.shader.TransformOptions;
+import gay.sylv.frappe.api.ext.terrain_material.QE_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialExtension;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterialRegistryEntrypoint;
@@ -76,6 +80,45 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 	public static List<ChunkSectionLayer> SOLID_LAYERS = new ArrayList<>();
 	public static List<ChunkSectionLayer> CUTOUT_LAYERS = new ArrayList<>();
 	public static List<ChunkSectionLayer> MOCHA_LAYERS = new ArrayList<>();
+
+	public static void buffer(
+			VertexConsumer instance,
+			float x,
+			float y,
+			float z,
+			int color,
+			float u,
+			float v,
+			int overlayCoords,
+			int lightCoords,
+			float nx,
+			float ny,
+			float nz,
+			int i,
+			QE_ExtTerrainMaterial materialQuad
+	) {
+		TerrainMaterial material = materialQuad.frappe$terrainMaterial();
+		int materialId = MochaIndigoEncodingFormat.TERRAIN_MATERIAL_2_INDEX.get(material);
+		instance.addVertex(x, y, z);
+		instance.setUv(u, v);
+
+		if (instance instanceof BufferBuilder builder) {
+			builder.frappe$setUv(materialQuad.frappe$u(i), materialQuad.frappe$v(i));
+			builder.frappe$setMaterialId((byte) materialId);
+
+			if (builder.frappe$setAo(materialQuad.frappe$ao(i))) {
+				instance.setColor(color);
+			} else {
+				instance.setColor(ARGB.scaleRGB(color, materialQuad.frappe$ao(i)));
+			}
+		} else {
+			instance.setColor(ARGB.scaleRGB(color, materialQuad.frappe$ao(i)));
+		}
+
+		instance.setOverlay(overlayCoords);
+		instance.setLight(lightCoords);
+		instance.setNormal(nx, ny, nz);
+	}
 
 	@Override
 	public TerrainMaterial createChunkLayer(

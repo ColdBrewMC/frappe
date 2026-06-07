@@ -9,14 +9,15 @@
 
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material;
 
+import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE_AO;
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE_U_0;
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE_V_0;
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.HEADER_MOCHA_BITS;
+import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.HEADER_STRIDE;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.caffeinemc.mods.sodium.client.render.frapi.wrapper.MutableQuadViewWrapper;
 import net.caffeinemc.mods.sodium.client.render.frapi.wrapper.QuadViewWrapper;
@@ -30,6 +31,7 @@ import gay.sylv.frappe.api.ext.terrain_material.QE_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.QV_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
 import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
+import gay.sylv.frappe.mocha.impl.indigo.terrain_material.IndigoTerrainMaterialExtension;
 
 @Mixin(QuadViewWrapper.class)
 public abstract class Mixin_QuadViewWrapper implements QV_ExtTerrainMaterial {
@@ -49,6 +51,11 @@ public abstract class Mixin_QuadViewWrapper implements QV_ExtTerrainMaterial {
 	@Override
 	public float frappe$v(int vertexIndex) {
 		return Float.intBitsToFloat(this.quad.data[this.quad.baseIndex + HEADER_MOCHA_BITS + FRAPPE_V_0 + vertexIndex * 2]);
+	}
+
+	@Override
+	public float frappe$ao(int vertexIndex) {
+		return Float.intBitsToFloat(this.quad.data[this.quad.baseIndex + HEADER_MOCHA_BITS + FRAPPE_AO + vertexIndex]);
 	}
 
 	@WrapOperation(
@@ -77,19 +84,21 @@ public abstract class Mixin_QuadViewWrapper implements QV_ExtTerrainMaterial {
 		//noinspection DataFlowIssue // "quad outputs" always use MutableQuadViewWrappers
 		QE_ExtTerrainMaterial materialQuad = FrappeMutableQuadView.of((MutableQuadViewWrapper) (Object) this)
 				.as(QE_ExtTerrainMaterial.class);
-		TerrainMaterial material = materialQuad.frappe$terrainMaterial();
-		int materialId = MochaIndigoEncodingFormat.TERRAIN_MATERIAL_2_INDEX.get(material);
-		instance.addVertex(x, y, z);
-		instance.setColor(color);
-		instance.setUv(u, v);
-
-		if (instance instanceof BufferBuilder builder) {
-			builder.frappe$setUv(materialQuad.frappe$u(i), materialQuad.frappe$v(i));
-			builder.frappe$setMaterialId((byte) materialId);
-		}
-
-		instance.setOverlay(overlayCoords);
-		instance.setLight(lightCoords);
-		instance.setNormal(nx, ny, nz);
+		IndigoTerrainMaterialExtension.buffer(
+				instance,
+				x,
+				y,
+				z,
+				color,
+				u,
+				v,
+				overlayCoords,
+				lightCoords,
+				nx,
+				ny,
+				nz,
+				i,
+				materialQuad
+		);
 	}
 }
