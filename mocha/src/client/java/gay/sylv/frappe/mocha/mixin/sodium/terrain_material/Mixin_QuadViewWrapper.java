@@ -13,7 +13,6 @@ import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE_U_0;
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.FRAPPE_V_0;
 import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.HEADER_MOCHA_BITS;
-import static gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat.HEADER_STRIDE;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;

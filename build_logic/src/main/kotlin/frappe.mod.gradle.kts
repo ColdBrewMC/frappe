@@ -27,6 +27,8 @@ loom {
 
 tasks {
 	withType<AbstractArchiveTask> {
+		from("licenses/glsl-transformer.md", "licenses/glsl-transformer.asc")
+
 		from("LICENSE") {
 			rename { "${it}_${mod_id}"}
 		}
