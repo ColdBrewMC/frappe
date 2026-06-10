@@ -23,6 +23,7 @@
 		"sodium.Mixin_EncodingFormat",
 		"sodium.quad_view.Mixin_MutableQuadViewWrapper",
 		"sodium.quad_view.Mixin_QuadViewWrapper",
+		"sodium.quad_view.Mixin_RenderSectionRegion",
 		"sodium.terrain_material.Mixin_MutableQuadViewWrapper",
 		"sodium.terrain_material.Mixin_QuadViewWrapper",
 		"sodium.terrain_material.Mixin_DefaultMaterials",
