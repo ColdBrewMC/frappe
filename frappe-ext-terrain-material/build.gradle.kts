@@ -9,6 +9,6 @@ base.archivesName = "frappe-ext-terrain-material"
 
 dependencies {
 	module("base")
-	extension("material", api = true)
-	extension("quad-view", api = true)
+	extension("material")
+	extension("quad-view")
 }

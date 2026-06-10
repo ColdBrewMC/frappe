@@ -38,6 +38,6 @@ fun DependencyHandlerScope.module(module: String, include: Boolean = false, api:
 	}
 }
 
-fun DependencyHandlerScope.extension(extension: String, include: Boolean = false, api: Boolean = false): Dependency? {
-	return module("ext-$extension", include, api)
+fun DependencyHandlerScope.extension(extension: String, include: Boolean = false, api: Boolean = true): Dependency? {
+	return module("ext-$extension", include = include, api = api)
 }

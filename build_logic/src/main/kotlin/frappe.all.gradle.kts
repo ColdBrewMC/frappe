@@ -4,6 +4,7 @@ plugins {
 	id("dev.yumi.gradle.licenser")
 	id("net.fabricmc.fabric-loom")
 	`maven-publish`
+	`java-library`
 	checkstyle
 }
 
@@ -171,12 +172,7 @@ publishing {
 	publications {
 		create<MavenPublication>("mavenJava") {
 			artifactId = base.archivesName.get()
-			val client = artifact(tasks.jar)
-			client.classifier = ""
-			val mixinConfig = artifact(tasks[sourceSets["mixinConfig"].jarTaskName])
-			mixinConfig.classifier = "mixin-config"
-			artifact(tasks["javadocJar"])
-			artifact(tasks["sourcesJar"])
+			from(components["java"])
 		}
 	}
 

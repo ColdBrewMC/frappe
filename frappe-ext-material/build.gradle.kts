@@ -9,5 +9,5 @@ base.archivesName = "frappe-ext-material"
 
 dependencies {
 	module("base")
-	extension("render-pipeline", api = true)
+	extension("render-pipeline")
 }
