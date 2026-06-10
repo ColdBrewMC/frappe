@@ -175,6 +175,8 @@ publishing {
 			client.classifier = ""
 			val mixinConfig = artifact(tasks[sourceSets["mixinConfig"].jarTaskName])
 			mixinConfig.classifier = "mixin-config"
+			artifact(tasks["javadocJar"])
+			artifact(tasks["sourcesJar"])
 		}
 	}
 
