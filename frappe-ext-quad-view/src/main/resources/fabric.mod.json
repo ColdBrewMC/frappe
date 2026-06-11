@@ -10,6 +10,7 @@
 	"license": "${mod_license}",
 	"icon": "assets/frappe-ext-quad-view/icon.png",
 	"environment": "client",
+	"accessWidener": "frappe-ext-quad-view.classtweaker",
 	"custom": {
 		"frappe": {
 			"schemaVersion": 0,

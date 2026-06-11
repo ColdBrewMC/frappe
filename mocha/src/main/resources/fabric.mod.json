@@ -13,6 +13,7 @@
 	},
 	"license": "${mod_license}",
 	"icon": "assets/mocha/icon.png",
+	"accessWidener": "mocha.classtweaker",
 	"environment": "client",
 	"entrypoints": {
 		"frappe-base:renderer_info": ["gay.sylv.frappe.mocha.impl.base.MochaRendererInfo"],
