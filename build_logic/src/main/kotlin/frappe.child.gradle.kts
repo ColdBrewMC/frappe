@@ -71,7 +71,5 @@ tasks {
 		filesMatching(listOf("fabric.mod.json")) {
 			expand(expandProps)
 		}
-
-		exclude("*.classtweaker")
 	}
 }

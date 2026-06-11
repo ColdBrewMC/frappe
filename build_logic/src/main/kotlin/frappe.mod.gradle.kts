@@ -63,7 +63,5 @@ tasks {
 		filesMatching(listOf("fabric.mod.json", "*.mixins.json")) {
 			expand(expandProps)
 		}
-
-		exclude("*.classtweaker")
 	}
 }
