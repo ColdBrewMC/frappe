@@ -9,6 +9,11 @@
 
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material;
 
+import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.FLOAT;
+import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC2;
+import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC3;
+import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC4;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +42,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.GameRenderState;
 
 import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline;
-import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.UniformType;
+import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType;
 
 @Mixin(DefaultShaderInterface.class)
 public abstract class Mixin_DefaultShaderInterface {
@@ -66,11 +71,11 @@ public abstract class Mixin_DefaultShaderInterface {
 		this.uniformLevelTime = context.bindUniformOptional("u_FrappeCompatLevelTime", GlUniformFloat::new);
 
 		for (FrappeRenderPipeline pipeline : FrappeRenderPipeline.getAllPipelines()) {
-			for (Map.Entry<String, UniformType<?>> entry : pipeline.uniformTypes().entrySet()) {
+			for (Map.Entry<String, DataType<?>> entry : pipeline.uniformDataTypes().entrySet()) {
 				String identifier = entry.getKey();
-				UniformType<?> type = entry.getValue();
+				DataType<?> type = entry.getValue();
 
-				if (type.equals(UniformType.FLOAT)) {
+				if (type.equals(FLOAT)) {
 					GlUniformFloat uniformFloat = context.bindUniformOptional(identifier, GlUniformFloat::new);
 
 					if (uniformFloat == null) {
@@ -78,7 +83,7 @@ public abstract class Mixin_DefaultShaderInterface {
 					}
 
 					this.floatUniforms.put(identifier, uniformFloat);
-				} else if (type.equals(UniformType.VEC2)) {
+				} else if (type.equals(VEC2)) {
 					GlUniformFloat2v uniformFloat = context.bindUniformOptional(identifier, GlUniformFloat2v::new);
 
 					if (uniformFloat == null) {
@@ -86,7 +91,7 @@ public abstract class Mixin_DefaultShaderInterface {
 					}
 
 					this.vec2Uniforms.put(identifier, uniformFloat);
-				} else if (type.equals(UniformType.VEC3)) {
+				} else if (type.equals(VEC3)) {
 					GlUniformFloat3v uniformFloat = context.bindUniformOptional(identifier, GlUniformFloat3v::new);
 
 					if (uniformFloat == null) {
@@ -94,7 +99,7 @@ public abstract class Mixin_DefaultShaderInterface {
 					}
 
 					this.vec3Uniforms.put(identifier, uniformFloat);
-				} else if (type.equals(UniformType.VEC4)) {
+				} else if (type.equals(VEC4)) {
 					GlUniformFloat4v uniformFloat = context.bindUniformOptional(identifier, GlUniformFloat4v::new);
 
 					if (uniformFloat == null) {

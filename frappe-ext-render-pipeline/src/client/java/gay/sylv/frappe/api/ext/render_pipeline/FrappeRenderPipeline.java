@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Unmodifiable;
@@ -56,16 +57,33 @@ public interface FrappeRenderPipeline {
 		return FrappeRenderPipelineImpl.SHADER_FORMAT_ID_2_PIPELINE.values();
 	}
 
+	/// @deprecated Use [#defineUniform(String, DataType, UniformGetter)]
+	@Deprecated(forRemoval = true)
+	default <T> FrappeRenderPipeline defineUniform(String identifier, UniformType<T> uniformType, UniformGetter<T> uniformGetter) {
+		return this.defineUniform(identifier, uniformType.dataType, uniformGetter);
+	}
+
 	/// Define a uniform's value with a [UniformGetter].
 	///
 	/// This method must be called in a [gay.sylv.frappe.api.base.extension.RendererReadyEntrypoint].
-	<T> FrappeRenderPipeline defineUniform(String identifier, UniformType<T> uniformType, UniformGetter<T> uniformGetter);
+	<T> FrappeRenderPipeline defineUniform(String identifier, DataType<T> dataType, UniformGetter<T> uniformGetter);
 
 	/// @return this pipeline's shader format.
 	ShaderFormat shaderFormat();
 
-	/// @return a map of shader global identifiers to this pipeline's uniform types.
-	@Unmodifiable Map<String, UniformType<?>> uniformTypes();
+	/// @deprecated Use [#uniformDataTypes()]
+	@Deprecated(forRemoval = true)
+	default @Unmodifiable Map<String, UniformType<?>> uniformTypes() {
+		// slow as hell but also binary compatible
+		return this.uniformDataTypes()
+				.entrySet()
+				.stream()
+				.map(entry -> Map.entry(entry.getKey(), UniformType.of(entry.getValue())))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+	}
+
+	/// @return a map of shader global identifiers to this pipeline's uniform data types.
+	@Unmodifiable Map<String, DataType<?>> uniformDataTypes();
 
 	/// @return a map of shader global identifiers to this pipeline's uniform getters.
 	@Unmodifiable Map<String, UniformGetter<?>> uniformGetters();
@@ -77,19 +95,49 @@ public interface FrappeRenderPipeline {
 		T getValue(GameRenderState gameRenderState);
 	}
 
-	final class UniformType<T> {
-		public static final UniformType<Float> FLOAT = new UniformType<>(Float.class);
-		public static final UniformType<Vector2fc> VEC2 = new UniformType<>(Vector2fc.class);
-		public static final UniformType<Vector3fc> VEC3 = new UniformType<>(Vector3fc.class);
-		public static final UniformType<Vector4fc> VEC4 = new UniformType<>(Vector4fc.class);
+	sealed class DataType<T> {
+		public static final DataType<Float> FLOAT = new DataType<>(Float.class);
+		public static final DataType<Vector2fc> VEC2 = new DataType<>(Vector2fc.class);
+		public static final DataType<Vector3fc> VEC3 = new DataType<>(Vector3fc.class);
+		public static final DataType<Vector4fc> VEC4 = new DataType<>(Vector4fc.class);
 		private final Class<T> clazz;
 
-		private UniformType(Class<T> clazz) {
+		protected DataType(Class<T> clazz) {
 			this.clazz = clazz;
 		}
 
 		public Class<T> getUnderlyingClass() {
 			return this.clazz;
+		}
+	}
+
+	/// @deprecated Use [DataType]
+	@Deprecated(forRemoval = true)
+	final class UniformType<T> extends DataType<T> {
+		public static final UniformType<Float> FLOAT = new UniformType<>(DataType.FLOAT);
+		public static final UniformType<Vector2fc> VEC2 = new UniformType<>(DataType.VEC2);
+		public static final UniformType<Vector3fc> VEC3 = new UniformType<>(DataType.VEC3);
+		public static final UniformType<Vector4fc> VEC4 = new UniformType<>(DataType.VEC4);
+		private final DataType<T> dataType;
+
+		private UniformType(DataType<T> dataType) {
+			super(dataType.clazz);
+			this.dataType = dataType;
+		}
+
+		@SuppressWarnings("unchecked")
+		private static <T> UniformType<T> of(DataType<T> dataType) {
+			if (dataType.equals(DataType.FLOAT)) {
+				return (UniformType<T>) FLOAT;
+			} else if (dataType.equals(DataType.VEC2)) {
+				return (UniformType<T>) VEC2;
+			} else if (dataType.equals(DataType.VEC3)) {
+				return (UniformType<T>) VEC3;
+			} else if (dataType.equals(DataType.VEC4)) {
+				return (UniformType<T>) VEC4;
+			} else {
+				throw new IllegalArgumentException("DataType does not correspond to a valid UniformType.");
+			}
 		}
 	}
 }

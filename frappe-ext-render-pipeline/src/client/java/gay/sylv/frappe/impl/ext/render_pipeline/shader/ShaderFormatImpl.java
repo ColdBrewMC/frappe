@@ -398,7 +398,7 @@ public record ShaderFormatImpl(
 					if (shaderFormat != null && FrappeRenderPipeline.exists(shaderFormat)) {
 						FrappeRenderPipeline renderPipeline = FrappeRenderPipeline.getOrCreate(shaderFormat);
 
-						if (renderPipeline.uniformTypes().containsKey(global.identifier())) {
+						if (renderPipeline.uniformDataTypes().containsKey(global.identifier())) {
 							isUniform = true;
 
 							//CHECKSTYLE.OFF: MatchXpath

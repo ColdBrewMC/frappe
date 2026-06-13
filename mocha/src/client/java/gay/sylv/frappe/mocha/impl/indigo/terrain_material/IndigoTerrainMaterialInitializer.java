@@ -23,7 +23,7 @@ public class IndigoTerrainMaterialInitializer implements ClientModInitializer {
 			for (FrappeRenderPipeline pipeline : FrappeRenderPipeline.getAllPipelines()) {
 				for (Map.Entry<String, FrappeRenderPipeline.UniformGetter<?>> entry : pipeline.uniformGetters().entrySet()) {
 					if (!IndigoPipelineUniform.INSTANCES.containsKey(entry.getKey())) {
-						IndigoPipelineUniform.INSTANCES.put(entry.getKey(), new IndigoPipelineUniform<>(entry.getKey(), pipeline.uniformTypes().get(entry.getKey())));
+						IndigoPipelineUniform.INSTANCES.put(entry.getKey(), new IndigoPipelineUniform<>(entry.getKey(), pipeline.uniformDataTypes().get(entry.getKey())));
 					}
 
 					//noinspection unchecked // Object upcast

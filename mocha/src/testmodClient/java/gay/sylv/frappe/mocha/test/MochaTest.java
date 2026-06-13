@@ -56,6 +56,7 @@ import gay.sylv.frappe.api.base.extension.RendererReadyEntrypoint;
 import gay.sylv.frappe.api.ext.material.Material.Complexity;
 import gay.sylv.frappe.api.ext.quad_view.FrappeMutableQuadView;
 import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline;
+import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType;
 import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderFormat;
 import gay.sylv.frappe.api.ext.terrain_material.MQV_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;
@@ -82,17 +83,17 @@ public final class MochaTest implements ClientModInitializer, RendererReadyEntry
 		FrappeRenderPipeline.getOrCreate(ShaderFormat.getFormatOrThrow("mocha-testmod-glint"))
 				.defineUniform(
 						"mochaTest_glintAlpha",
-						FrappeRenderPipeline.UniformType.FLOAT,
+						DataType.FLOAT,
 						gameRenderState -> (float) gameRenderState.optionsRenderState.glintStrength
 				)
 				.defineUniform(
 						"mochaTest_glintSpeed",
-						FrappeRenderPipeline.UniformType.FLOAT,
+						DataType.FLOAT,
 						gameRenderState -> (float) gameRenderState.optionsRenderState.glintSpeed
 				)
 				.defineUniform(
 						"mochaTest_skyColor",
-						FrappeRenderPipeline.UniformType.VEC3,
+						DataType.VEC3,
 						gameRenderState -> ARGB.vector3fFromRGB24(gameRenderState.levelRenderState.skyRenderState.skyColor)
 				);
 	}

@@ -17,7 +17,7 @@ import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderFormat;
 
 public record FrappeRenderPipelineImpl(
 		ShaderFormat shaderFormat,
-		Map<String, UniformType<?>> uniformTypes,
+		Map<String, DataType<?>> uniformDataTypes,
 		Map<String, FrappeRenderPipeline.UniformGetter<?>> uniformGetters
 ) implements FrappeRenderPipeline {
 	public static final Map<String, FrappeRenderPipeline> SHADER_FORMAT_ID_2_PIPELINE = new HashMap<>();
@@ -25,10 +25,10 @@ public record FrappeRenderPipelineImpl(
 	@Override
 	public <T> FrappeRenderPipeline defineUniform(
 			String identifier,
-			UniformType<T> uniformType,
+			DataType<T> uniformType,
 			UniformGetter<T> uniformGetter
 	) {
-		this.uniformTypes.put(identifier, uniformType);
+		this.uniformDataTypes.put(identifier, uniformType);
 		this.uniformGetters.put(identifier, uniformGetter);
 		return this;
 	}

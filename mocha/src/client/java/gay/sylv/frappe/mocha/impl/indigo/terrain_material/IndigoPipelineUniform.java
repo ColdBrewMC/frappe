@@ -9,10 +9,10 @@
 
 package gay.sylv.frappe.mocha.impl.indigo.terrain_material;
 
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.UniformType.FLOAT;
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.UniformType.VEC2;
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.UniformType.VEC3;
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.UniformType.VEC4;
+import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.FLOAT;
+import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC2;
+import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC3;
+import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC4;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,17 +26,17 @@ import org.joml.Vector3fc;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryStack;
 
-import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.UniformType;
+import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType;
 
 public class IndigoPipelineUniform<T> implements AutoCloseable {
 	public static final Map<String, IndigoPipelineUniform<?>> INSTANCES = new HashMap<>();
 
 	private final String identifier;
-	private final UniformType<T> type;
+	private final DataType<T> type;
 	private final int size;
 	private final GpuBuffer buffer;
 
-	public IndigoPipelineUniform(String identifier, UniformType<T> type) {
+	public IndigoPipelineUniform(String identifier, DataType<T> type) {
 		this.identifier = identifier;
 		Std140SizeCalculator calculator = new Std140SizeCalculator();
 
