@@ -9,10 +9,10 @@
 
 package gay.sylv.frappe.mocha.impl.indigo.terrain_material;
 
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.FLOAT;
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC2;
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC3;
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC4;
+import static gay.sylv.frappe.api.ext.render_pipeline.value.DataType.FLOAT;
+import static gay.sylv.frappe.api.ext.render_pipeline.value.DataType.VEC2;
+import static gay.sylv.frappe.api.ext.render_pipeline.value.DataType.VEC3;
+import static gay.sylv.frappe.api.ext.render_pipeline.value.DataType.VEC4;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +26,7 @@ import org.joml.Vector3fc;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryStack;
 
-import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType;
+import gay.sylv.frappe.api.ext.render_pipeline.value.DataType;
 
 public class IndigoPipelineUniform<T> implements AutoCloseable {
 	public static final Map<String, IndigoPipelineUniform<?>> INSTANCES = new HashMap<>();

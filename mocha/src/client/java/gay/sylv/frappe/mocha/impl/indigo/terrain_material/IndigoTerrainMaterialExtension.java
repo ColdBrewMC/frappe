@@ -130,6 +130,45 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 		instance.setNormal(nx, ny, nz);
 	}
 
+	public static void buffer(
+			VertexConsumer instance,
+			float x,
+			float y,
+			float z,
+			int color,
+			float u,
+			float v,
+			int overlayCoords,
+			int lightCoords,
+			float nx,
+			float ny,
+			float nz,
+			int i,
+			QE_ExtTerrainMaterial materialQuad
+	) {
+		TerrainMaterial material = materialQuad.frappe$terrainMaterial();
+		int materialId = MochaIndigoEncodingFormat.TERRAIN_MATERIAL_2_INDEX.get(material);
+		instance.addVertex(x, y, z);
+		instance.setUv(u, v);
+
+		if (instance instanceof BufferBuilder builder) {
+			builder.frappe$setUv(materialQuad.frappe$u(i), materialQuad.frappe$v(i));
+			builder.frappe$setMaterialId((byte) materialId);
+
+			if (builder.frappe$setAo(materialQuad.frappe$ao(i))) {
+				instance.setColor(color);
+			} else {
+				instance.setColor(ARGB.scaleRGB(color, materialQuad.frappe$ao(i)));
+			}
+		} else {
+			instance.setColor(ARGB.scaleRGB(color, materialQuad.frappe$ao(i)));
+		}
+
+		instance.setOverlay(overlayCoords);
+		instance.setLight(lightCoords);
+		instance.setNormal(nx, ny, nz);
+	}
+
 	@Override
 	public TerrainMaterial createChunkLayer(
 			Identifier shaderId,

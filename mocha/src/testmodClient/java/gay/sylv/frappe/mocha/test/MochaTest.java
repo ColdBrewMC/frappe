@@ -56,7 +56,7 @@ import gay.sylv.frappe.api.base.extension.RendererReadyEntrypoint;
 import gay.sylv.frappe.api.ext.material.Material.Complexity;
 import gay.sylv.frappe.api.ext.quad_view.FrappeMutableQuadView;
 import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline;
-import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType;
+import gay.sylv.frappe.api.ext.render_pipeline.value.DataType;
 import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderFormat;
 import gay.sylv.frappe.api.ext.terrain_material.MQV_ExtTerrainMaterial;
 import gay.sylv.frappe.api.ext.terrain_material.TerrainMaterial;

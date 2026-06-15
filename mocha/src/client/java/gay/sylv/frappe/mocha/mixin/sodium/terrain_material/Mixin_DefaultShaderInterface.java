@@ -9,10 +9,10 @@
 
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material;
 
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.FLOAT;
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC2;
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC3;
-import static gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType.VEC4;
+import static gay.sylv.frappe.api.ext.render_pipeline.value.DataType.FLOAT;
+import static gay.sylv.frappe.api.ext.render_pipeline.value.DataType.VEC2;
+import static gay.sylv.frappe.api.ext.render_pipeline.value.DataType.VEC3;
+import static gay.sylv.frappe.api.ext.render_pipeline.value.DataType.VEC4;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +43,7 @@ import net.minecraft.client.renderer.state.GameRenderState;
 import net.minecraft.world.phys.Vec3;
 
 import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline;
-import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType;
+import gay.sylv.frappe.api.ext.render_pipeline.value.DataType;
 
 @Mixin(DefaultShaderInterface.class)
 public abstract class Mixin_DefaultShaderInterface {

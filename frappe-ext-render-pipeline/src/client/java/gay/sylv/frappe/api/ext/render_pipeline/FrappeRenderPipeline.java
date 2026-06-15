@@ -24,6 +24,11 @@ import org.joml.Vector4fc;
 import net.minecraft.client.renderer.state.GameRenderState;
 
 import gay.sylv.frappe.api.ext.render_pipeline.shader.ShaderFormat;
+import gay.sylv.frappe.api.ext.render_pipeline.value.Attribute;
+import gay.sylv.frappe.api.ext.render_pipeline.value.BlockAttribute;
+import gay.sylv.frappe.api.ext.render_pipeline.value.DataType;
+import gay.sylv.frappe.api.ext.render_pipeline.value.QuadAttribute;
+import gay.sylv.frappe.api.ext.render_pipeline.value.VertexAttribute;
 import gay.sylv.frappe.impl.ext.render_pipeline.shader.FrappeRenderPipelineImpl;
 
 /// An abstraction for defining compatible render pipeline modifications.
@@ -39,7 +44,15 @@ public interface FrappeRenderPipeline {
 
 		return FrappeRenderPipelineImpl.SHADER_FORMAT_ID_2_PIPELINE.computeIfAbsent(
 				Objects.requireNonNull(format.singleId()),
-				_ -> new FrappeRenderPipelineImpl(format, new HashMap<>(), new HashMap<>())
+				_ -> new FrappeRenderPipelineImpl(
+						format,
+						new HashMap<>(),
+						new HashMap<>(),
+						new HashMap<>(),
+						new HashMap<>(),
+						new HashMap<>(),
+						new HashMap<>()
+				)
 		);
 	}
 
@@ -68,6 +81,30 @@ public interface FrappeRenderPipeline {
 	/// This method must be called in a [gay.sylv.frappe.api.base.extension.RendererReadyEntrypoint].
 	<T> FrappeRenderPipeline defineUniform(String identifier, DataType<T> dataType, UniformGetter<T> uniformGetter);
 
+	/// Declare a [vertex attribute][VertexAttribute].
+	///
+	/// This method must be called in a [gay.sylv.frappe.api.base.extension.RendererReadyEntrypoint].
+	///
+	/// **Warning:** Attributes are not required to be implemented yet and likely will not work.
+	@ApiStatus.Experimental
+	<T> FrappeRenderPipeline declareVertexAttribute(VertexAttribute<T> vertexAttribute);
+
+	/// Declare a [quad attribute][QuadAttribute].
+	///
+	/// This method must be called in a [gay.sylv.frappe.api.base.extension.RendererReadyEntrypoint].
+	///
+	/// **Warning:** Attributes are not required to be implemented yet and likely will not work.
+	@ApiStatus.Experimental
+	<T> FrappeRenderPipeline declareQuadAttribute(QuadAttribute<T> quadAttribute);
+
+	/// Declare a [block attribute][BlockAttribute].
+	///
+	/// This method must be called in a [gay.sylv.frappe.api.base.extension.RendererReadyEntrypoint].
+	///
+	/// **Warning:** Attributes are not required to be implemented yet and likely will not work.
+	@ApiStatus.Experimental
+	<T> FrappeRenderPipeline declareBlockAttribute(BlockAttribute<T> blockAttribute);
+
 	/// @return this pipeline's shader format.
 	ShaderFormat shaderFormat();
 
@@ -88,27 +125,26 @@ public interface FrappeRenderPipeline {
 	/// @return a map of shader global identifiers to this pipeline's uniform getters.
 	@Unmodifiable Map<String, UniformGetter<?>> uniformGetters();
 
+	/// @return a map of shader global identifiers to this pipeline's [attributes][Attribute].
+	/// @see VertexAttribute
+	/// @see QuadAttribute
+	/// @see BlockAttribute
+	@Unmodifiable Map<String, Attribute<?>> attributes();
+
+	/// @return a map of shader global identifiers to this pipeline's [vertex attributes][VertexAttribute].
+	@Unmodifiable Map<String, VertexAttribute<?>> vertexAttributes();
+
+	/// @return a map of shader global identifiers to this pipeline's [quad attributes][QuadAttribute].
+	@Unmodifiable Map<String, QuadAttribute<?>> quadAttributes();
+
+	/// @return a map of shader global identifiers to this pipeline's [block attributes][BlockAttribute].
+	@Unmodifiable Map<String, BlockAttribute<?>> blockAttributes();
+
 	/// Retrieves uniform globals' values.
 	@FunctionalInterface
 	interface UniformGetter<T> {
 		/// @return the value of this uniform.
 		T getValue(GameRenderState gameRenderState);
-	}
-
-	sealed class DataType<T> {
-		public static final DataType<Float> FLOAT = new DataType<>(Float.class);
-		public static final DataType<Vector2fc> VEC2 = new DataType<>(Vector2fc.class);
-		public static final DataType<Vector3fc> VEC3 = new DataType<>(Vector3fc.class);
-		public static final DataType<Vector4fc> VEC4 = new DataType<>(Vector4fc.class);
-		private final Class<T> clazz;
-
-		protected DataType(Class<T> clazz) {
-			this.clazz = clazz;
-		}
-
-		public Class<T> getUnderlyingClass() {
-			return this.clazz;
-		}
 	}
 
 	/// @deprecated Use [DataType]
@@ -121,7 +157,7 @@ public interface FrappeRenderPipeline {
 		private final DataType<T> dataType;
 
 		private UniformType(DataType<T> dataType) {
-			super(dataType.clazz);
+			super(dataType.getUnderlyingClass());
 			this.dataType = dataType;
 		}
 
