@@ -7,10 +7,9 @@ in vec4 v_Color; // The interpolated vertex color
 in vec2 v_TexCoord; // The interpolated block texture coordinates
 in vec2 v_FragDistance; // The fragment's distance from the camera (cylindrical and spherical)
 in float fadeFactor;
-#ifdef _FRAPPE_COMPLEX_MATERIAL
 in vec2 v_FrappeUV;
-#endif
 in float v_FrappeAO;
+flat in ivec3 v_FrappeBlockPos;
 
 flat in uint v_Material;
 flat in uint v_FrappeMaterialId;
@@ -108,10 +107,8 @@ void main() {
 	frp_quadMaterialId = v_FrappeMaterialId;
 	frp_texCoord = v_TexCoord;
 	ftm_vertAo = v_FrappeAO;
-
-	#ifdef _FRAPPE_COMPLEX_MATERIAL
 	ftm_texCoord = v_FrappeUV;
-	#endif
+	ftm_blockPos = v_FrappeBlockPos;
 
 	frp_inputFragment();
 

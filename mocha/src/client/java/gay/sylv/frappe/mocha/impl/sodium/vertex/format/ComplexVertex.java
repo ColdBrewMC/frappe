@@ -14,6 +14,7 @@ import net.caffeinemc.mods.sodium.client.render.chunk.vertex.format.ChunkVertexE
 public class ComplexVertex extends ChunkVertexEncoder.Vertex {
 	public float frappeU;
 	public float frappeV;
+	public long blockPos;
 
 	public static ComplexVertex[] uninitializedQuad() {
 		ComplexVertex[] vertices = new ComplexVertex[4];

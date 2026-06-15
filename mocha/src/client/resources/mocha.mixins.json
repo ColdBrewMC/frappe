@@ -16,6 +16,7 @@
 		"indigo.terrain_material.Mixin_BufferBuilder",
 		"indigo.terrain_material.Mixin_GlProgram",
 		"indigo.terrain_material.Mixin_AltModelBlockRendererImpl",
+		"indigo.terrain_material.Mixin_SectionCompiler",
 		"indigo.Mixin_EncodingFormat",
 		"indigo.quad_view.Mixin_QuadViewImpl",
 		"indigo.quad_view.Mixin_MutableQuadViewImpl",
@@ -36,14 +37,15 @@
 		"sodium.terrain_material.Mixin_DefaultTerrainRenderPasses",
 		"sodium.terrain_material.Mixin_ShaderParser",
 		"sodium.terrain_material.Mixin_QuadViewImpl",
-		"sodium.terrain_material.Mixin_CompactChunkVertex",
+		"sodium.terrain_material.chunk.Mixin_CompactChunkVertex",
 		"sodium.terrain_material.chunk.Mixin_BlockRenderer",
 		"sodium.terrain_material.chunk.Mixin_BuiltSectionInfo$Mixin_Builder",
 		"sodium.terrain_material.chunk.Mixin_BuiltSectionInfo",
 		"sodium.terrain_material.Mixin_ChunkShaderTextureSlot",
 		"sodium.terrain_material.Mixin_NativeImage",
 		"sodium.terrain_material.Mixin_RenderSectionManager",
-		"sodium.terrain_material.Mixin_RenderRegion_DeviceResources"
+		"sodium.terrain_material.Mixin_RenderRegion_DeviceResources",
+		"sodium.terrain_material.chunk.Accessor_CompactChunkVertex"
 	],
 	"injectors": {
 		"defaultRequire": 1

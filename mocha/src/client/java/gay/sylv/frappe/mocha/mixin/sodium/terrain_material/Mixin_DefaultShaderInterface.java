@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.GameRenderState;
+import net.minecraft.world.phys.Vec3;
 
 import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline;
 import gay.sylv.frappe.api.ext.render_pipeline.FrappeRenderPipeline.DataType;
@@ -50,6 +51,8 @@ public abstract class Mixin_DefaultShaderInterface {
 	private @Nullable GlUniformFloat2v uniformTextureSize;
 	@Unique
 	private @Nullable GlUniformFloat uniformLevelTime;
+	@Unique
+	private @Nullable GlUniformFloat3v uniformCameraOffset;
 	@Unique
 	private final Map<String, GlUniformFloat> floatUniforms = new HashMap<>();
 	@Unique
@@ -69,6 +72,7 @@ public abstract class Mixin_DefaultShaderInterface {
 	) {
 		this.uniformTextureSize = context.bindUniformOptional("u_FrappeCompatTextureSize", GlUniformFloat2v::new);
 		this.uniformLevelTime = context.bindUniformOptional("u_FrappeCompatLevelTime", GlUniformFloat::new);
+		this.uniformCameraOffset = context.bindUniformOptional("u_FrappeCameraOffset", GlUniformFloat3v::new);
 
 		for (FrappeRenderPipeline pipeline : FrappeRenderPipeline.getAllPipelines()) {
 			for (Map.Entry<String, DataType<?>> entry : pipeline.uniformDataTypes().entrySet()) {
@@ -151,6 +155,11 @@ public abstract class Mixin_DefaultShaderInterface {
 			long gameTime = gameRenderState.levelRenderState.gameTime;
 			DeltaTracker deltaTracker = Minecraft.getInstance().getDeltaTracker();
 			this.uniformLevelTime.set(((float) (gameTime % 24000L) + deltaTracker.getGameTimeDeltaPartialTick(false)) / 24000.0F);
+		}
+
+		if (this.uniformCameraOffset != null) {
+			Vec3 pos = gameRenderState.levelRenderState.cameraRenderState.pos;
+			this.uniformCameraOffset.set((float) pos.x(), (float) pos.y(), (float) pos.z());
 		}
 	}
 }

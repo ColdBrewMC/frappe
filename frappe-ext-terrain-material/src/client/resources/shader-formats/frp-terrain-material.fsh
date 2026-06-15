@@ -11,6 +11,11 @@ const in vec2 ftm_texCoord, ftm_vertUv;
 const in float ftm_vertAo;
 
 /*
+ * The discrete block position.
+ */
+const in ivec3 ftm_blockPos;
+
+/*
  * The block atlas texture.
  */
 const sampler2D ftm_blockAtlasTexture;

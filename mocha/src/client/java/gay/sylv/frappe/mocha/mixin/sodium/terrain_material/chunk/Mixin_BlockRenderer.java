@@ -9,6 +9,10 @@
 
 package gay.sylv.frappe.mocha.mixin.sodium.terrain_material.chunk;
 
+import static gay.sylv.frappe.mocha.impl.sodium.vertex.format.ComplexChunkVertex.BLOCK_POS;
+
+import java.util.function.Predicate;
+
 import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
@@ -20,12 +24,22 @@ import net.caffeinemc.mods.sodium.client.render.chunk.terrain.material.Material;
 import net.caffeinemc.mods.sodium.client.render.chunk.vertex.builder.ChunkMeshBufferBuilder;
 import net.caffeinemc.mods.sodium.client.render.chunk.vertex.format.ChunkVertexEncoder;
 import net.caffeinemc.mods.sodium.client.render.model.MutableQuadViewImpl;
+import net.caffeinemc.mods.sodium.client.services.PlatformModelEmitter;
+import org.joml.Vector3f;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
 
 import gay.sylv.frappe.mocha.impl.indigo.MochaIndigoEncodingFormat;
 import gay.sylv.frappe.mocha.impl.sodium.MochaSodiumMaterials;
@@ -33,6 +47,10 @@ import gay.sylv.frappe.mocha.impl.sodium.vertex.format.ComplexVertex;
 
 @Mixin(BlockRenderer.class)
 public abstract class Mixin_BlockRenderer {
+	@Shadow
+	@Final
+	private Vector3f posOffset;
+
 	@SuppressWarnings("LocalMayUseName") // can't find it, no name
 	@WrapOperation(method = "processQuad", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/render/chunk/terrain/material/DefaultMaterials;forChunkLayer(Lnet/minecraft/client/renderer/chunk/ChunkSectionLayer;)Lnet/caffeinemc/mods/sodium/client/render/chunk/terrain/material/Material;"))
 	private Material useMochaLayers(
@@ -51,6 +69,37 @@ public abstract class Mixin_BlockRenderer {
 		}
 
 		return material;
+	}
+
+	@WrapOperation(method = "renderModel", at = @At(
+			value = "INVOKE",
+			target = "Lnet/caffeinemc/mods/sodium/client/services/PlatformModelEmitter;emitModel(Lnet/minecraft/client/renderer/block/dispatch/BlockStateModel;Ljava/util/function/Predicate;Lnet/caffeinemc/mods/sodium/client/render/model/MutableQuadViewImpl;Lnet/minecraft/util/RandomSource;Lnet/minecraft/client/renderer/block/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/caffeinemc/mods/sodium/client/services/PlatformModelEmitter$Bufferer;)V"
+			))
+	private void setScopedValueBlockPos(
+			PlatformModelEmitter instance,
+			BlockStateModel model,
+			Predicate<Direction> directionPredicate,
+			MutableQuadViewImpl mutableQuadView,
+			RandomSource randomSource,
+			BlockAndTintGetter blockAndTintGetter,
+			BlockPos pos,
+			BlockState state,
+			PlatformModelEmitter.Bufferer bufferer,
+			Operation<Void> original,
+			@Local(name = "origin", argsOnly = true) BlockPos origin
+	) {
+		ScopedValue.where(BLOCK_POS, origin)
+				.call(() -> original.call(
+						instance,
+						model,
+						directionPredicate,
+						mutableQuadView,
+						randomSource,
+						blockAndTintGetter,
+						pos,
+						state,
+						bufferer
+				));
 	}
 
 	@WrapOperation(method = "<init>", at = @At(
@@ -105,6 +154,9 @@ public abstract class Mixin_BlockRenderer {
 		ComplexVertex complexVertex = (ComplexVertex) out;
 		complexVertex.frappeU = Float.intBitsToFloat(quad.data[quad.baseIndex + MochaIndigoEncodingFormat.HEADER_MOCHA_BITS + MochaIndigoEncodingFormat.FRAPPE_U_0 + srcIndex * 2]);
 		complexVertex.frappeV = Float.intBitsToFloat(quad.data[quad.baseIndex + MochaIndigoEncodingFormat.HEADER_MOCHA_BITS + MochaIndigoEncodingFormat.FRAPPE_V_0 + srcIndex * 2]);
+		// fixme: wrong, posOffset isn't the block pos. go get the block pos with scopedvalue
+		BlockPos blockPos = BLOCK_POS.get();
+		complexVertex.blockPos = BlockPos.asLong(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 		float ao = Float.intBitsToFloat(quad.data[quad.baseIndex + MochaIndigoEncodingFormat.HEADER_MOCHA_BITS + MochaIndigoEncodingFormat.FRAPPE_AO + srcIndex]);
 
 		if (ao != 0.0f) {

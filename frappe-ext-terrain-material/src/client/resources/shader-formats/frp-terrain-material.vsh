@@ -11,6 +11,16 @@ out vec2 ftm_texCoord, ftm_vertUv;
 out float ftm_vertAo;
 
 /*
+ * The displacement of this vertex's initial position to the center of this block.
+ */
+const vec3 ftm_vertCenterOffset;
+
+/*
+ * The discrete block position.
+ */
+const out ivec3 ftm_blockPos;
+
+/*
  * The block atlas's texture size.
  */
 const ivec2 ftm_blockAtlasTextureSize;

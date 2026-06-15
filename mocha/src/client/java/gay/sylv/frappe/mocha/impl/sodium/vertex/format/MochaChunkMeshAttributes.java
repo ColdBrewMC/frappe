@@ -13,8 +13,9 @@ import net.caffeinemc.mods.sodium.client.gl.attribute.GlVertexAttributeFormat;
 import net.caffeinemc.mods.sodium.client.render.vertex.VertexFormatAttribute;
 
 public final class MochaChunkMeshAttributes {
-	public static final VertexFormatAttribute FRAPPE_UV = new VertexFormatAttribute("FRAPPE_UV", GlVertexAttributeFormat.FLOAT, 2, false, false);
-	public static final VertexFormatAttribute FRAPPE_AO = new VertexFormatAttribute("FRAPPE_AO", GlVertexAttributeFormat.FLOAT, 1, false, false);
+	public static final VertexFormatAttribute FRAPPE_UV = new VertexFormatAttribute("FRAPPE_UV", GlVertexAttributeFormat.UNSIGNED_SHORT, 2, false, true);
+	public static final VertexFormatAttribute FRAPPE_CENTER_OFFSET = new VertexFormatAttribute("FRAPPE_CENTER_OFFSET", GlVertexAttributeFormat.BYTE, 3, false, true);
+	public static final VertexFormatAttribute FRAPPE_AO = new VertexFormatAttribute("FRAPPE_AO", GlVertexAttributeFormat.UNSIGNED_BYTE, 1, false, true);
 
 	private MochaChunkMeshAttributes() {
 	}

@@ -36,6 +36,11 @@ const mat4 frp_projectionMatrix;
 const mat4 frp_modelViewMatrix;
 
 /*
+ * The vertex's initial position.
+ */
+const vec4 frp_vertInitialPosition;
+
+/*
  * The vertex's position.
  */
 out vec4 frp_vertPosition;

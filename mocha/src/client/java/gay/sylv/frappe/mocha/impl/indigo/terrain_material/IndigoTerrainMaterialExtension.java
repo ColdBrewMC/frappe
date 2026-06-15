@@ -11,6 +11,7 @@ package gay.sylv.frappe.mocha.impl.indigo.terrain_material;
 
 import static gay.sylv.frappe.impl.base.FrappeInitializer.frappeId;
 import static gay.sylv.frappe.mocha.impl.Mocha.modId;
+import static gay.sylv.frappe.mocha.impl.indigo.vertex.format.MochaVertexFormats.calculateCenterOffset;
 import static net.minecraft.client.renderer.RenderPipelines.CUTOUT_TERRAIN;
 import static net.minecraft.client.renderer.RenderPipelines.SOLID_TERRAIN;
 import static net.minecraft.client.renderer.RenderPipelines.TRANSLUCENT_TERRAIN;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 
@@ -80,6 +82,8 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 	public static List<ChunkSectionLayer> SOLID_LAYERS = new ArrayList<>();
 	public static List<ChunkSectionLayer> CUTOUT_LAYERS = new ArrayList<>();
 	public static List<ChunkSectionLayer> MOCHA_LAYERS = new ArrayList<>();
+	public static ScopedValue<BlockPos> BLOCK_POS = ScopedValue.newInstance();
+	private static final boolean HAS_SODIUM = FabricLoader.getInstance().isModLoaded("sodium");
 
 	public static void buffer(
 			VertexConsumer instance,
@@ -106,11 +110,17 @@ public final class IndigoTerrainMaterialExtension implements TerrainMaterialExte
 			builder.frappe$setUv(materialQuad.frappe$u(i), materialQuad.frappe$v(i));
 			builder.frappe$setMaterialId((byte) materialId);
 
-			if (builder.frappe$setAo(materialQuad.frappe$ao(i))) {
-				instance.setColor(color);
-			} else {
-				instance.setColor(ARGB.scaleRGB(color, materialQuad.frappe$ao(i)));
+			if (BLOCK_POS.isBound()) {
+				BlockPos blockPos = BLOCK_POS.get();
+				builder.frappe$setCenterOffset(
+						calculateCenterOffset(blockPos.getX(), x),
+						calculateCenterOffset(blockPos.getY(), y),
+						calculateCenterOffset(blockPos.getZ(), z)
+				);
 			}
+
+			builder.frappe$setAo(materialQuad.frappe$ao(i));
+			instance.setColor(color);
 		} else {
 			instance.setColor(ARGB.scaleRGB(color, materialQuad.frappe$ao(i)));
 		}

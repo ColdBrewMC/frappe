@@ -13,10 +13,9 @@ flat out uint v_Material;
 out vec2 v_FragDistance;
 out float fadeFactor;
 #endif
-#ifdef _FRAPPE_COMPLEX_MATERIAL
 out vec2 v_FrappeUV;
-#endif
 out float v_FrappeAO;
+flat out ivec3 v_FrappeBlockPos;
 flat out uint v_FrappeMaterialId;
 
 // Extra uniforms included by Frappé
@@ -26,6 +25,7 @@ uniform vec3 u_RegionOffset;
 uniform vec2 u_TexCoordShrink;
 uniform vec2 u_FrappeCompatTextureSize;
 uniform float u_FrappeCompatLevelTime;
+uniform vec3 u_FrappeCameraOffset;
 
 uniform sampler2D u_LightTex; // The light map texture sampler
 
@@ -61,22 +61,23 @@ void main() {
 	ftm_vertAo = _vert_frappe_ao;
 	frp_quadMaterialId = _frappe_material_id;
 	frp_texCoord = (_vert_tex_diffuse_coord_bias * u_TexCoordShrink) + _vert_tex_diffuse_coord; // FMA for precision
+	ftm_texCoord = (_vert_frappe_tex_diffuse_coord_bias * u_TexCoordShrink) + _vert_frappe_tex_diffuse_coord; // FMA for precision
 
 	// Transform the chunk-local vertex position into world model space
 	vec3 translation = u_RegionOffset + _get_draw_translation(_draw_id);
 	vec3 position = _vert_position + translation;
-
-	frp_vertPosition = vec4(position, 1.0);
+	frp_vertPosition = vec4(position + u_FrappeCameraOffset, 1.0);
+	frp_vertInitialPosition = frp_vertPosition;
+	ftm_vertCenterOffset = _vert_frappe_center_offset;
+	vec3 blockPos = frp_vertInitialPosition.xyz + ftm_vertCenterOffset;
+	const vec3 epsilon = vec3(0.0001);
+	ftm_blockPos = ivec3(round(blockPos - epsilon));
 
 	#ifdef USE_FOG
 	v_FragDistance = getFragDistance(position);
 	frp_vertDistance = v_FragDistance.y;
 	#else
 //	frp_vertDistance = 0.0;
-	#endif
-
-	#ifdef _FRAPPE_COMPLEX_MATERIAL
-	ftm_texCoord = _vert_frappe_uv;
 	#endif
 
 	frp_inputVertex();
@@ -99,6 +100,7 @@ void main() {
 	frp_vertColor = frp_vertColor * texture(u_LightTex, _vert_tex_light_coord);
 
 	// Transform the vertex position into model-view-projection space
+	frp_vertPosition.xyz -= u_FrappeCameraOffset;
 	frp_vertPosition = frp_projectionMatrix * frp_modelViewMatrix * frp_vertPosition;
 
 	// ==== Vertex Output ====
@@ -114,8 +116,7 @@ void main() {
 	// Unpack material ID byte
 	v_FrappeMaterialId = frp_quadMaterialId;
 
-	#ifdef _FRAPPE_COMPLEX_MATERIAL
 	v_FrappeUV = ftm_vertUv;
-	#endif
 	v_FrappeAO = ftm_vertAo;
+	v_FrappeBlockPos = ftm_blockPos;
 }

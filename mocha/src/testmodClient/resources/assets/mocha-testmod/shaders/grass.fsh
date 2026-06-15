@@ -40,6 +40,6 @@ void frp_inputFragment() {
 	const float maxcolor = 0.25;
 	color += (frp_quadMaterialId == FRP_MATERIAL_ID) ? min(ao, maxcolor) * aoColor : vec3(0.0);
 //	color *= color;
-	frp_fragColor.rgb += color;
+//	frp_fragColor.rgb += color;
 	//	ftm_vertAo *= (frp_quadMaterialId == FRP_MATERIAL_ID) ? 0.8 : 1.0;
 }

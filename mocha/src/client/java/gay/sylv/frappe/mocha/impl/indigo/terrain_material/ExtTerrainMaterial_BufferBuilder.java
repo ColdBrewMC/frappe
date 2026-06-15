@@ -20,6 +20,10 @@ public interface ExtTerrainMaterial_BufferBuilder {
 		throw new UnsupportedOperationException("Implemented via Mixin.");
 	}
 
+	default VertexConsumer frappe$setCenterOffset(byte x, byte y, byte z) {
+		throw new UnsupportedOperationException("Implemented via Mixin.");
+	}
+
 	default boolean frappe$setAo(float ao) {
 		throw new UnsupportedOperationException("Implemented via Mixin.");
 	}

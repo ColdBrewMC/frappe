@@ -14,6 +14,7 @@ in vec2 texCoord0;
 in vec2 v_FrappeUV;
 #endif
 flat in uint v_FrappeMaterialId;
+in float v_FrappeAO;
 
 out vec4 fragColor;
 
@@ -107,15 +108,11 @@ void main() {
 	#ifdef _FRAPPE_COMPLEX_MATERIAL
 	ftm_texCoord = v_FrappeUV;
 	#endif
-	ftm_vertAo = 1.0;
+	ftm_vertAo = v_FrappeAO;
 	frp_inputFragment();
 
 	frp_fragColor *= (UseRgss == 1 ? sampleRGSS(Sampler0, texCoord0, 1.0f / TextureSize) : sampleNearest(Sampler0, texCoord0, 1.0f / TextureSize));
 	ALPHA_CUTOUT;
-
-	// ==== Ambient Occlusion ====
-	ftm_setupAoFragment();
-	ftm_applyAoFragment();
 
 	// ==== Fog Application ====
 	frp_fragColor = mix(FogColor * vec4(1, 1, 1, frp_fragColor.a), frp_fragColor, ChunkVisibility);

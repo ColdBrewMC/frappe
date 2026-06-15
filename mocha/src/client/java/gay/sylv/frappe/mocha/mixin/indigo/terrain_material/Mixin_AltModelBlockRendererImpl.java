@@ -12,6 +12,7 @@ package gay.sylv.frappe.mocha.mixin.indigo.terrain_material;
 import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -37,6 +38,26 @@ public abstract class Mixin_AltModelBlockRendererImpl {
 		return original;
 	}
 
+	@WrapMethod(method = "shadeQuad")
+	private void setDefaultDisabledAo(
+			MutableQuadViewImpl quad,
+			boolean ao,
+			boolean emissive,
+			boolean vanillaShade,
+			Operation<Void> original,
+			@Share("ao") LocalFloatRef aoLocal
+	) {
+		if (!ao) {
+			for (int i = 0; i < 4; i++) {
+				FrappeMutableQuadView.of(quad)
+						.as(MQV_ExtTerrainMaterial.class)
+						.frappe$ao(i, 1.0f);
+			}
+		}
+
+		original.call(quad, ao, emissive, vanillaShade);
+	}
+
 	@Definition(id = "quad", local = @Local(type = MutableQuadViewImpl.class, name = "quad", argsOnly = true))
 	@Definition(
 			id = "color",
@@ -51,11 +72,11 @@ public abstract class Mixin_AltModelBlockRendererImpl {
 			int vertexIndex,
 			int color,
 			Operation<MutableQuadViewImpl> original,
-			@Share("ao") LocalFloatRef ao
+			@Share("ao") LocalFloatRef aoLocal
 	) {
 		FrappeMutableQuadView.of(instance)
 				.as(MQV_ExtTerrainMaterial.class)
-				.frappe$ao(vertexIndex, ao.get());
+				.frappe$ao(vertexIndex, aoLocal.get());
 		return instance;
 	}
 }

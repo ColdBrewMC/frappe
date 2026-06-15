@@ -17,9 +17,12 @@ uint _draw_id;
 // The material bits for the primitive
 uint _material_params;
 
-vec2 _vert_frappe_uv;
+vec2 _vert_frappe_tex_diffuse_coord;
+vec2 _vert_frappe_tex_diffuse_coord_bias;
 
 float _vert_frappe_ao;
+
+vec3 _vert_frappe_center_offset;
 
 // This vertex's material ID
 uint _frappe_material_id;
@@ -36,12 +39,17 @@ const uint TEXTURE_MAX_VALUE    = TEXTURE_MAX_COORD - 1u;
 const float VERTEX_SCALE = 32.0 / float(POSITION_MAX_COORD);
 const float VERTEX_OFFSET = -8.0;
 
+const uint FRAPPE_POSITION_HORIZONTAL_MASK = 0x3FFFFFFu;
+const uint FRAPPE_POSITION_Y_MASK = 0xFFFu;
+const float FRAPPE_CENTER_OFFSET_SCALE = 64.0;
+
 in uvec2 a_Position;
 in vec4 a_Color;
 in uvec2 a_TexCoord;
 in uvec4 a_LightAndData;
-in vec2 a_FrappeUV;
-in float a_FrappeAO;
+in uvec2 a_FrappeUV;
+in ivec3 a_FrappeCenterOffset;
+in uint a_FrappeAO;
 
 uvec3 _deinterleave_u20x3(uvec2 data) {
 	uvec3 hi = (uvec3(data.x) >> uvec3(0u, 10u, 20u)) & 0x3FFu;
@@ -58,6 +66,14 @@ vec2 _get_texcoord_bias() {
 	return mix(vec2(-1.0), vec2(1.0), bvec2(a_TexCoord >> TEXTURE_BITS));
 }
 
+vec2 _get_frappe_texcoord() {
+	return vec2(a_FrappeUV & TEXTURE_MAX_VALUE) / float(TEXTURE_MAX_COORD);
+}
+
+vec2 _get_frappe_texcoord_bias() {
+	return mix(vec2(-1.0), vec2(1.0), bvec2(a_FrappeUV >> TEXTURE_BITS));
+}
+
 void _vert_init() {
 	_vert_position = (_deinterleave_u20x3(a_Position) * VERTEX_SCALE) + VERTEX_OFFSET;
 	_vert_color = a_Color;
@@ -68,8 +84,14 @@ void _vert_init() {
 
 	_material_params = a_LightAndData[2];
 	_draw_id = a_LightAndData[3];
-	_vert_frappe_uv = a_FrappeUV;
-	_vert_frappe_ao = a_FrappeAO;
+	_vert_frappe_tex_diffuse_coord = _get_frappe_texcoord();
+	_vert_frappe_tex_diffuse_coord_bias = _get_frappe_texcoord_bias();
+	_vert_frappe_center_offset = vec3(
+			a_FrappeCenterOffset.x,
+			a_FrappeCenterOffset.y,
+			a_FrappeCenterOffset.z
+	) / FRAPPE_CENTER_OFFSET_SCALE;
+	_vert_frappe_ao = float(a_FrappeAO) / 255.0;
 	_frappe_material_id = ((_material_params >> 4u) | ((a_Position.y >> 30u) << 2u) | ((a_Position.x >> 30u) << 4u));
 }
 

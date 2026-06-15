@@ -82,7 +82,19 @@ public abstract class Mixin_BufferBuilder implements ExtTerrainMaterial_BufferBu
 
 		if (pointer != -1) {
 			MemoryUtil.memPutByte(pointer, id);
-			MemoryUtil.memPutByte(pointer + 1, (byte) 0);
+		}
+
+		return (VertexConsumer) this;
+	}
+
+	@Override
+	public VertexConsumer frappe$setCenterOffset(byte x, byte y, byte z) {
+		long pointer = this.beginElement(MochaVertexFormats.CENTER_OFFSET);
+
+		if (pointer != -1) {
+			MemoryUtil.memPutByte(pointer, x);
+			MemoryUtil.memPutByte(pointer + 1, y);
+			MemoryUtil.memPutByte(pointer + 2, z);
 		}
 
 		return (VertexConsumer) this;
@@ -90,10 +102,10 @@ public abstract class Mixin_BufferBuilder implements ExtTerrainMaterial_BufferBu
 
 	@Override
 	public boolean frappe$setAo(float ao) {
-		long pointer = this.beginElement(VertexFormatElement.LINE_WIDTH);
+		long pointer = this.beginElement(MochaVertexFormats.AO);
 
 		if (pointer != -1) {
-			MemoryUtil.memPutFloat(pointer, ao);
+			MemoryUtil.memPutByte(pointer, MochaVertexFormats.packAo(ao));
 		}
 
 		return pointer != 1;

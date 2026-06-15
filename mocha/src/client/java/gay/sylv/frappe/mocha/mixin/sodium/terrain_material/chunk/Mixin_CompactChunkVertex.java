@@ -7,7 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package gay.sylv.frappe.mocha.mixin.sodium.terrain_material;
+package gay.sylv.frappe.mocha.mixin.sodium.terrain_material.chunk;
 
 import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;

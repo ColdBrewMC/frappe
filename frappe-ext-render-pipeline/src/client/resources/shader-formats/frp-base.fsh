@@ -26,6 +26,11 @@ const in vec4 frp_vertColor;
 const in vec2 frp_texCoord;
 
 /*
+ * The discrete block position.
+ */
+const in ivec3 frp_blockPos;
+
+/*
  * The fragment's color interpolated from the vertex's color.
  *
  * Set this to change the fragment's final color.
